@@ -12,13 +12,28 @@ const TypingIndicator = () => (
   </div>
 );
 
+const STORAGE_KEY = "smEliteHajj_chatHistory";
+
 const WhatsAppButton = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState<{text: string; isUser: boolean; time: string}[]>([]);
+  const [chatMessages, setChatMessages] = useState<{text: string; isUser: boolean; time: string}[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [isTyping, setIsTyping] = useState(false);
   const phoneNumber = "8801619959626";
+
+  // Save chat messages to localStorage whenever they change
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chatMessages));
+    }
+  }, [chatMessages]);
 
   useEffect(() => {
     const handleScroll = () => {
