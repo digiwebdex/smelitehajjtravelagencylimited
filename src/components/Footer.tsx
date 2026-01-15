@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, ArrowUp } from "luci
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import companyLogo from "@/assets/company-logo.jpeg";
-
+import FloatingIslamicPattern from "./FloatingIslamicPattern";
 interface FooterLink {
   name: string;
   href: string;
@@ -96,11 +96,13 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
+      {/* Floating Islamic Pattern Animation */}
+      <FloatingIslamicPattern />
+      
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 geometric-pattern" />
       </div>
-
       {/* Scroll to top button */}
       <motion.button
         onClick={scrollToTop}
