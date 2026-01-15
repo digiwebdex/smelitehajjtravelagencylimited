@@ -142,50 +142,6 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
         </motion.div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Guest Contact Info */}
-          <div className="space-y-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
-            <h4 className="font-medium text-sm text-foreground flex items-center gap-2">
-              <User className="w-4 h-4" /> Contact Information
-            </h4>
-            <div className="space-y-2">
-              <Label htmlFor="guestName">Your Name *</Label>
-              <Input
-                id="guestName"
-                placeholder="Enter your full name"
-                value={formData.guestName}
-                onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
-                required
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="guestPhone" className="flex items-center gap-2">
-                  <Phone className="w-3 h-3" /> Phone *
-                </Label>
-                <Input
-                  id="guestPhone"
-                  type="tel"
-                  placeholder="+880 1XXX-XXXXXX"
-                  value={formData.guestPhone}
-                  onChange={(e) => setFormData({ ...formData, guestPhone: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="guestEmail" className="flex items-center gap-2">
-                  <Mail className="w-3 h-3" /> Email
-                </Label>
-                <Input
-                  id="guestEmail"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={formData.guestEmail}
-                  onChange={(e) => setFormData({ ...formData, guestEmail: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="passengerCount" className="flex items-center gap-2">
@@ -209,6 +165,50 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                 type="date"
                 value={formData.travelDate}
                 onChange={(e) => setFormData({ ...formData, travelDate: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Number - Mandatory */}
+          <div className="space-y-2">
+            <Label htmlFor="guestPhone" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" /> Mobile Number <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="guestPhone"
+              type="tel"
+              placeholder="+880 1XXX-XXXXXX"
+              value={formData.guestPhone}
+              onChange={(e) => setFormData({ ...formData, guestPhone: e.target.value })}
+              required
+              className="border-primary/30 focus:border-primary"
+            />
+          </div>
+
+          {/* Contact Info */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="guestName" className="flex items-center gap-2">
+                <User className="w-4 h-4" /> Your Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="guestName"
+                placeholder="Enter your full name"
+                value={formData.guestName}
+                onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="guestEmail" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" /> Email
+              </Label>
+              <Input
+                id="guestEmail"
+                type="email"
+                placeholder="your@email.com"
+                value={formData.guestEmail}
+                onChange={(e) => setFormData({ ...formData, guestEmail: e.target.value })}
               />
             </div>
           </div>
