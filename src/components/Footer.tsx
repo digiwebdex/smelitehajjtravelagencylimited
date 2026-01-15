@@ -96,6 +96,21 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
+      {/* Background Video Animation */}
+      <div className="absolute inset-0 z-0">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover opacity-30"
+        >
+          <source src="/videos/footer-bg.mp4" type="video/mp4" />
+        </video>
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-primary/70" />
+      </div>
+      
       {/* Floating Islamic Pattern Animation */}
       <FloatingIslamicPattern />
       
