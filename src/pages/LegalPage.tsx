@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import { ChevronRight, Home } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -154,6 +155,19 @@ const LegalPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
+            {/* Breadcrumb Navigation */}
+            <nav className="flex items-center gap-2 text-sm mb-6 text-primary-foreground/80">
+              <Link 
+                to="/" 
+                className="flex items-center gap-1 hover:text-secondary transition-colors"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </Link>
+              <ChevronRight className="w-4 h-4" />
+              <span className="text-secondary font-medium">{content.title}</span>
+            </nav>
+            
             <h1 className="text-4xl md:text-5xl font-heading font-bold">{content.title}</h1>
           </motion.div>
         </div>
