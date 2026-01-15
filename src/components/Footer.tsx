@@ -136,7 +136,7 @@ const Footer = () => {
               <img 
                 src={companyLogo} 
                 alt="S.M. Elite Hajj Limited" 
-                className="h-24 w-auto object-contain"
+                className="h-16 w-auto object-contain bg-white/10 rounded-xl p-1"
               />
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
