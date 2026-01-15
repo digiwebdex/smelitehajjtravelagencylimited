@@ -114,7 +114,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
     setLoading(false);
   };
 
-  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+  const updateBookingStatus = async (bookingId: string, newStatus: "pending" | "confirmed" | "completed" | "cancelled") => {
     const { error } = await supabase
       .from("bookings")
       .update({ status: newStatus })
@@ -255,7 +255,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                         </Button>
                         <Select
                           value={booking.status}
-                          onValueChange={(value) => updateBookingStatus(booking.id, value)}
+                          onValueChange={(value) => updateBookingStatus(booking.id, value as "pending" | "confirmed" | "completed" | "cancelled")}
                         >
                           <SelectTrigger className="w-32 h-8">
                             <SelectValue />
