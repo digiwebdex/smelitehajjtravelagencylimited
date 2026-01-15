@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import companyLogo from "@/assets/company-logo.jpeg";
 import FloatingIslamicPattern from "./FloatingIslamicPattern";
 interface FooterLink {
-  name: string;
+  label: string;
   href: string;
 }
 
@@ -37,12 +37,12 @@ const Footer = () => {
     company_description: "Your trusted partner for Hajj & Umrah journeys. We provide comprehensive packages with premium services to ensure a spiritually fulfilling experience.",
     copyright_text: `© ${currentYear} SM Elite Hajj & Umrah Services. All rights reserved.`,
     quick_links: [
-      { name: "Home", href: "#home" },
-      { name: "Hajj Packages", href: "#hajj" },
-      { name: "Umrah Packages", href: "#umrah" },
-      { name: "Visa Services", href: "#visa" },
-      { name: "Our Team", href: "#team" },
-      { name: "Contact", href: "#contact" },
+      { label: "Home", href: "#home" },
+      { label: "Hajj Packages", href: "#hajj" },
+      { label: "Umrah Packages", href: "#umrah" },
+      { label: "Visa Services", href: "#visa" },
+      { label: "Our Team", href: "#team" },
+      { label: "Contact", href: "#contact" },
     ],
     services_links: [
       { label: "Hajj Packages", href: "#hajj" },
@@ -177,14 +177,16 @@ const Footer = () => {
               Quick Links
             </h4>
             <ul className="space-y-3">
-              {content.quick_links.map((link) => (
-                <li key={link.name}>
+              {content.quick_links.map((link, index) => (
+                <li key={index}>
                   <a
                     href={link.href}
+                    target={link.href.startsWith('http') ? '_blank' : undefined}
+                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                     className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm flex items-center gap-2 group"
                   >
                     <span className="w-0 group-hover:w-2 h-0.5 bg-secondary transition-all duration-300" />
-                    {link.name}
+                    {link.label}
                   </a>
                 </li>
               ))}
