@@ -14,16 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          package_id: string
+          passenger_count: number
+          passenger_details: Json | null
+          status: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          travel_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          package_id: string
+          passenger_count?: number
+          passenger_details?: Json | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price: number
+          travel_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          package_id?: string
+          passenger_count?: number
+          passenger_details?: Json | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          total_price?: number
+          travel_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_days: number
+          hotel_rating: number | null
+          id: string
+          image_url: string | null
+          includes: string[] | null
+          is_active: boolean
+          price: number
+          stock: number
+          title: string
+          type: Database["public"]["Enums"]["package_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          hotel_rating?: number | null
+          id?: string
+          image_url?: string | null
+          includes?: string[] | null
+          is_active?: boolean
+          price: number
+          stock?: number
+          title: string
+          type: Database["public"]["Enums"]["package_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          hotel_rating?: number | null
+          id?: string
+          image_url?: string | null
+          includes?: string[] | null
+          is_active?: boolean
+          price?: number
+          stock?: number
+          title?: string
+          type?: Database["public"]["Enums"]["package_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      package_type: "hajj" | "umrah"
+      user_role: "customer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +279,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      package_type: ["hajj", "umrah"],
+      user_role: ["customer", "admin"],
+    },
   },
 } as const
