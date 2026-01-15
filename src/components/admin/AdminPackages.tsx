@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useImageUpload } from "@/hooks/useImageUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ import {
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, CURRENCY } from "@/lib/currency";
+import ImageUpload from "./ImageUpload";
 
 interface Package {
   id: string;
@@ -44,6 +46,7 @@ interface Package {
   hotel_rating: number | null;
   stock: number;
   is_active: boolean;
+  image_url: string | null;
 }
 
 interface AdminPackagesProps {
@@ -52,6 +55,10 @@ interface AdminPackagesProps {
 
 const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
   const { toast } = useToast();
+  const { uploadImage, uploading } = useImageUpload({
+    bucket: "admin-uploads",
+    folder: "packages",
+  });
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -66,6 +73,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
     hotel_rating: 5,
     stock: 50,
     is_active: true,
+    image_url: "",
   });
 
   useEffect(() => {
@@ -95,6 +103,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
       hotel_rating: 5,
       stock: 50,
       is_active: true,
+      image_url: "",
     });
     setEditingPackage(null);
   };
@@ -111,6 +120,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
       hotel_rating: pkg.hotel_rating || 5,
       stock: pkg.stock,
       is_active: pkg.is_active,
+      image_url: pkg.image_url || "",
     });
     setIsDialogOpen(true);
   };
@@ -128,6 +138,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
       hotel_rating: formData.hotel_rating,
       stock: formData.stock,
       is_active: formData.is_active,
+      image_url: formData.image_url || null,
     };
 
     let error;
@@ -326,6 +337,15 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                     rows={4}
                   />
                 </div>
+
+                <ImageUpload
+                  value={formData.image_url}
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                  onUpload={uploadImage}
+                  uploading={uploading}
+                  label="Package Image"
+                  placeholder="https://example.com/package-image.jpg"
+                />
 
                 <div className="flex items-center gap-2">
                   <Switch
