@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,19 +13,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 import companyLogo from "@/assets/company-logo.jpeg";
 
+interface MenuItem {
+  id: string;
+  label: string;
+  href: string;
+  order_index: number;
+}
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
-  const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Hajj Packages", href: "#hajj" },
-    { name: "Umrah Packages", href: "#umrah" },
-    { name: "Visa Services", href: "#visa" },
-    { name: "Our Team", href: "#team" },
-    { name: "Contact", href: "#contact" },
-  ];
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  const fetchMenuItems = async () => {
+    const { data } = await supabase
+      .from("menu_items")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index");
+    
+    if (data && data.length > 0) {
+      setMenuItems(data);
+    } else {
+      // Fallback to default menu items
+      setMenuItems([
+        { id: "1", label: "Home", href: "#home", order_index: 0 },
+        { id: "2", label: "Hajj Packages", href: "#hajj", order_index: 1 },
+        { id: "3", label: "Umrah Packages", href: "#umrah", order_index: 2 },
+        { id: "4", label: "Visa Services", href: "#visa", order_index: 3 },
+        { id: "5", label: "Our Team", href: "#team", order_index: 4 },
+        { id: "6", label: "Contact", href: "#contact", order_index: 5 },
+      ]);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -65,13 +91,13 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {menuItems.map((link) => (
               <a
-                key={link.name}
+                key={link.id}
                 href={link.href}
                 className="text-foreground hover:text-primary font-medium transition-colors relative group"
               >
-                {link.name}
+                {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all duration-300" />
               </a>
             ))}
@@ -130,14 +156,14 @@ const Header = () => {
         {isMenuOpen && (
           <div className="lg:hidden mt-4 pb-4 border-t border-border pt-4 animate-fade-up">
             <div className="flex flex-col gap-4">
-              {navLinks.map((link) => (
+              {menuItems.map((link) => (
                 <a
-                  key={link.name}
+                  key={link.id}
                   href={link.href}
                   className="text-foreground hover:text-primary font-medium py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {link.name}
+                  {link.label}
                 </a>
               ))}
               <div className="flex flex-col gap-2 mt-4">

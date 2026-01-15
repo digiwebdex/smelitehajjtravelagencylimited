@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { 
@@ -12,12 +12,30 @@ import {
   DollarSign, 
   TrendingUp,
   ArrowLeft,
-  LogOut
+  LogOut,
+  Menu,
+  Image,
+  Settings,
+  MessageSquare,
+  HelpCircle,
+  Globe,
+  Phone,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import AdminBookings from "@/components/admin/AdminBookings";
 import AdminPackages from "@/components/admin/AdminPackages";
 import AdminRevenue from "@/components/admin/AdminRevenue";
+import AdminMenu from "@/components/admin/AdminMenu";
+import AdminHero from "@/components/admin/AdminHero";
+import AdminServices from "@/components/admin/AdminServices";
+import AdminTestimonials from "@/components/admin/AdminTestimonials";
+import AdminTeam from "@/components/admin/AdminTeam";
+import AdminFAQ from "@/components/admin/AdminFAQ";
+import AdminVisa from "@/components/admin/AdminVisa";
+import AdminContact from "@/components/admin/AdminContact";
+import AdminFooter from "@/components/admin/AdminFooter";
 
 interface Stats {
   totalBookings: number;
@@ -57,7 +75,6 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      // Fetch bookings stats
       const { data: bookings } = await supabase
         .from("bookings")
         .select("status, total_price");
@@ -76,7 +93,6 @@ const AdminDashboard = () => {
         }));
       }
 
-      // Fetch packages count
       const { count: packagesCount } = await supabase
         .from("packages")
         .select("*", { count: "exact", head: true });
@@ -137,6 +153,21 @@ const AdminDashboard = () => {
     },
   ];
 
+  const cmsTabs = [
+    { value: "bookings", label: "Bookings", icon: Package },
+    { value: "packages", label: "Packages", icon: Package },
+    { value: "revenue", label: "Revenue", icon: DollarSign },
+    { value: "menu", label: "Menu", icon: Menu },
+    { value: "hero", label: "Hero", icon: Image },
+    { value: "services", label: "Services", icon: Settings },
+    { value: "testimonials", label: "Testimonials", icon: MessageSquare },
+    { value: "team", label: "Team", icon: Users },
+    { value: "faq", label: "FAQ", icon: HelpCircle },
+    { value: "visa", label: "Visa", icon: Globe },
+    { value: "contact", label: "Contact", icon: Phone },
+    { value: "footer", label: "Footer", icon: FileText },
+  ];
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -194,11 +225,17 @@ const AdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
-            <TabsTrigger value="packages">Packages</TabsTrigger>
-            <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <TabsList className="inline-flex h-10 w-max">
+              {cmsTabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="bookings">
             <AdminBookings onUpdate={fetchStats} />
@@ -210,6 +247,42 @@ const AdminDashboard = () => {
 
           <TabsContent value="revenue">
             <AdminRevenue />
+          </TabsContent>
+
+          <TabsContent value="menu">
+            <AdminMenu />
+          </TabsContent>
+
+          <TabsContent value="hero">
+            <AdminHero />
+          </TabsContent>
+
+          <TabsContent value="services">
+            <AdminServices />
+          </TabsContent>
+
+          <TabsContent value="testimonials">
+            <AdminTestimonials />
+          </TabsContent>
+
+          <TabsContent value="team">
+            <AdminTeam />
+          </TabsContent>
+
+          <TabsContent value="faq">
+            <AdminFAQ />
+          </TabsContent>
+
+          <TabsContent value="visa">
+            <AdminVisa />
+          </TabsContent>
+
+          <TabsContent value="contact">
+            <AdminContact />
+          </TabsContent>
+
+          <TabsContent value="footer">
+            <AdminFooter />
           </TabsContent>
         </Tabs>
       </main>

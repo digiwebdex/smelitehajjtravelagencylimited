@@ -1,18 +1,50 @@
+import { useState, useEffect } from "react";
 import { ArrowRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 
+interface VisaCountry {
+  id: string;
+  country_name: string;
+  flag_emoji: string;
+  processing_time: string;
+  price: number;
+  order_index: number;
+}
+
 const VisaServices = () => {
-  const countries = [
-    { name: "Thailand", flag: "🇹🇭", processingTime: "5-7 days", price: "From ৳8,000" },
-    { name: "France", flag: "🇫🇷", processingTime: "15-20 days", price: "From ৳18,000" },
-    { name: "Italy", flag: "🇮🇹", processingTime: "15-20 days", price: "From ৳18,000" },
-    { name: "United States", flag: "🇺🇸", processingTime: "Interview based", price: "From ৳12,000" },
-    { name: "Cuba", flag: "🇨🇺", processingTime: "10-15 days", price: "From ৳15,000" },
-    { name: "Japan", flag: "🇯🇵", processingTime: "7-10 days", price: "From ৳10,000" },
-    { name: "Australia", flag: "🇦🇺", processingTime: "20-25 days", price: "From ৳20,000" },
-    { name: "Malaysia", flag: "🇲🇾", processingTime: "3-5 days", price: "From ৳5,000" },
-  ];
+  const [countries, setCountries] = useState<VisaCountry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+
+  const fetchCountries = async () => {
+    const { data } = await supabase
+      .from("visa_countries")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index");
+    
+    if (data && data.length > 0) {
+      setCountries(data);
+    } else {
+      // Fallback to default countries
+      setCountries([
+        { id: "1", country_name: "Thailand", flag_emoji: "🇹🇭", processing_time: "5-7 days", price: 8000, order_index: 0 },
+        { id: "2", country_name: "France", flag_emoji: "🇫🇷", processing_time: "15-20 days", price: 18000, order_index: 1 },
+        { id: "3", country_name: "Italy", flag_emoji: "🇮🇹", processing_time: "15-20 days", price: 18000, order_index: 2 },
+        { id: "4", country_name: "United States", flag_emoji: "🇺🇸", processing_time: "Interview based", price: 12000, order_index: 3 },
+        { id: "5", country_name: "Cuba", flag_emoji: "🇨🇺", processing_time: "10-15 days", price: 15000, order_index: 4 },
+        { id: "6", country_name: "Japan", flag_emoji: "🇯🇵", processing_time: "7-10 days", price: 10000, order_index: 5 },
+        { id: "7", country_name: "Australia", flag_emoji: "🇦🇺", processing_time: "20-25 days", price: 20000, order_index: 6 },
+        { id: "8", country_name: "Malaysia", flag_emoji: "🇲🇾", processing_time: "3-5 days", price: 5000, order_index: 7 },
+      ]);
+    }
+    setLoading(false);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -28,6 +60,18 @@ const VisaServices = () => {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
+
+  if (loading) {
+    return (
+      <section id="visa" className="py-24 bg-muted relative overflow-hidden">
+        <div className="container">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="visa" className="py-24 bg-muted relative overflow-hidden">
@@ -64,7 +108,7 @@ const VisaServices = () => {
         >
           {countries.map((country) => (
             <motion.div
-              key={country.name}
+              key={country.id}
               variants={itemVariants}
               whileHover={{ y: -8, scale: 1.02 }}
               className="group bg-card rounded-2xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden"
@@ -74,16 +118,16 @@ const VisaServices = () => {
               
               <div className="relative z-10">
                 <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {country.flag}
+                  {country.flag_emoji}
                 </div>
                 <h3 className="font-heading font-semibold text-lg text-foreground mb-1 group-hover:text-primary transition-colors">
-                  {country.name}
+                  {country.country_name}
                 </h3>
                 <p className="text-xs text-muted-foreground mb-2">
-                  ⏱️ {country.processingTime}
+                  ⏱️ {country.processing_time}
                 </p>
                 <p className="text-sm font-semibold text-secondary mb-4">
-                  {country.price}
+                  From ৳{country.price.toLocaleString()}
                 </p>
                 <div className="flex items-center text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-2">
                   Apply Now

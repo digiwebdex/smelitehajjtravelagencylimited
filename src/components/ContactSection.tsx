@@ -1,14 +1,33 @@
-import { Phone, Mail, MapPin, Clock, Send, MessageSquare } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Phone, Mail, MapPin, Clock, Send, MessageSquare, LucideIcon } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+
+interface ContactInfo {
+  id: string;
+  icon_name: string;
+  title: string;
+  details: string[];
+  type: string;
+  order_index: number;
+}
+
+const iconMap: Record<string, LucideIcon> = {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+};
 
 const ContactSection = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +35,37 @@ const ContactSection = () => {
     package: "",
     message: "",
   });
+
+  useEffect(() => {
+    fetchContactInfo();
+  }, []);
+
+  const fetchContactInfo = async () => {
+    const { data } = await supabase
+      .from("contact_info")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index");
+    
+    if (data && data.length > 0) {
+      setContactInfo(data.map(item => ({
+        ...item,
+        details: Array.isArray(item.details) ? item.details as string[] : [],
+      })));
+    } else {
+      // Fallback to default contact info
+      setContactInfo([
+        { id: "1", icon_name: "Phone", title: "Call Us", details: ["+880 1234-567890", "+880 9876-543210"], type: "phone", order_index: 0 },
+        { id: "2", icon_name: "Mail", title: "Email Us", details: ["info@smelitehajj.com", "support@smelitehajj.com"], type: "email", order_index: 1 },
+        { id: "3", icon_name: "MapPin", title: "Visit Us", details: ["Savar, Dhaka", "Bangladesh"], type: "address", order_index: 2 },
+        { id: "4", icon_name: "Clock", title: "Office Hours", details: ["Sat - Thu: 9AM - 8PM", "Friday: Closed"], type: "hours", order_index: 3 },
+      ]);
+    }
+  };
+
+  const getIcon = (iconName: string): LucideIcon => {
+    return iconMap[iconName] || Phone;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,31 +81,6 @@ const ContactSection = () => {
     setFormData({ name: "", email: "", phone: "", package: "", message: "" });
     setIsSubmitting(false);
   };
-
-  const contactInfo = [
-    {
-      icon: Phone,
-      title: "Call Us",
-      details: ["+880 1234-567890", "+880 9876-543210"],
-      action: "tel:+8801234567890",
-    },
-    {
-      icon: Mail,
-      title: "Email Us",
-      details: ["info@smelitehajj.com", "support@smelitehajj.com"],
-      action: "mailto:info@smelitehajj.com",
-    },
-    {
-      icon: MapPin,
-      title: "Visit Us",
-      details: ["Savar, Dhaka", "Bangladesh"],
-    },
-    {
-      icon: Clock,
-      title: "Office Hours",
-      details: ["Sat - Thu: 9AM - 8PM", "Friday: Closed"],
-    },
-  ];
 
   return (
     <section id="contact" className="py-24 bg-muted geometric-pattern relative overflow-hidden">
@@ -92,29 +117,32 @@ const ContactSection = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="grid sm:grid-cols-2 gap-6 mb-8">
-              {contactInfo.map((info, index) => (
-                <motion.div
-                  key={info.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                  className="bg-card rounded-2xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 group"
-                >
-                  <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-elegant">
-                    <info.icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-foreground mb-3">
-                    {info.title}
-                  </h3>
-                  {info.details.map((detail, idx) => (
-                    <p key={idx} className="text-muted-foreground text-sm">
-                      {detail}
-                    </p>
-                  ))}
-                </motion.div>
-              ))}
+              {contactInfo.map((info, index) => {
+                const Icon = getIcon(info.icon_name);
+                return (
+                  <motion.div
+                    key={info.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -5 }}
+                    className="bg-card rounded-2xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 group"
+                  >
+                    <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-elegant">
+                      <Icon className="w-7 h-7 text-primary-foreground" />
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-foreground mb-3">
+                      {info.title}
+                    </h3>
+                    {info.details.map((detail, idx) => (
+                      <p key={idx} className="text-muted-foreground text-sm">
+                        {detail}
+                      </p>
+                    ))}
+                  </motion.div>
+                );
+              })}
             </div>
 
             {/* Map */}

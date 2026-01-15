@@ -1,38 +1,71 @@
-import { Plane, Hotel, Shield, Users, Clock, HeartHandshake } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Plane, Hotel, Shield, Users, Clock, HeartHandshake, LucideIcon } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+
+interface Service {
+  id: string;
+  icon_name: string;
+  title: string;
+  description: string;
+  order_index: number;
+}
+
+const iconMap: Record<string, LucideIcon> = {
+  Plane,
+  Hotel,
+  Shield,
+  Users,
+  Clock,
+  HeartHandshake,
+};
 
 const ServicesOverview = () => {
-  const services = [
-    {
-      icon: Plane,
-      title: "Flight Booking",
-      description: "Premium airlines with comfortable travel arrangements to Saudi Arabia",
-    },
-    {
-      icon: Hotel,
-      title: "Hotel Accommodation",
-      description: "Hand-picked hotels near Haram for convenient access to worship",
-    },
-    {
-      icon: Shield,
-      title: "Visa Processing",
-      description: "100% success rate in Hajj & Umrah visa processing",
-    },
-    {
-      icon: Users,
-      title: "Expert Guides",
-      description: "Experienced Islamic scholars to guide you through rituals",
-    },
-    {
-      icon: Clock,
-      title: "24/7 Support",
-      description: "Round-the-clock assistance throughout your spiritual journey",
-    },
-    {
-      icon: HeartHandshake,
-      title: "Complete Care",
-      description: "From departure to return, we handle every detail with care",
-    },
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    const { data } = await supabase
+      .from("services")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index");
+    
+    if (data && data.length > 0) {
+      setServices(data);
+    } else {
+      // Fallback to default services
+      setServices([
+        { id: "1", icon_name: "Plane", title: "Flight Booking", description: "Premium airlines with comfortable travel arrangements to Saudi Arabia", order_index: 0 },
+        { id: "2", icon_name: "Hotel", title: "Hotel Accommodation", description: "Hand-picked hotels near Haram for convenient access to worship", order_index: 1 },
+        { id: "3", icon_name: "Shield", title: "Visa Processing", description: "100% success rate in Hajj & Umrah visa processing", order_index: 2 },
+        { id: "4", icon_name: "Users", title: "Expert Guides", description: "Experienced Islamic scholars to guide you through rituals", order_index: 3 },
+        { id: "5", icon_name: "Clock", title: "24/7 Support", description: "Round-the-clock assistance throughout your spiritual journey", order_index: 4 },
+        { id: "6", icon_name: "HeartHandshake", title: "Complete Care", description: "From departure to return, we handle every detail with care", order_index: 5 },
+      ]);
+    }
+    setLoading(false);
+  };
+
+  const getIcon = (iconName: string): LucideIcon => {
+    return iconMap[iconName] || Plane;
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-card relative overflow-hidden">
+        <div className="container">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-card relative overflow-hidden">
@@ -51,25 +84,28 @@ const ServicesOverview = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <div
-              key={service.title}
-              className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-all duration-300"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-elegant">
-                <service.icon className="w-7 h-7 text-primary-foreground" />
+          {services.map((service, index) => {
+            const Icon = getIcon(service.icon_name);
+            return (
+              <div
+                key={service.id}
+                className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-all duration-300"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-elegant">
+                  <Icon className="w-7 h-7 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {service.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {service.description}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                  {service.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
