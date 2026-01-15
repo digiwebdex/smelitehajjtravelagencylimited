@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Users, Plane } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/currency";
 
 interface Package {
   id: string;
@@ -119,7 +120,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold text-primary">
-                ${package_info.price.toLocaleString()}
+                {formatCurrency(package_info.price)}
               </p>
               <p className="text-xs text-muted-foreground">per person</p>
             </div>
@@ -210,11 +211,11 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
             <div className="flex justify-between items-center">
               <span className="font-medium">Total Amount</span>
               <span className="text-2xl font-bold text-secondary">
-                ${(package_info.price * formData.passengerCount).toLocaleString()}
+                {formatCurrency(package_info.price * formData.passengerCount)}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {formData.passengerCount} passenger(s) × ${package_info.price.toLocaleString()}
+              {formData.passengerCount} passenger(s) × {formatCurrency(package_info.price)}
             </p>
           </div>
 

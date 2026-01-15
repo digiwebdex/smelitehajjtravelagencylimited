@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Calendar, Package, ArrowLeft, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 
 interface Booking {
   id: string;
@@ -161,7 +162,7 @@ const MyBookings = () => {
                       <div>
                         <p className="text-muted-foreground">Total Amount</p>
                         <p className="font-bold text-primary text-lg">
-                          ${booking.total_price.toLocaleString()}
+                          {formatCurrency(booking.total_price)}
                         </p>
                       </div>
                     </div>

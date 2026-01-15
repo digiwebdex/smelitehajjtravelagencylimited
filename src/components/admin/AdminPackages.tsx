@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency, CURRENCY } from "@/lib/currency";
 
 interface Package {
   id: string;
@@ -251,7 +252,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price ($)</Label>
+                    <Label htmlFor="price">Price ({CURRENCY.symbol} {CURRENCY.code})</Label>
                     <Input
                       id="price"
                       type="number"
@@ -378,7 +379,7 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                       {pkg.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-bold">${pkg.price.toLocaleString()}</TableCell>
+                  <TableCell className="font-bold">{formatCurrency(pkg.price)}</TableCell>
                   <TableCell>{pkg.duration_days} days</TableCell>
                   <TableCell>{pkg.stock}</TableCell>
                   <TableCell>
