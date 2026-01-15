@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
+import VisaApplicationModal from "./VisaApplicationModal";
 
 interface VisaCountry {
   id: string;
@@ -17,6 +18,8 @@ interface VisaCountry {
 const VisaServices = () => {
   const [countries, setCountries] = useState<VisaCountry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<VisaCountry | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCountries();
@@ -184,6 +187,10 @@ const VisaServices = () => {
               key={country.id}
               variants={itemVariants}
               whileHover={{ y: -8, scale: 1.02 }}
+              onClick={() => {
+                setSelectedCountry(country);
+                setIsModalOpen(true);
+              }}
               className="group bg-card rounded-2xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden"
             >
               {/* Hover gradient overlay */}
@@ -212,10 +219,18 @@ const VisaServices = () => {
                 <p className="text-sm font-semibold text-secondary mb-4">
                   From ৳{country.price.toLocaleString()}
                 </p>
-                <div className="flex items-center text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-2">
+                <Button
+                  size="sm"
+                  className="w-full bg-gradient-primary text-primary-foreground opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCountry(country);
+                    setIsModalOpen(true);
+                  }}
+                >
                   Apply Now
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
             </motion.div>
           ))}
@@ -239,6 +254,15 @@ const VisaServices = () => {
         </motion.div>
       </div>
       </section>
+
+      <VisaApplicationModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCountry(null);
+        }}
+        country={selectedCountry}
+      />
     </IslamicBorder>
   );
 };
