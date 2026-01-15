@@ -2,11 +2,22 @@ import { MessageCircle, ArrowUp, X, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
+const TypingIndicator = () => (
+  <div className="flex items-center gap-1 p-3 bg-card rounded-lg shadow-sm max-w-[85%] mb-3">
+    <div className="flex gap-1">
+      <span className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-2 h-2 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+    </div>
+  </div>
+);
+
 const WhatsAppButton = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<{text: string; isUser: boolean; time: string}[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const phoneNumber = "8801619959626";
 
   useEffect(() => {
@@ -30,18 +41,21 @@ const WhatsAppButton = () => {
     
     // Add user message to chat
     setChatMessages(prev => [...prev, { text: message, isUser: true, time: timeStr }]);
+    setMessage("");
+    
+    // Show typing indicator
+    setIsTyping(true);
     
     // Simulate auto-reply after a short delay
     setTimeout(() => {
+      setIsTyping(false);
       const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       setChatMessages(prev => [...prev, { 
         text: "Thank you for your message! Our team will respond shortly. For immediate assistance, you can also call us at +880 1619 959626.", 
         isUser: false, 
         time: replyTime 
       }]);
-    }, 1000);
-    
-    setMessage("");
+    }, 1500);
   };
 
   const handleQuickMessage = (msg: string) => {
@@ -50,8 +64,12 @@ const WhatsAppButton = () => {
     
     setChatMessages(prev => [...prev, { text: msg, isUser: true, time: timeStr }]);
     
+    // Show typing indicator
+    setIsTyping(true);
+    
     // Simulate auto-reply
     setTimeout(() => {
+      setIsTyping(false);
       const replyTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       let reply = "Thank you for your interest! Our team will get back to you shortly.";
       
@@ -66,7 +84,7 @@ const WhatsAppButton = () => {
       }
       
       setChatMessages(prev => [...prev, { text: reply, isUser: false, time: replyTime }]);
-    }, 1200);
+    }, 1800);
   };
 
   const quickMessages = [
@@ -127,6 +145,9 @@ const WhatsAppButton = () => {
               </div>
             </div>
           ))}
+
+          {/* Typing Indicator */}
+          {isTyping && <TypingIndicator />}
 
           {/* Quick Reply Buttons - only show if no messages yet */}
           {chatMessages.length === 0 && (
