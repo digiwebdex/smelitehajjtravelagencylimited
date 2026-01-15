@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, Play, Star } from "lucide-react";
+import { ChevronDown, Play, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface HeroContent {
   title: string;
@@ -15,6 +20,7 @@ interface HeroContent {
   secondary_button_text?: string;
   secondary_button_link?: string;
   background_image_url?: string;
+  video_url?: string;
   stats?: { number: string; label: string }[];
 }
 
@@ -35,6 +41,7 @@ const HeroSection = () => {
       { number: "24/7", label: "Support Available" },
     ],
   });
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   useEffect(() => {
     fetchHeroContent();
@@ -59,9 +66,28 @@ const HeroSection = () => {
         secondary_button_text: data.secondary_button_text || undefined,
         secondary_button_link: data.secondary_button_link || undefined,
         background_image_url: data.background_image_url || undefined,
+        video_url: data.video_url || undefined,
         stats: Array.isArray(data.stats) ? data.stats as { number: string; label: string }[] : undefined,
       });
     }
+  };
+
+  // Convert YouTube URL to embed format
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+    
+    // YouTube URL patterns
+    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1`;
+    }
+    
+    // Return as-is for direct video URLs
+    return url;
+  };
+
+  const isYouTubeUrl = (url: string) => {
+    return url?.includes("youtube.com") || url?.includes("youtu.be");
   };
 
   const scrollToSection = (id: string) => {
@@ -238,17 +264,20 @@ const HeroSection = () => {
           </motion.div>
 
           {/* Video CTA */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="inline-flex items-center gap-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors group"
-          >
-            <span className="w-14 h-14 rounded-full bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-primary-foreground/30 transition-all group-hover:scale-110">
-              <Play className="w-5 h-5 fill-current ml-1" />
-            </span>
-            <span className="font-medium">Watch Our Journey Video</span>
-          </motion.button>
+          {content.video_url && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.6 }}
+              onClick={() => setIsVideoOpen(true)}
+              className="inline-flex items-center gap-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors group"
+            >
+              <span className="w-14 h-14 rounded-full bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-primary-foreground/30 transition-all group-hover:scale-110">
+                <Play className="w-5 h-5 fill-current ml-1" />
+              </span>
+              <span className="font-medium">Watch Our Journey Video</span>
+            </motion.button>
+          )}
 
           {/* Stats */}
           {content.stats && content.stats.length > 0 && (
@@ -293,6 +322,30 @@ const HeroSection = () => {
           <ChevronDown className="w-6 h-6" />
         </motion.a>
       </div>
+
+      {/* Video Modal */}
+      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+        <DialogContent className="max-w-4xl p-0 bg-black border-none">
+          <DialogTitle className="sr-only">Watch Our Journey Video</DialogTitle>
+          <div className="relative aspect-video">
+            {content.video_url && isYouTubeUrl(content.video_url) ? (
+              <iframe
+                src={isVideoOpen ? getEmbedUrl(content.video_url) : ""}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : content.video_url ? (
+              <video
+                src={content.video_url}
+                controls
+                autoPlay
+                className="w-full h-full"
+              />
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

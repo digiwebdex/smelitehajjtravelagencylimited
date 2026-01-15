@@ -18,6 +18,7 @@ interface HeroContent {
   secondary_button_text: string;
   secondary_button_link: string;
   background_image_url: string;
+  video_url: string;
   stats: { number: string; label: string }[];
 }
 
@@ -36,6 +37,7 @@ const AdminHero = () => {
     secondary_button_text: "View Umrah Packages",
     secondary_button_link: "#umrah",
     background_image_url: "",
+    video_url: "",
     stats: [
       { number: "10+", label: "Years Experience" },
       { number: "5000+", label: "Happy Pilgrims" },
@@ -59,6 +61,7 @@ const AdminHero = () => {
     if (!error && data) {
       setHeroContent({
         ...data,
+        video_url: data.video_url || "",
         stats: Array.isArray(data.stats) ? data.stats as { number: string; label: string }[] : [],
       });
     }
@@ -78,6 +81,7 @@ const AdminHero = () => {
       secondary_button_text: heroContent.secondary_button_text,
       secondary_button_link: heroContent.secondary_button_link,
       background_image_url: heroContent.background_image_url,
+      video_url: heroContent.video_url,
       stats: heroContent.stats,
       is_active: true,
     };
@@ -157,6 +161,18 @@ const AdminHero = () => {
               placeholder="https://..."
             />
           </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium">Journey Video URL (YouTube or Direct Link)</label>
+          <Input
+            value={heroContent.video_url}
+            onChange={(e) => setHeroContent({ ...heroContent, video_url: e.target.value })}
+            placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Add a YouTube video link or direct video URL for the "Watch Our Journey Video" button
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
