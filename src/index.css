@@ -209,3 +209,9 @@
     transform: scale(1);
   }
 }
+
+/* Arabic vertical writing mode */
+.writing-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}

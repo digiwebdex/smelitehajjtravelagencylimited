@@ -89,17 +89,74 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Floating Decorative Elements */}
+      {/* Arabic Calligraphy Decorative Elements - Left Side */}
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 0.15, x: 0 }}
+        transition={{ duration: 1.2, delay: 0.5 }}
+        className="absolute left-0 top-0 h-full w-32 md:w-48 lg:w-64 hidden md:flex flex-col justify-center items-center pointer-events-none"
+      >
+        <div className="font-arabic text-secondary text-6xl md:text-7xl lg:text-9xl leading-none writing-vertical-rl transform rotate-180 select-none opacity-60">
+          بِسْمِ اللَّهِ
+        </div>
+        <div className="font-arabic text-secondary/50 text-4xl md:text-5xl lg:text-7xl leading-none writing-vertical-rl transform rotate-180 mt-8 select-none">
+          الرَّحْمَنِ
+        </div>
+        <div className="font-arabic text-secondary/30 text-3xl md:text-4xl lg:text-6xl leading-none writing-vertical-rl transform rotate-180 mt-8 select-none">
+          الرَّحِيمِ
+        </div>
+      </motion.div>
+
+      {/* Arabic Calligraphy Decorative Elements - Right Side */}
+      <motion.div
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 0.12, x: 0 }}
+        transition={{ duration: 1.2, delay: 0.7 }}
+        className="absolute right-0 top-1/4 hidden lg:flex flex-col items-end pointer-events-none pr-4"
+      >
+        <div className="font-arabic text-secondary text-5xl lg:text-7xl leading-none select-none">
+          ٱللَّٰه
+        </div>
+        <div className="font-arabic text-secondary/60 text-3xl lg:text-5xl leading-none mt-4 select-none">
+          أَكْبَر
+        </div>
+      </motion.div>
+
+      {/* Decorative Islamic Pattern Overlay - Top Right Corner */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 0.1, scale: 1 }}
+        transition={{ duration: 1, delay: 0.8 }}
+        className="absolute top-20 right-8 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 hidden md:block pointer-events-none"
+      >
+        <svg viewBox="0 0 100 100" className="w-full h-full text-secondary fill-current">
+          <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" />
+        </svg>
+      </motion.div>
+
+      {/* Floating Decorative Circles */}
       <motion.div
         animate={{ y: [-10, 10, -10] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-10 w-20 h-20 border border-secondary/30 rounded-full hidden lg:block"
+        className="absolute top-1/4 left-[15%] w-20 h-20 border border-secondary/30 rounded-full hidden lg:block"
       />
       <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-1/4 right-10 w-32 h-32 border border-secondary/20 rounded-full hidden lg:block"
+        className="absolute bottom-1/4 right-[15%] w-32 h-32 border border-secondary/20 rounded-full hidden lg:block"
       />
+
+      {/* Bottom Left Calligraphy Accent */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 0.1, y: 0 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="absolute bottom-20 left-8 hidden lg:block pointer-events-none"
+      >
+        <div className="font-arabic text-secondary text-4xl lg:text-6xl select-none">
+          عيد مبارك
+        </div>
+      </motion.div>
 
       {/* Content */}
       <div className="relative z-10 container text-center text-primary-foreground pt-32 pb-20">
