@@ -100,14 +100,17 @@ const Header = () => {
       {/* Main Nav */}
       <nav className="container py-4">
         <div className="flex items-center justify-between">
-          <a href="#home" className="flex items-center gap-3 group">
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+            className="flex items-center gap-3 group cursor-pointer"
+          >
             <img 
               src={companyLogo} 
               alt="S.M. Elite Hajj Limited" 
               className="h-14 w-auto object-contain ring-2 ring-primary/20 rounded-lg p-1 bg-white shadow-elegant group-hover:ring-primary/40 transition-all"
             />
             <span className="font-calligraphy font-bold text-2xl text-primary hidden sm:inline group-hover:text-primary/80 transition-colors">S. M. Elite Hajj</span>
-          </a>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
