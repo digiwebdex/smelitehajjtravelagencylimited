@@ -42,12 +42,14 @@ const Header = () => {
     } else {
       // Fallback to default menu items
       setMenuItems([
-        { id: "1", label: "Home", href: "#home", order_index: 0 },
+        { id: "1", label: "Services", href: "#services", order_index: 0 },
         { id: "2", label: "Hajj Packages", href: "#hajj", order_index: 1 },
         { id: "3", label: "Umrah Packages", href: "#umrah", order_index: 2 },
         { id: "4", label: "Visa Services", href: "#visa", order_index: 3 },
         { id: "5", label: "Our Team", href: "#team", order_index: 4 },
-        { id: "6", label: "Contact", href: "#contact", order_index: 5 },
+        { id: "6", label: "Testimonials", href: "#testimonials", order_index: 5 },
+        { id: "7", label: "FAQ", href: "#faq", order_index: 6 },
+        { id: "8", label: "Contact", href: "#contact", order_index: 7 },
       ]);
     }
   };
@@ -87,6 +89,7 @@ const Header = () => {
               alt="S.M. Elite Hajj Limited" 
               className="h-12 w-auto object-contain"
             />
+            <span className="font-bold text-lg text-foreground hidden sm:inline">S. M. Elite Hajj</span>
           </a>
 
           {/* Desktop Navigation */}
@@ -104,7 +107,7 @@ const Header = () => {
           </div>
 
           <div className="hidden lg:flex items-center gap-4">
-            {user ? (
+            {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
@@ -129,12 +132,6 @@ const Header = () => {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Link to="/auth">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  Sign In
-                </Button>
-              </Link>
             )}
             <a href="#hajj">
               <Button className="bg-gradient-primary hover:opacity-90 shadow-gold">
@@ -167,12 +164,11 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 mt-4">
-                <Button variant="outline" className="border-primary text-primary">
-                  Get Quote
-                </Button>
-                <Button className="bg-gradient-primary">
-                  Book Now
-                </Button>
+                <a href="#hajj">
+                  <Button className="bg-gradient-primary w-full">
+                    Book Now
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
