@@ -9,7 +9,6 @@ import {
   LayoutDashboard, 
   Package, 
   Users, 
-  DollarSign, 
   TrendingUp,
   ArrowLeft,
   LogOut,
@@ -20,7 +19,8 @@ import {
   HelpCircle,
   Globe,
   Phone,
-  FileText
+  FileText,
+  Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -36,6 +36,8 @@ import AdminFAQ from "@/components/admin/AdminFAQ";
 import AdminVisa from "@/components/admin/AdminVisa";
 import AdminContact from "@/components/admin/AdminContact";
 import AdminFooter from "@/components/admin/AdminFooter";
+import AdminSettings from "@/components/admin/AdminSettings";
+import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
   totalBookings: number;
@@ -146,8 +148,8 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Revenue",
-      value: `$${stats.totalRevenue.toLocaleString()}`,
-      icon: DollarSign,
+      value: formatCurrency(stats.totalRevenue),
+      icon: Wallet,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
@@ -156,7 +158,7 @@ const AdminDashboard = () => {
   const cmsTabs = [
     { value: "bookings", label: "Bookings", icon: Package },
     { value: "packages", label: "Packages", icon: Package },
-    { value: "revenue", label: "Revenue", icon: DollarSign },
+    { value: "revenue", label: "Revenue", icon: Wallet },
     { value: "menu", label: "Menu", icon: Menu },
     { value: "hero", label: "Hero", icon: Image },
     { value: "services", label: "Services", icon: Settings },
@@ -166,6 +168,7 @@ const AdminDashboard = () => {
     { value: "visa", label: "Visa", icon: Globe },
     { value: "contact", label: "Contact", icon: Phone },
     { value: "footer", label: "Footer", icon: FileText },
+    { value: "settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -283,6 +286,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="footer">
             <AdminFooter />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettings />
           </TabsContent>
         </Tabs>
       </main>

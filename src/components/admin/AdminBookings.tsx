@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatCurrency } from "@/lib/currency";
 
 interface Booking {
   id: string;
@@ -238,7 +239,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                     </TableCell>
                     <TableCell>{booking.passenger_count}</TableCell>
                     <TableCell className="font-bold">
-                      ${Number(booking.total_price).toLocaleString()}
+                      {formatCurrency(Number(booking.total_price))}
                     </TableCell>
                     <TableCell>{getStatusBadge(booking.status)}</TableCell>
                     <TableCell className="text-xs">
@@ -353,7 +354,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Amount</p>
                   <p className="text-2xl font-bold text-primary">
-                    ${Number(selectedBooking.total_price).toLocaleString()}
+                    {formatCurrency(Number(selectedBooking.total_price))}
                   </p>
                 </div>
                 {getStatusBadge(selectedBooking.status)}

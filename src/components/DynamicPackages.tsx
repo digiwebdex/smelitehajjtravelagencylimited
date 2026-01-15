@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import BookingModal from "./BookingModal";
+import { formatCurrency } from "@/lib/currency";
 
 interface Package {
   id: string;
@@ -168,7 +169,7 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
                 
                 {/* Price badge */}
                 <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold">
-                  <span className="text-2xl font-bold">${pkg.price.toLocaleString()}</span>
+                  <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
                   <span className="text-xs block opacity-80">per person</span>
                 </div>
               </CardHeader>

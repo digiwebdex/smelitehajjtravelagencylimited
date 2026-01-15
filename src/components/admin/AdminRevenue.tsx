@@ -24,7 +24,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { TrendingUp, TrendingDown, DollarSign, Package, Users } from "lucide-react";
+import { TrendingUp, Package, Wallet } from "lucide-react";
+import { formatCurrency, CURRENCY } from "@/lib/currency";
 
 interface RevenueData {
   month: string;
@@ -169,11 +170,11 @@ const AdminRevenue = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Total Revenue</p>
                   <p className="text-3xl font-bold text-primary">
-                    ${totals.totalRevenue.toLocaleString()}
+                    {formatCurrency(totals.totalRevenue)}
                   </p>
                 </div>
                 <div className="bg-primary/10 p-3 rounded-xl">
-                  <DollarSign className="w-6 h-6 text-primary" />
+                  <Wallet className="w-6 h-6 text-primary" />
                 </div>
               </div>
             </CardContent>
@@ -211,7 +212,7 @@ const AdminRevenue = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Avg. Order Value</p>
                   <p className="text-3xl font-bold">
-                    ${Math.round(totals.averageOrderValue).toLocaleString()}
+                    {formatCurrency(Math.round(totals.averageOrderValue))}
                   </p>
                 </div>
                 <div className="bg-secondary/10 p-3 rounded-xl">
@@ -237,9 +238,9 @@ const AdminRevenue = () => {
                 <BarChart data={monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" className="text-xs" />
-                  <YAxis className="text-xs" tickFormatter={(value) => `$${value / 1000}k`} />
+                  <YAxis className="text-xs" tickFormatter={(value) => `${CURRENCY.symbol}${value / 1000}k`} />
                   <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -282,7 +283,7 @@ const AdminRevenue = () => {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: number) => [formatCurrency(value), "Revenue"]}
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
                       border: "1px solid hsl(var(--border))",
@@ -328,7 +329,7 @@ const AdminRevenue = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>{pkg.bookings}</TableCell>
-                  <TableCell className="font-bold">${pkg.revenue.toLocaleString()}</TableCell>
+                  <TableCell className="font-bold">{formatCurrency(pkg.revenue)}</TableCell>
                   <TableCell>
                     {totals.totalRevenue > 0
                       ? ((pkg.revenue / totals.totalRevenue) * 100).toFixed(1)
