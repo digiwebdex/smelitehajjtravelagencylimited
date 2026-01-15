@@ -114,7 +114,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
 
     setLoading(true);
     
-    const { error } = await supabase.from("bookings").insert({
+    const { data: bookingData, error } = await supabase.from("bookings").insert({
       package_id: package_info.id,
       passenger_count: formData.passengerCount,
       travel_date: formData.travelDate || null,
@@ -124,7 +124,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       guest_name: formData.guestName.trim(),
       guest_email: formData.guestEmail.trim() || null,
       guest_phone: formData.guestPhone.trim(),
-    });
+    }).select("id").single();
 
     if (error) {
       toast({
@@ -133,9 +133,16 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
         variant: "destructive",
       });
     } else {
+      // Send booking confirmation notifications (SMS & Email)
+      if (bookingData?.id) {
+        supabase.functions.invoke("send-booking-notification", {
+          body: { bookingId: bookingData.id }
+        }).catch(err => console.error("Notification error:", err));
+      }
+
       toast({
         title: "Booking Submitted!",
-        description: "Your booking has been submitted successfully. We will contact you shortly.",
+        description: "Your booking has been submitted successfully. You will receive a confirmation shortly.",
       });
       onClose();
       // Reset form

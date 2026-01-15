@@ -37,7 +37,9 @@ import AdminVisa from "@/components/admin/AdminVisa";
 import AdminContact from "@/components/admin/AdminContact";
 import AdminFooter from "@/components/admin/AdminFooter";
 import AdminSettings from "@/components/admin/AdminSettings";
+import AdminNotifications from "@/components/admin/AdminNotifications";
 import { formatCurrency } from "@/lib/currency";
+import { Bell } from "lucide-react";
 
 interface Stats {
   totalBookings: number;
@@ -159,6 +161,7 @@ const AdminDashboard = () => {
     { value: "bookings", label: "Bookings", icon: Package },
     { value: "packages", label: "Packages", icon: Package },
     { value: "revenue", label: "Revenue", icon: Wallet },
+    { value: "notifications", label: "Notifications", icon: Bell },
     { value: "menu", label: "Menu", icon: Menu },
     { value: "hero", label: "Hero", icon: Image },
     { value: "services", label: "Services", icon: Settings },
@@ -250,6 +253,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="revenue">
             <AdminRevenue />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <AdminNotifications />
           </TabsContent>
 
           <TabsContent value="menu">
