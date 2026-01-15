@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { motion } from "framer-motion";
-import { Calendar, MapPin, Star, Users, Check, ArrowUpDown, Filter } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar, MapPin, Star, Users, Check, ArrowUpDown, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import BookingModal from "./BookingModal";
 import { formatCurrency } from "@/lib/currency";
+import { cn } from "@/lib/utils";
 
 interface Package {
   id: string;
@@ -32,6 +33,126 @@ interface DynamicPackagesProps {
 }
 
 type SortOption = "price-asc" | "price-desc" | "duration-asc" | "duration-desc" | "rating-desc";
+
+const VISIBLE_FEATURES_COUNT = 6;
+
+// Expandable Package Card Component
+const ExpandablePackageCard = ({ 
+  pkg, 
+  index, 
+  onBookNow 
+}: { 
+  pkg: Package; 
+  index: number; 
+  onBookNow: (pkg: Package) => void;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const features = pkg.includes || [];
+  const hasMoreFeatures = features.length > VISIBLE_FEATURES_COUNT;
+  const visibleFeatures = isExpanded ? features : features.slice(0, VISIBLE_FEATURES_COUNT);
+  const remainingCount = features.length - VISIBLE_FEATURES_COUNT;
+
+  return (
+    <motion.div
+      key={pkg.id}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1 }}
+      className="w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] max-w-sm flex"
+    >
+      <Card className="h-full flex flex-col overflow-hidden hover:shadow-elegant transition-all duration-300 group border-border/50">
+        {/* Header with gradient */}
+        <CardHeader className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-heading text-xl font-bold">{pkg.title}</h3>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                  {pkg.duration_days} Days
+                </Badge>
+                {pkg.hotel_rating && (
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: pkg.hotel_rating }).map((_, i) => (
+                      <Star key={i} className="w-3 h-3 fill-secondary text-secondary" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {pkg.stock < 10 && (
+              <Badge className="bg-secondary text-secondary-foreground">
+                Only {pkg.stock} left
+              </Badge>
+            )}
+          </div>
+          
+          {/* Price badge */}
+          <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold">
+            <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
+            <span className="text-xs block opacity-80">per person</span>
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex-1 pt-8 pb-4">
+          {pkg.description && (
+            <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
+          )}
+          
+          {features.length > 0 && (
+            <ul className="space-y-2">
+              <AnimatePresence mode="sync">
+                {visibleFeatures.map((item, i) => (
+                  <motion.li 
+                    key={item} 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, delay: i < VISIBLE_FEATURES_COUNT ? 0 : 0.03 * (i - VISIBLE_FEATURES_COUNT) }}
+                    className="flex items-start gap-2 text-sm overflow-hidden"
+                  >
+                    <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
+          )}
+
+          {/* Expand/Collapse Button */}
+          {hasMoreFeatures && (
+            <motion.button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-sm font-medium mt-3 text-primary hover:text-primary/80 transition-colors"
+              whileTap={{ scale: 0.98 }}
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Show less
+                </>
+              ) : (
+                <>
+                  <span className="text-lg font-bold mr-1">+</span>
+                  {remainingCount} more inclusion{remainingCount > 1 ? 's' : ''}
+                </>
+              )}
+            </motion.button>
+          )}
+        </CardContent>
+
+        <CardFooter className="pt-0">
+          <Button 
+            onClick={() => onBookNow(pkg)}
+            className="w-full bg-gradient-primary hover:opacity-90 shadow-gold group-hover:scale-105 transition-transform"
+          >
+            Book Now
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
+};
 
 const DynamicPackages = ({ type }: DynamicPackagesProps) => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -133,79 +254,12 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
 
       <div className="flex flex-wrap justify-center gap-6">
         {sortedPackages.map((pkg, index) => (
-          <motion.div
+          <ExpandablePackageCard
             key={pkg.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-          className="w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] xl:w-[calc(25%-18px)] max-w-sm flex"
-          >
-            <Card className="h-full flex flex-col overflow-hidden hover:shadow-elegant transition-all duration-300 group border-border/50">
-              {/* Header with gradient */}
-              <CardHeader className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-heading text-xl font-bold">{pkg.title}</h3>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                        {pkg.duration_days} Days
-                      </Badge>
-                      {pkg.hotel_rating && (
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: pkg.hotel_rating }).map((_, i) => (
-                            <Star key={i} className="w-3 h-3 fill-secondary text-secondary" />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {pkg.stock < 10 && (
-                    <Badge className="bg-secondary text-secondary-foreground">
-                      Only {pkg.stock} left
-                    </Badge>
-                  )}
-                </div>
-                
-                {/* Price badge */}
-                <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold">
-                  <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
-                  <span className="text-xs block opacity-80">per person</span>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex-1 pt-8 pb-4">
-                {pkg.description && (
-                  <p className="text-sm text-muted-foreground mb-4">{pkg.description}</p>
-                )}
-                
-                {pkg.includes && pkg.includes.length > 0 && (
-                  <ul className="space-y-2">
-                    {pkg.includes.slice(0, 6).map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    {pkg.includes.length > 6 && (
-                      <li className="text-sm text-primary font-medium">
-                        + {pkg.includes.length - 6} more inclusions
-                      </li>
-                    )}
-                  </ul>
-                )}
-              </CardContent>
-
-              <CardFooter className="pt-0">
-                <Button 
-                  onClick={() => handleBookNow(pkg)}
-                  className="w-full bg-gradient-primary hover:opacity-90 shadow-gold group-hover:scale-105 transition-transform"
-                >
-                  Book Now
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
+            pkg={pkg}
+            index={index}
+            onBookNow={handleBookNow}
+          />
         ))}
       </div>
 
