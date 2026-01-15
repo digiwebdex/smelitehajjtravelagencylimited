@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plane, Hotel, Shield, Users, Clock, HeartHandshake, LucideIcon } from "lucide-react";
 import * as LucideIcons from "lucide-react";
+import IslamicBorder from "./IslamicBorder";
 
 interface Service {
   id: string;
@@ -68,10 +69,11 @@ const ServicesOverview = () => {
   }
 
   return (
-    <section className="py-20 bg-card relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full translate-x-1/2 translate-y-1/2" />
+    <IslamicBorder>
+      <section className="py-20 bg-card relative overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/5 rounded-full translate-x-1/2 translate-y-1/2" />
       
       <div className="container relative z-10">
         <div className="text-center mb-12">
@@ -109,7 +111,8 @@ const ServicesOverview = () => {
           })}
         </div>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

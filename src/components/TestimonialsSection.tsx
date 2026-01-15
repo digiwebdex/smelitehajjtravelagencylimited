@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import IslamicBorder from "./IslamicBorder";
 
 interface Testimonial {
   id: string;
@@ -85,7 +86,8 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <section className="py-24 bg-gradient-to-b from-background to-muted overflow-hidden">
+    <IslamicBorder>
+      <section className="py-24 bg-gradient-to-b from-background to-muted overflow-hidden">
       <div className="container">
         <div className="text-center mb-16">
           <span className="text-secondary font-semibold uppercase tracking-wider">
@@ -161,7 +163,8 @@ const TestimonialsSection = () => {
           <CarouselNext className="hidden md:flex -right-12" />
         </Carousel>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

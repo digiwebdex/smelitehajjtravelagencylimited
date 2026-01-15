@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import IslamicBorder from "./IslamicBorder";
 
 interface ContactInfo {
   id: string;
@@ -83,10 +84,11 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contact" className="py-24 bg-muted geometric-pattern relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-72 h-72 bg-secondary/5 rounded-full blur-3xl" />
+    <IslamicBorder>
+      <section id="contact" className="py-24 bg-muted geometric-pattern relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-secondary/5 rounded-full blur-3xl" />
       
       <div className="container relative z-10">
         <motion.div
@@ -285,7 +287,8 @@ const ContactSection = () => {
           </motion.div>
         </div>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

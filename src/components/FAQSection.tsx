@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { HelpCircle } from "lucide-react";
+import IslamicBorder from "./IslamicBorder";
 
 interface FAQItem {
   id: string;
@@ -83,7 +84,8 @@ const FAQSection = () => {
   }
 
   return (
-    <section className="py-24 bg-background">
+    <IslamicBorder>
+      <section className="py-24 bg-background">
       <div className="container">
         <div className="text-center mb-16">
           <span className="text-secondary font-semibold uppercase tracking-wider">
@@ -123,7 +125,8 @@ const FAQSection = () => {
           </Accordion>
         </div>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

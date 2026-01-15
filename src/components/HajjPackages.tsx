@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
 import DynamicPackages from "./DynamicPackages";
+import IslamicBorder from "./IslamicBorder";
 
 const HajjPackages = () => {
   return (
-    <section id="hajj" className="py-24 bg-muted geometric-pattern relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-20 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
+    <IslamicBorder>
+      <section id="hajj" className="py-24 bg-muted geometric-pattern relative overflow-hidden">
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
       
       <div className="container relative z-10">
         <motion.div
@@ -69,7 +71,8 @@ const HajjPackages = () => {
           </div>
         </motion.div>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

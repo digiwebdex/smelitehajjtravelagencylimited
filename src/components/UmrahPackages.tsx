@@ -2,16 +2,18 @@ import medinaImage from "@/assets/medina-mosque.jpg";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import DynamicPackages from "./DynamicPackages";
+import IslamicBorder from "./IslamicBorder";
 
 const UmrahPackages = () => {
   return (
-    <section id="umrah" className="py-24 bg-background relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-muted to-transparent" />
-      </div>
-      
-      <div className="container relative z-10">
+    <IslamicBorder>
+      <section id="umrah" className="py-24 bg-background relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-muted to-transparent" />
+        </div>
+        
+        <div className="container relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-16">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -95,7 +97,8 @@ const UmrahPackages = () => {
 
         <DynamicPackages type="umrah" />
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

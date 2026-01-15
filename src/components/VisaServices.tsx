@@ -3,6 +3,7 @@ import { ArrowRight, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+import IslamicBorder from "./IslamicBorder";
 
 interface VisaCountry {
   id: string;
@@ -74,9 +75,10 @@ const VisaServices = () => {
   }
 
   return (
-    <section id="visa" className="py-24 bg-muted relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-50 geometric-pattern" />
+    <IslamicBorder>
+      <section id="visa" className="py-24 bg-muted relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-50 geometric-pattern" />
       
       <div className="container relative z-10">
         <motion.div
@@ -156,7 +158,8 @@ const VisaServices = () => {
           </Button>
         </motion.div>
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 

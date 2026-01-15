@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import IslamicBorder from "./IslamicBorder";
 
 interface TeamMember {
   id: string;
@@ -78,9 +79,10 @@ const TeamSection = () => {
   }
 
   return (
-    <section id="team" className="py-24 bg-background relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
+    <IslamicBorder>
+      <section id="team" className="py-24 bg-background relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
       
       <div className="container relative z-10">
         {/* Management Board */}
@@ -211,7 +213,8 @@ const TeamSection = () => {
           </>
         )}
       </div>
-    </section>
+      </section>
+    </IslamicBorder>
   );
 };
 
