@@ -255,7 +255,7 @@ const ContactSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-card rounded-3xl p-8 md:p-10 shadow-elegant relative overflow-hidden"
+            className="bg-card rounded-3xl p-8 md:p-10 shadow-elegant relative overflow-hidden h-fit"
           >
             {/* Decorative */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full" />
