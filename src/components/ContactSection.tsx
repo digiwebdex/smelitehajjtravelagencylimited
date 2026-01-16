@@ -136,14 +136,14 @@ const ContactSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
           {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="space-y-6"
+            className="flex flex-col gap-4"
           >
             <div className="grid grid-cols-2 gap-4">
               {contactInfo.map((info, index) => {
@@ -181,7 +181,7 @@ const ContactSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 gap-4 flex-1"
               >
                 {officeLocations.map((office) => (
                   <div 
