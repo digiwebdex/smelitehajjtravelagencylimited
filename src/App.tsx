@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import MyBookings from "./pages/MyBookings";
+import TrackOrder from "./pages/TrackOrder";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LegalPage from "./pages/LegalPage";
 import PaymentResult from "./pages/PaymentResult";
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/my-bookings" element={<MyBookings />} />
+              <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/legal/:pageKey" element={<LegalPage />} />
               <Route path="/payment/success" element={<PaymentResult />} />

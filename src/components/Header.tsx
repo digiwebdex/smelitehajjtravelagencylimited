@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -163,6 +163,12 @@ const Header = () => {
 
           <div className={`hidden lg:flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <LanguageSelector />
+            <Link to="/track-order">
+              <Button variant="ghost" size="sm" className={`gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <MapPin className="w-4 h-4" />
+                Track Order
+              </Button>
+            </Link>
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -225,6 +231,12 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 mt-4">
+                <Link to="/track-order" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Track Order
+                  </Button>
+                </Link>
                 <a href="#hajj">
                   <Button className="bg-gradient-primary w-full">
                     {t('nav.bookNow')}
