@@ -89,16 +89,21 @@ const Header = () => {
 
   const logoSrc = companyInfo.logo_url || companyLogo;
 
+  const hasAnnouncement = appearance.show_announcement_bar && appearance.announcement_text;
+
   return (
     <>
       {/* Announcement Bar */}
-      {appearance.show_announcement_bar && appearance.announcement_text && (
-        <div className="bg-secondary text-secondary-foreground py-2 text-center text-sm font-medium">
-          {appearance.announcement_text}
+      {hasAnnouncement && (
+        <div className="fixed top-0 left-0 right-0 z-[60] bg-secondary text-secondary-foreground py-2 text-center text-sm font-medium animate-fade-down">
+          <div className="container flex items-center justify-center gap-2">
+            <span>📢</span>
+            <span>{appearance.announcement_text}</span>
+          </div>
         </div>
       )}
       
-      <header className={`fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-elegant transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''} ${appearance.show_announcement_bar && appearance.announcement_text ? 'top-[36px]' : ''}`}>
+      <header className={`fixed left-0 right-0 z-50 bg-card/95 backdrop-blur-md shadow-elegant transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''} ${hasAnnouncement ? 'top-[36px]' : 'top-0'}`}>
         {/* Top Bar - Hide when scrolled */}
         <div className={`bg-primary text-primary-foreground overflow-hidden transition-all duration-300 ${isScrolled ? 'h-0 py-0' : 'h-auto py-2'}`}>
           <div className="container flex justify-between items-center text-sm">
