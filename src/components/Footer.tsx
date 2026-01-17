@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, ArrowUp } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, Twitter, ArrowUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import companyLogo from "@/assets/company-logo.jpeg";
 import FloatingIslamicPattern from "./FloatingIslamicPattern";
 
@@ -34,9 +35,11 @@ interface FooterContent {
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const { companyInfo, contactDetails, socialLinks } = useSiteSettings();
+  
   const [content, setContent] = useState<FooterContent>({
-    company_description: "Your trusted partner for Hajj & Umrah journeys. We provide comprehensive packages with premium services to ensure a spiritually fulfilling experience.",
-    copyright_text: `© ${currentYear} SM Elite Hajj & Umrah Services. All rights reserved.`,
+    company_description: "",
+    copyright_text: "",
     quick_links: [
       { label: "Home", href: "#home" },
       { label: "Hajj Packages", href: "#hajj" },
@@ -53,40 +56,54 @@ const Footer = () => {
       { label: "Hotel Booking", href: "#" },
       { label: "Travel Insurance", href: "#" },
     ],
-    social_links: [
-      { platform: "Facebook", href: "#" },
-      { platform: "Instagram", href: "#" },
-      { platform: "Youtube", href: "#" },
-    ],
-    contact_address: "Savar, Dhaka, Bangladesh",
-    contact_phones: ["+880 1234-567890", "+880 9876-543210"],
-    contact_email: "info@smelitehajj.com",
+    social_links: [],
+    contact_address: "",
+    contact_phones: [],
+    contact_email: "",
   });
 
   useEffect(() => {
     fetchFooterContent();
   }, []);
 
+  // Build social links from site settings
+  const buildSocialLinks = (): SocialLink[] => {
+    const links: SocialLink[] = [];
+    if (socialLinks.facebook) links.push({ platform: "Facebook", href: socialLinks.facebook });
+    if (socialLinks.instagram) links.push({ platform: "Instagram", href: socialLinks.instagram });
+    if (socialLinks.youtube) links.push({ platform: "Youtube", href: socialLinks.youtube });
+    if (socialLinks.twitter) links.push({ platform: "Twitter", href: socialLinks.twitter });
+    return links;
+  };
+
   const fetchFooterContent = async () => {
     const { data } = await supabase
       .from("footer_content")
       .select("*")
       .limit(1)
-      .single();
+      .maybeSingle();
     
     if (data) {
       setContent({
-        company_description: data.company_description || content.company_description,
-        copyright_text: data.copyright_text || content.copyright_text,
+        company_description: data.company_description || "",
+        copyright_text: data.copyright_text || "",
         quick_links: Array.isArray(data.quick_links) ? (data.quick_links as unknown as FooterLink[]) : content.quick_links,
         services_links: Array.isArray(data.services_links) ? (data.services_links as unknown as ServiceLink[]) : content.services_links,
-        social_links: Array.isArray(data.social_links) ? (data.social_links as unknown as SocialLink[]) : content.social_links,
-        contact_address: (data as any).contact_address || content.contact_address,
-        contact_phones: Array.isArray((data as any).contact_phones) ? (data as any).contact_phones : content.contact_phones,
-        contact_email: (data as any).contact_email || content.contact_email,
+        social_links: Array.isArray(data.social_links) ? (data.social_links as unknown as SocialLink[]) : [],
+        contact_address: (data as Record<string, unknown>).contact_address as string || "",
+        contact_phones: Array.isArray((data as Record<string, unknown>).contact_phones) ? (data as Record<string, unknown>).contact_phones as string[] : [],
+        contact_email: (data as Record<string, unknown>).contact_email as string || "",
       });
     }
   };
+
+  // Use site settings as fallback for footer content
+  const displayDescription = content.company_description || companyInfo.tagline;
+  const displayCopyright = content.copyright_text || `© ${currentYear} ${companyInfo.name}. All rights reserved.`;
+  const displayAddress = content.contact_address || contactDetails.address;
+  const displayPhones = content.contact_phones?.length ? content.contact_phones : [contactDetails.phone];
+  const displayEmail = content.contact_email || contactDetails.email;
+  const displaySocialLinks = content.social_links?.length ? content.social_links : buildSocialLinks();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -100,10 +117,14 @@ const Footer = () => {
         return Instagram;
       case "youtube":
         return Youtube;
+      case "twitter":
+        return Twitter;
       default:
         return Facebook;
     }
   };
+
+  const logoSrc = companyInfo.logo_url || companyLogo;
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
@@ -144,30 +165,34 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-3 mb-6">
               <img 
-                src={companyLogo} 
-                alt="S.M. Elite Hajj Limited" 
+                src={logoSrc} 
+                alt={companyInfo.name} 
                 className="h-16 w-auto object-contain bg-white/10 rounded-xl p-1"
               />
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
-              {content.company_description}
+              {displayDescription}
             </p>
-            <div className="flex gap-3">
-              {content.social_links.map((social) => {
-                const Icon = getSocialIcon(social.platform);
-                return (
-                  <motion.a
-                    key={social.platform}
-                    href={social.href}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className="w-11 h-11 bg-primary-foreground/10 rounded-xl flex items-center justify-center hover:bg-secondary hover:text-secondary-foreground transition-all duration-300"
-                    aria-label={social.platform}
-                  >
-                    <Icon className="w-5 h-5" />
-                  </motion.a>
-                );
-              })}
-            </div>
+            {displaySocialLinks.length > 0 && (
+              <div className="flex gap-3">
+                {displaySocialLinks.map((social) => {
+                  const Icon = getSocialIcon(social.platform);
+                  return (
+                    <motion.a
+                      key={social.platform}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.1, y: -2 }}
+                      className="w-11 h-11 bg-primary-foreground/10 rounded-xl flex items-center justify-center hover:bg-secondary hover:text-secondary-foreground transition-all duration-300"
+                      aria-label={social.platform}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </motion.a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -226,7 +251,7 @@ const Footer = () => {
                   <MapPin className="w-5 h-5 text-secondary" />
                 </div>
                 <span className="text-primary-foreground/80 text-sm pt-2">
-                  {content.contact_address}
+                  {displayAddress}
                 </span>
               </li>
               <li className="flex items-start gap-3">
@@ -234,7 +259,7 @@ const Footer = () => {
                   <Phone className="w-5 h-5 text-secondary" />
                 </div>
                 <div className="text-primary-foreground/80 text-sm pt-2">
-                  {content.contact_phones?.map((phone, index) => (
+                  {displayPhones.map((phone, index) => (
                     <div key={index}>{phone}</div>
                   ))}
                 </div>
@@ -244,7 +269,7 @@ const Footer = () => {
                   <Mail className="w-5 h-5 text-secondary" />
                 </div>
                 <span className="text-primary-foreground/80 text-sm pt-2">
-                  {content.contact_email}
+                  {displayEmail}
                 </span>
               </li>
             </ul>
@@ -256,7 +281,7 @@ const Footer = () => {
       <div className="border-t border-primary-foreground/10 relative z-10">
         <div className="container py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/70 text-sm text-center md:text-left">
-            {content.copyright_text}
+            {displayCopyright}
           </p>
           <div className="flex gap-6 text-sm">
             <Link to="/legal/privacy-policy" className="text-primary-foreground/70 hover:text-secondary transition-colors">

@@ -1,6 +1,7 @@
 import { MessageCircle, ArrowUp, X, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const TypingIndicator = () => (
   <div className="flex items-center gap-1 p-3 bg-card rounded-lg shadow-sm max-w-[85%] mb-3">
@@ -15,6 +16,7 @@ const TypingIndicator = () => (
 const STORAGE_KEY = "smEliteHajj_chatHistory";
 
 const WhatsAppButton = () => {
+  const { companyInfo, contactDetails } = useSiteSettings();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -26,7 +28,7 @@ const WhatsAppButton = () => {
     return [];
   });
   const [isTyping, setIsTyping] = useState(false);
-  const phoneNumber = "8801619959626";
+  const phoneNumber = contactDetails.whatsapp?.replace(/[^0-9]/g, '') || "8801619959626";
 
   // Save chat messages to localStorage whenever they change
   useEffect(() => {
@@ -123,7 +125,7 @@ const WhatsAppButton = () => {
             <MessageCircle className="w-6 h-6 text-[#25D366]" />
           </div>
           <div className="flex-1">
-            <h3 className="text-white font-semibold">S.M. Elite Hajj</h3>
+            <h3 className="text-white font-semibold">{companyInfo.name}</h3>
             <p className="text-white/80 text-sm">Typically replies within minutes</p>
           </div>
           <button
@@ -142,7 +144,7 @@ const WhatsAppButton = () => {
               Assalamu Alaikum! 👋
             </p>
             <p className="text-sm text-foreground mt-1">
-              Welcome to S.M. Elite Hajj. How can we assist you today?
+              Welcome to {companyInfo.name}. How can we assist you today?
             </p>
             <span className="text-xs text-muted-foreground mt-1 block">Just now</span>
           </div>
@@ -200,7 +202,7 @@ const WhatsAppButton = () => {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Live Chat Support • +880 1619 959626
+            Live Chat Support • {contactDetails.phone}
           </p>
         </div>
       </div>
