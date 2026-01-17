@@ -215,3 +215,70 @@
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
+
+/* RTL Support for Arabic */
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+body.rtl .font-arabic,
+body.rtl .font-thuluth,
+body.rtl .font-calligraphy {
+  font-family: 'Scheherazade New', 'Amiri', 'Aref Ruqaa', serif;
+}
+
+/* RTL specific adjustments */
+body.rtl .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+body.rtl .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+body.rtl .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+body.rtl .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+body.rtl .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Flip icons in RTL */
+body.rtl .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Adjust margins and paddings in RTL */
+body.rtl .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+body.rtl .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+body.rtl .ml-4 { margin-left: 0; margin-right: 1rem; }
+body.rtl .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+body.rtl .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+body.rtl .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+body.rtl .pl-2 { padding-left: 0; padding-right: 0.5rem; }
+body.rtl .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+body.rtl .pl-4 { padding-left: 0; padding-right: 1rem; }
+body.rtl .pr-2 { padding-right: 0; padding-left: 0.5rem; }
+body.rtl .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+body.rtl .pr-4 { padding-right: 0; padding-left: 1rem; }
+
+/* RTL text alignment adjustments */
+body.rtl .text-left { text-align: right; }
+body.rtl .text-right { text-align: left; }
+
+/* RTL flex adjustments */
+body.rtl .flex-row { flex-direction: row-reverse; }
+
+/* Bangla font support */
+@font-face {
+  font-family: 'Bangla';
+  src: local('Noto Sans Bengali'), local('Hind Siliguri'), local('Kalpurush');
+  unicode-range: U+0980-09FF;
+}
