@@ -14,7 +14,8 @@ import {
   Bell,
   Scale,
   LayoutDashboard,
-  ChevronLeft
+  ChevronLeft,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
+  { value: "overview", label: "Overview", icon: BarChart3 },
   { value: "bookings", label: "Bookings", icon: Package },
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "revenue", label: "Revenue", icon: Wallet },

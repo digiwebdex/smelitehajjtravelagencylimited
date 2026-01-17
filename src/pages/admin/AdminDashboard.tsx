@@ -33,6 +33,7 @@ import AdminOfficeLocations from "@/components/admin/AdminOfficeLocations";
 import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
+import AdminOverview from "@/components/admin/AdminOverview";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -46,7 +47,7 @@ interface Stats {
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("bookings");
+  const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalBookings: 0,
@@ -155,6 +156,8 @@ const AdminDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case "overview":
+        return <AdminOverview />;
       case "bookings":
         return <AdminBookings onUpdate={fetchStats} />;
       case "packages":
@@ -190,7 +193,7 @@ const AdminDashboard = () => {
       case "settings":
         return <AdminSettings />;
       default:
-        return <AdminBookings onUpdate={fetchStats} />;
+        return <AdminOverview />;
     }
   };
 

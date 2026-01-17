@@ -14,7 +14,7 @@ import {
   Bell,
   Scale,
   LayoutDashboard,
-  X
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ interface AdminMobileNavProps {
 }
 
 const menuItems = [
+  { value: "overview", label: "Overview", icon: BarChart3 },
   { value: "bookings", label: "Bookings", icon: Package },
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "revenue", label: "Revenue", icon: Wallet },
