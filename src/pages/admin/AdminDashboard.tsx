@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { 
   LayoutDashboard, 
@@ -12,19 +11,9 @@ import {
   TrendingUp,
   ArrowLeft,
   LogOut,
-  Menu,
-  Image,
-  Settings,
-  MessageSquare,
-  HelpCircle,
-  Globe,
-  Phone,
-  FileText,
-  Wallet,
-  Building2
+  Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import AdminBookings from "@/components/admin/AdminBookings";
 import AdminPackages from "@/components/admin/AdminPackages";
 import AdminRevenue from "@/components/admin/AdminRevenue";
@@ -42,8 +31,9 @@ import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminLegalPages from "@/components/admin/AdminLegalPages";
 import AdminOfficeLocations from "@/components/admin/AdminOfficeLocations";
 import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import { formatCurrency } from "@/lib/currency";
-import { Bell, Scale } from "lucide-react";
 
 interface Stats {
   totalBookings: number;
@@ -56,6 +46,8 @@ interface Stats {
 const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("bookings");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalBookings: 0,
     pendingBookings: 0,
@@ -161,31 +153,52 @@ const AdminDashboard = () => {
     },
   ];
 
-  const cmsTabs = [
-    { value: "bookings", label: "Bookings", icon: Package },
-    { value: "packages", label: "Packages", icon: Package },
-    { value: "revenue", label: "Revenue", icon: Wallet },
-    { value: "payments", label: "Payments", icon: Wallet },
-    { value: "notifications", label: "Notifications", icon: Bell },
-    { value: "menu", label: "Menu", icon: Menu },
-    { value: "hero", label: "Hero", icon: Image },
-    { value: "services", label: "Services", icon: Settings },
-    { value: "testimonials", label: "Testimonials", icon: MessageSquare },
-    { value: "team", label: "Team", icon: Users },
-    { value: "faq", label: "FAQ", icon: HelpCircle },
-    { value: "visa", label: "Visa", icon: Globe },
-    { value: "contact", label: "Contact", icon: Phone },
-    { value: "offices", label: "Offices", icon: Building2 },
-    { value: "footer", label: "Footer", icon: FileText },
-    { value: "legal", label: "Legal Pages", icon: Scale },
-    { value: "settings", label: "Settings", icon: Settings },
-  ];
+  const renderContent = () => {
+    switch (activeTab) {
+      case "bookings":
+        return <AdminBookings onUpdate={fetchStats} />;
+      case "packages":
+        return <AdminPackages onUpdate={fetchStats} />;
+      case "revenue":
+        return <AdminRevenue />;
+      case "payments":
+        return <AdminPaymentMethods />;
+      case "notifications":
+        return <AdminNotifications />;
+      case "menu":
+        return <AdminMenu />;
+      case "hero":
+        return <AdminHero />;
+      case "services":
+        return <AdminServices />;
+      case "testimonials":
+        return <AdminTestimonials />;
+      case "team":
+        return <AdminTeam />;
+      case "faq":
+        return <AdminFAQ />;
+      case "visa":
+        return <AdminVisa />;
+      case "contact":
+        return <AdminContact />;
+      case "offices":
+        return <AdminOfficeLocations />;
+      case "footer":
+        return <AdminFooter />;
+      case "legal":
+        return <AdminLegalPages />;
+      case "settings":
+        return <AdminSettings />;
+      default:
+        return <AdminBookings onUpdate={fetchStats} />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="container py-4 flex items-center justify-between">
+        <div className="px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/">
               <Button variant="ghost" size="icon">
@@ -198,127 +211,63 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <h1 className="font-heading font-bold text-lg">Admin Dashboard</h1>
-                <p className="text-xs text-muted-foreground">SM Elite Hajj Management</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">SM Elite Hajj Management</p>
               </div>
             </div>
           </div>
           <Button variant="outline" onClick={handleSignOut} className="gap-2">
             <LogOut className="w-4 h-4" />
-            Sign Out
+            <span className="hidden sm:inline">Sign Out</span>
           </Button>
         </div>
       </header>
 
-      <main className="container py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statCards.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{stat.title}</p>
-                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
+      {/* Mobile Navigation */}
+      <AdminMobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <AdminSidebar 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          collapsed={sidebarCollapsed}
+          onCollapsedChange={setSidebarCollapsed}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 lg:p-6 min-w-0">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+            {statCards.map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card>
+                  <CardContent className="pt-4 lg:pt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs lg:text-sm text-muted-foreground">{stat.title}</p>
+                        <p className="text-xl lg:text-3xl font-bold mt-1">{stat.value}</p>
+                      </div>
+                      <div className={`${stat.bgColor} p-2 lg:p-3 rounded-xl`}>
+                        <stat.icon className={`w-4 h-4 lg:w-6 lg:h-6 ${stat.color}`} />
+                      </div>
                     </div>
-                    <div className={`${stat.bgColor} p-3 rounded-xl`}>
-                      <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="bookings" className="space-y-6">
-          <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="inline-flex h-10 w-max">
-              {cmsTabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-
-          <TabsContent value="bookings">
-            <AdminBookings onUpdate={fetchStats} />
-          </TabsContent>
-
-          <TabsContent value="packages">
-            <AdminPackages onUpdate={fetchStats} />
-          </TabsContent>
-
-          <TabsContent value="revenue">
-            <AdminRevenue />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <AdminPaymentMethods />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <AdminNotifications />
-          </TabsContent>
-
-          <TabsContent value="menu">
-            <AdminMenu />
-          </TabsContent>
-
-          <TabsContent value="hero">
-            <AdminHero />
-          </TabsContent>
-
-          <TabsContent value="services">
-            <AdminServices />
-          </TabsContent>
-
-          <TabsContent value="testimonials">
-            <AdminTestimonials />
-          </TabsContent>
-
-          <TabsContent value="team">
-            <AdminTeam />
-          </TabsContent>
-
-          <TabsContent value="faq">
-            <AdminFAQ />
-          </TabsContent>
-
-          <TabsContent value="visa">
-            <AdminVisa />
-          </TabsContent>
-
-          <TabsContent value="contact">
-            <AdminContact />
-          </TabsContent>
-
-          <TabsContent value="offices">
-            <AdminOfficeLocations />
-          </TabsContent>
-
-          <TabsContent value="footer">
-            <AdminFooter />
-          </TabsContent>
-
-          <TabsContent value="legal">
-            <AdminLegalPages />
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <AdminSettings />
-          </TabsContent>
-        </Tabs>
-      </main>
+          {/* Tab Content */}
+          <div className="animate-in fade-in-50 duration-300">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
