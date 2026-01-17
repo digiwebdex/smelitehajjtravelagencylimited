@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -16,20 +18,76 @@ import {
   Shield, 
   Database,
   Save,
-  RefreshCw
+  RefreshCw,
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
+  Share2,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+  Megaphone
 } from "lucide-react";
 import { CURRENCY } from "@/lib/currency";
 
+interface CompanyInfo {
+  name: string;
+  tagline: string;
+  description: string;
+  logo_url: string;
+}
+
+interface ContactDetails {
+  email: string;
+  phone: string;
+  whatsapp: string;
+  address: string;
+}
+
+interface SocialLinks {
+  facebook: string;
+  instagram: string;
+  youtube: string;
+  twitter: string;
+}
+
+interface Appearance {
+  primary_color: string;
+  show_announcement_bar: boolean;
+  announcement_text: string;
+}
+
 const AdminSettings = () => {
-  const [loading, setLoading] = useState(false);
-  const [siteSettings, setSiteSettings] = useState({
-    siteName: "SM Elite Hajj",
-    siteTagline: "Your Trusted Partner for Sacred Journeys",
-    contactEmail: "info@smelitehajj.com",
-    contactPhone: "+880 1234-567890",
-    whatsappNumber: "+8801712345678",
-    currency: CURRENCY.code,
-    currencySymbol: CURRENCY.symbol,
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
+    name: "SM Elite Hajj",
+    tagline: "Your Trusted Partner for Sacred Journeys",
+    description: "Government Approved Hajj & Umrah Agency",
+    logo_url: "",
+  });
+
+  const [contactDetails, setContactDetails] = useState<ContactDetails>({
+    email: "info@smelitehajj.com",
+    phone: "+880 1234-567890",
+    whatsapp: "+8801712345678",
+    address: "Dhaka, Bangladesh",
+  });
+
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
+    facebook: "",
+    instagram: "",
+    youtube: "",
+    twitter: "",
+  });
+
+  const [appearance, setAppearance] = useState<Appearance>({
+    primary_color: "#10b981",
+    show_announcement_bar: false,
+    announcement_text: "",
   });
 
   const [notifications, setNotifications] = useState({
@@ -38,109 +96,429 @@ const AdminSettings = () => {
     smsNotifications: false,
   });
 
-  const handleSaveGeneral = () => {
-    setLoading(true);
-    // Simulating save - in real app, this would save to database
-    setTimeout(() => {
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("*");
+
+      if (error) throw error;
+
+      if (data) {
+        data.forEach((setting) => {
+          const value = setting.setting_value as Record<string, unknown>;
+          switch (setting.setting_key) {
+            case "company_info":
+              setCompanyInfo(value as unknown as CompanyInfo);
+              break;
+            case "contact_details":
+              setContactDetails(value as unknown as ContactDetails);
+              break;
+            case "social_links":
+              setSocialLinks(value as unknown as SocialLinks);
+              break;
+            case "appearance":
+              setAppearance(value as unknown as Appearance);
+              break;
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      toast.error("Failed to load settings");
+    } finally {
       setLoading(false);
-      toast.success("Settings saved successfully!");
-    }, 500);
+    }
+  };
+
+  const saveSetting = async (key: string, value: Record<string, unknown>, category: string) => {
+    // First check if the setting exists
+    const { data: existing } = await supabase
+      .from("site_settings")
+      .select("id")
+      .eq("setting_key", key)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({
+          setting_value: value as Json,
+          category,
+        })
+        .eq("setting_key", key);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from("site_settings")
+        .insert([{
+          setting_key: key,
+          setting_value: value as Json,
+          category,
+        }]);
+      if (error) throw error;
+    }
+  };
+
+  const handleSaveAll = async () => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        saveSetting("company_info", companyInfo as unknown as Record<string, unknown>, "general"),
+        saveSetting("contact_details", contactDetails as unknown as Record<string, unknown>, "general"),
+        saveSetting("social_links", socialLinks as unknown as Record<string, unknown>, "general"),
+        saveSetting("appearance", appearance as unknown as Record<string, unknown>, "appearance"),
+      ]);
+      toast.success("All settings saved successfully!");
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast.error("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const settingsTabs = [
-    { value: "general", label: "General", icon: Settings },
+    { value: "company", label: "Company", icon: Building2 },
+    { value: "contact", label: "Contact", icon: Phone },
+    { value: "social", label: "Social", icon: Share2 },
+    { value: "appearance", label: "Appearance", icon: Palette },
     { value: "notifications", label: "Notifications", icon: Bell },
     { value: "security", label: "Security", icon: Shield },
     { value: "database", label: "Database", icon: Database },
   ];
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" />
-          System Settings
+          Site Settings
         </CardTitle>
         <CardDescription>
-          Configure system-wide settings for your application
+          Configure your website settings, company info, and appearance
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList>
+        <Tabs defaultValue="company" className="space-y-6">
+          <TabsList className="flex flex-wrap h-auto gap-1">
             {settingsTabs.map((tab) => (
               <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
                 <tab.icon className="w-4 h-4" />
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
-          <TabsContent value="general" className="space-y-6">
+          {/* Company Info Tab */}
+          <TabsContent value="company" className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid gap-6 md:grid-cols-2"
+              className="space-y-6"
             >
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input
+                    id="companyName"
+                    value={companyInfo.name}
+                    onChange={(e) => setCompanyInfo({ ...companyInfo, name: e.target.value })}
+                    placeholder="Enter company name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tagline">Tagline</Label>
+                  <Input
+                    id="tagline"
+                    value={companyInfo.tagline}
+                    onChange={(e) => setCompanyInfo({ ...companyInfo, tagline: e.target.value })}
+                    placeholder="Your company tagline"
+                  />
+                </div>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="siteName">Site Name</Label>
-                <Input
-                  id="siteName"
-                  value={siteSettings.siteName}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, siteName: e.target.value })}
+                <Label htmlFor="description">Company Description</Label>
+                <Textarea
+                  id="description"
+                  value={companyInfo.description}
+                  onChange={(e) => setCompanyInfo({ ...companyInfo, description: e.target.value })}
+                  placeholder="Brief description of your company"
+                  rows={3}
                 />
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="siteTagline">Site Tagline</Label>
+                <Label htmlFor="logoUrl">Logo URL</Label>
                 <Input
-                  id="siteTagline"
-                  value={siteSettings.siteTagline}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, siteTagline: e.target.value })}
+                  id="logoUrl"
+                  value={companyInfo.logo_url}
+                  onChange={(e) => setCompanyInfo({ ...companyInfo, logo_url: e.target.value })}
+                  placeholder="https://example.com/logo.png"
                 />
+                {companyInfo.logo_url && (
+                  <div className="mt-2 p-4 bg-muted rounded-lg">
+                    <img 
+                      src={companyInfo.logo_url} 
+                      alt="Logo preview" 
+                      className="h-16 object-contain"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  </div>
+                )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email</Label>
-                <Input
-                  id="contactEmail"
-                  type="email"
-                  value={siteSettings.contactEmail}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactPhone">Contact Phone</Label>
-                <Input
-                  id="contactPhone"
-                  value={siteSettings.contactPhone}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, contactPhone: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
-                <Input
-                  id="whatsappNumber"
-                  value={siteSettings.whatsappNumber}
-                  onChange={(e) => setSiteSettings({ ...siteSettings, whatsappNumber: e.target.value })}
-                />
-              </div>
+
               <div className="space-y-2">
                 <Label>Currency</Label>
                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                   <Globe className="w-5 h-5 text-muted-foreground" />
-                  <span className="font-medium">{siteSettings.currencySymbol} {siteSettings.currency}</span>
+                  <span className="font-medium">{CURRENCY.symbol} {CURRENCY.code}</span>
                   <span className="text-muted-foreground">({CURRENCY.name})</span>
                 </div>
               </div>
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveGeneral} disabled={loading} className="gap-2">
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
               </Button>
             </div>
           </TabsContent>
 
+          {/* Contact Details Tab */}
+          <TabsContent value="contact" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Contact Email
+                  </Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={contactDetails.email}
+                    onChange={(e) => setContactDetails({ ...contactDetails, email: e.target.value })}
+                    placeholder="info@company.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone" className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    Contact Phone
+                  </Label>
+                  <Input
+                    id="contactPhone"
+                    value={contactDetails.phone}
+                    onChange={(e) => setContactDetails({ ...contactDetails, phone: e.target.value })}
+                    placeholder="+880 1234-567890"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp" className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 text-green-500" />
+                    WhatsApp Number
+                  </Label>
+                  <Input
+                    id="whatsapp"
+                    value={contactDetails.whatsapp}
+                    onChange={(e) => setContactDetails({ ...contactDetails, whatsapp: e.target.value })}
+                    placeholder="+8801712345678"
+                  />
+                  <p className="text-xs text-muted-foreground">Include country code without spaces</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address" className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Business Address
+                  </Label>
+                  <Input
+                    id="address"
+                    value={contactDetails.address}
+                    onChange={(e) => setContactDetails({ ...contactDetails, address: e.target.value })}
+                    placeholder="City, Country"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Changes
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Social Links Tab */}
+          <TabsContent value="social" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="facebook" className="flex items-center gap-2">
+                    <Facebook className="w-4 h-4 text-blue-600" />
+                    Facebook URL
+                  </Label>
+                  <Input
+                    id="facebook"
+                    value={socialLinks.facebook}
+                    onChange={(e) => setSocialLinks({ ...socialLinks, facebook: e.target.value })}
+                    placeholder="https://facebook.com/yourpage"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram" className="flex items-center gap-2">
+                    <Instagram className="w-4 h-4 text-pink-500" />
+                    Instagram URL
+                  </Label>
+                  <Input
+                    id="instagram"
+                    value={socialLinks.instagram}
+                    onChange={(e) => setSocialLinks({ ...socialLinks, instagram: e.target.value })}
+                    placeholder="https://instagram.com/yourpage"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="youtube" className="flex items-center gap-2">
+                    <Youtube className="w-4 h-4 text-red-500" />
+                    YouTube URL
+                  </Label>
+                  <Input
+                    id="youtube"
+                    value={socialLinks.youtube}
+                    onChange={(e) => setSocialLinks({ ...socialLinks, youtube: e.target.value })}
+                    placeholder="https://youtube.com/channel/..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="twitter" className="flex items-center gap-2">
+                    <Twitter className="w-4 h-4 text-sky-500" />
+                    Twitter/X URL
+                  </Label>
+                  <Input
+                    id="twitter"
+                    value={socialLinks.twitter}
+                    onChange={(e) => setSocialLinks({ ...socialLinks, twitter: e.target.value })}
+                    placeholder="https://twitter.com/yourhandle"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Changes
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Appearance Tab */}
+          <TabsContent value="appearance" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor" className="flex items-center gap-2">
+                    <Palette className="w-4 h-4" />
+                    Primary Color
+                  </Label>
+                  <div className="flex gap-3">
+                    <Input
+                      id="primaryColor"
+                      type="color"
+                      value={appearance.primary_color}
+                      onChange={(e) => setAppearance({ ...appearance, primary_color: e.target.value })}
+                      className="w-16 h-10 p-1 cursor-pointer"
+                    />
+                    <Input
+                      value={appearance.primary_color}
+                      onChange={(e) => setAppearance({ ...appearance, primary_color: e.target.value })}
+                      placeholder="#10b981"
+                      className="flex-1"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Note: Theme colors are managed in the design system. This is for reference.
+                  </p>
+                </div>
+
+                <Card className="border-dashed">
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Megaphone className="w-5 h-5 text-primary" />
+                        <div>
+                          <Label className="text-base">Announcement Bar</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Show a banner at the top of your site
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={appearance.show_announcement_bar}
+                        onCheckedChange={(checked) => setAppearance({ ...appearance, show_announcement_bar: checked })}
+                      />
+                    </div>
+
+                    {appearance.show_announcement_bar && (
+                      <div className="space-y-2 pt-2">
+                        <Label htmlFor="announcementText">Announcement Text</Label>
+                        <Input
+                          id="announcementText"
+                          value={appearance.announcement_text}
+                          onChange={(e) => setAppearance({ ...appearance, announcement_text: e.target.value })}
+                          placeholder="🎉 Special offer: Book now and save 10%!"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </motion.div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Changes
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Notifications Tab */}
           <TabsContent value="notifications" className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -186,23 +564,24 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveGeneral} disabled={loading} className="gap-2">
-                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+                {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
               </Button>
             </div>
           </TabsContent>
 
+          {/* Security Tab */}
           <TabsContent value="security" className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              <Card className="border-yellow-500/20 bg-yellow-500/5">
+              <Card className="border-green-500/20 bg-green-500/5">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
-                    <Shield className="w-8 h-8 text-yellow-500" />
+                    <Shield className="w-8 h-8 text-green-500" />
                     <div>
                       <h3 className="font-semibold">Security Status</h3>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -222,6 +601,10 @@ const AdminSettings = () => {
                           <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                           Admin role verification in place
                         </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          Secure edge functions deployed
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -230,6 +613,7 @@ const AdminSettings = () => {
             </motion.div>
           </TabsContent>
 
+          {/* Database Tab */}
           <TabsContent value="database" className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -248,11 +632,15 @@ const AdminSettings = () => {
                       <div className="mt-4 grid gap-3 text-sm">
                         <div className="flex justify-between p-3 bg-muted rounded-lg">
                           <span className="text-muted-foreground">Tables</span>
-                          <span className="font-medium">13 active</span>
+                          <span className="font-medium">21 active</span>
                         </div>
                         <div className="flex justify-between p-3 bg-muted rounded-lg">
-                          <span className="text-muted-foreground">Storage</span>
-                          <span className="font-medium">Enabled</span>
+                          <span className="text-muted-foreground">Storage Buckets</span>
+                          <span className="font-medium">2 configured</span>
+                        </div>
+                        <div className="flex justify-between p-3 bg-muted rounded-lg">
+                          <span className="text-muted-foreground">Edge Functions</span>
+                          <span className="font-medium">5 deployed</span>
                         </div>
                         <div className="flex justify-between p-3 bg-muted rounded-lg">
                           <span className="text-muted-foreground">Realtime</span>
