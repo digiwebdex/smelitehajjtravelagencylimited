@@ -1,1 +1,13 @@
 project_id = "miixzsgabxqhiqiqkpry"
+
+[functions.send-booking-notification]
+verify_jwt = false
+
+[functions.payment-sslcommerz]
+verify_jwt = false
+
+[functions.payment-bkash]
+verify_jwt = false
+
+[functions.payment-nagad]
+verify_jwt = false
