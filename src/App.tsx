@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LegalPage from "./pages/LegalPage";
+import PaymentResult from "./pages/PaymentResult";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,10 @@ const App = () => (
               <Route path="/my-bookings" element={<MyBookings />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/legal/:pageKey" element={<LegalPage />} />
+              <Route path="/payment/success" element={<PaymentResult />} />
+              <Route path="/payment/failed" element={<PaymentResult />} />
+              <Route path="/payment/cancelled" element={<PaymentResult />} />
+              <Route path="/payment/callback" element={<PaymentResult />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

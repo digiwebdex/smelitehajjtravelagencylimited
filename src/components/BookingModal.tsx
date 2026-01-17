@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Users, Plane, Phone, Mail, User, AlertCircle } from "lucide-react";
+import { Calendar, Users, Plane, Phone, Mail, User, AlertCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
 import { z } from "zod";
@@ -52,6 +53,7 @@ interface FormErrors {
 
 const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
   const { toast } = useToast();
+  const { initiatePayment, processing: paymentProcessing } = usePaymentProcessing();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -138,38 +140,57 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      // Send booking confirmation notifications (SMS & Email)
-      if (bookingData?.id) {
-        supabase.functions.invoke("send-booking-notification", {
-          body: { bookingId: bookingData.id }
-        }).catch(err => console.error("Notification error:", err));
-      }
-
-      toast({
-        title: "Booking Submitted!",
-        description: "Your booking has been submitted successfully. You will receive a confirmation shortly.",
-      });
-      onClose();
-      // Reset form
-      setFormData({
-        guestName: "",
-        guestEmail: "",
-        guestPhone: "",
-        passengerCount: 1,
-        travelDate: "",
-        notes: "",
-        paymentMethod: "",
-        passengerDetails: {
-          name: "",
-          passportNumber: "",
-          dateOfBirth: "",
-          nationality: "Bangladeshi",
-        },
-      });
-      setErrors({});
-      setTouched({});
+      setLoading(false);
+      return;
     }
+
+    // Process payment based on selected method
+    if (bookingData?.id) {
+      // Send booking confirmation notifications in background
+      supabase.functions.invoke("send-booking-notification", {
+        body: { bookingId: bookingData.id }
+      }).catch(err => console.error("Notification error:", err));
+
+      // Initiate payment
+      const paymentResult = await initiatePayment({
+        bookingId: bookingData.id,
+        paymentMethod: formData.paymentMethod,
+        amount: package_info.price * formData.passengerCount,
+      });
+
+      if (paymentResult.success) {
+        // For cash payments or if redirect URL is not needed, close modal
+        if (formData.paymentMethod === 'cash' || !paymentResult.redirectUrl) {
+          onClose();
+          // Reset form
+          setFormData({
+            guestName: "",
+            guestEmail: "",
+            guestPhone: "",
+            passengerCount: 1,
+            travelDate: "",
+            notes: "",
+            paymentMethod: "",
+            passengerDetails: {
+              name: "",
+              passportNumber: "",
+              dateOfBirth: "",
+              nationality: "Bangladeshi",
+            },
+          });
+          setErrors({});
+          setTouched({});
+        }
+        // For online payments, the hook handles the redirect
+      } else {
+        toast({
+          title: "Payment Initiation Failed",
+          description: paymentResult.error || "Could not initiate payment. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
+
     setLoading(false);
   };
 
@@ -375,15 +396,28 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
           </div>
 
           <div className="flex gap-3">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose} 
+              className="flex-1"
+              disabled={loading || paymentProcessing}
+            >
               Cancel
             </Button>
             <Button 
               type="submit" 
               className="flex-1 bg-gradient-primary"
-              disabled={loading}
+              disabled={loading || paymentProcessing}
             >
-              {loading ? "Processing..." : "Confirm Booking"}
+              {loading || paymentProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {paymentProcessing ? "Processing Payment..." : "Creating Booking..."}
+                </>
+              ) : (
+                "Confirm & Pay"
+              )}
             </Button>
           </div>
         </form>
