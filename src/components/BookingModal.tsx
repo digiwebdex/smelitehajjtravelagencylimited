@@ -16,6 +16,7 @@ import { Calendar, Users, Plane, Phone, Mail, User, AlertCircle } from "lucide-r
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
 import { z } from "zod";
+import PaymentMethodSelector from "./PaymentMethodSelector";
 
 interface Package {
   id: string;
@@ -38,6 +39,7 @@ const bookingSchema = z.object({
   passengerCount: z.number().min(1, "At least 1 passenger required").max(10, "Maximum 10 passengers allowed"),
   travelDate: z.string().optional(),
   notes: z.string().max(1000, "Notes must be less than 1000 characters").optional(),
+  paymentMethod: z.string().min(1, "Please select a payment method"),
 });
 
 interface FormErrors {
@@ -45,6 +47,7 @@ interface FormErrors {
   guestEmail?: string;
   guestPhone?: string;
   passengerCount?: string;
+  paymentMethod?: string;
 }
 
 const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
@@ -59,6 +62,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
     passengerCount: 1,
     travelDate: "",
     notes: "",
+    paymentMethod: "",
     passengerDetails: {
       name: "",
       passportNumber: "",
@@ -124,6 +128,8 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       guest_name: formData.guestName.trim(),
       guest_email: formData.guestEmail.trim() || null,
       guest_phone: formData.guestPhone.trim(),
+      payment_method: formData.paymentMethod,
+      payment_status: formData.paymentMethod === 'cash' ? 'pending_cash' : 'pending',
     }).select("id").single();
 
     if (error) {
@@ -153,6 +159,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
         passengerCount: 1,
         travelDate: "",
         notes: "",
+        paymentMethod: "",
         passengerDetails: {
           name: "",
           passportNumber: "",
@@ -335,6 +342,24 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
             />
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="border-t pt-4">
+            <PaymentMethodSelector
+              selectedMethod={formData.paymentMethod}
+              onSelect={(method) => {
+                setFormData({ ...formData, paymentMethod: method });
+                if (touched.paymentMethod) {
+                  setErrors(prev => ({ ...prev, paymentMethod: undefined }));
+                }
+              }}
+            />
+            {touched.paymentMethod && errors.paymentMethod && (
+              <p className="text-xs text-destructive flex items-center gap-1 mt-2">
+                <AlertCircle className="w-3 h-3" /> {errors.paymentMethod}
+              </p>
+            )}
           </div>
 
           <div className="bg-secondary/10 rounded-lg p-4 border border-secondary/20">

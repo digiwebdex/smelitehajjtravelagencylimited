@@ -41,6 +41,7 @@ import AdminSettings from "@/components/admin/AdminSettings";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import AdminLegalPages from "@/components/admin/AdminLegalPages";
 import AdminOfficeLocations from "@/components/admin/AdminOfficeLocations";
+import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
 import { formatCurrency } from "@/lib/currency";
 import { Bell, Scale } from "lucide-react";
 
@@ -164,6 +165,7 @@ const AdminDashboard = () => {
     { value: "bookings", label: "Bookings", icon: Package },
     { value: "packages", label: "Packages", icon: Package },
     { value: "revenue", label: "Revenue", icon: Wallet },
+    { value: "payments", label: "Payments", icon: Wallet },
     { value: "notifications", label: "Notifications", icon: Bell },
     { value: "menu", label: "Menu", icon: Menu },
     { value: "hero", label: "Hero", icon: Image },
@@ -258,6 +260,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="revenue">
             <AdminRevenue />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <AdminPaymentMethods />
           </TabsContent>
 
           <TabsContent value="notifications">

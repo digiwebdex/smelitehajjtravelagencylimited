@@ -25,8 +25,11 @@ export type Database = {
           package_id: string
           passenger_count: number
           passenger_details: Json | null
+          payment_method: string | null
+          payment_status: string
           status: Database["public"]["Enums"]["booking_status"]
           total_price: number
+          transaction_id: string | null
           travel_date: string | null
           updated_at: string
           user_id: string | null
@@ -41,8 +44,11 @@ export type Database = {
           package_id: string
           passenger_count?: number
           passenger_details?: Json | null
+          payment_method?: string | null
+          payment_status?: string
           status?: Database["public"]["Enums"]["booking_status"]
           total_price: number
+          transaction_id?: string | null
           travel_date?: string | null
           updated_at?: string
           user_id?: string | null
@@ -57,8 +63,11 @@ export type Database = {
           package_id?: string
           passenger_count?: number
           passenger_details?: Json | null
+          payment_method?: string | null
+          payment_status?: string
           status?: Database["public"]["Enums"]["booking_status"]
           total_price?: number
+          transaction_id?: string | null
           travel_date?: string | null
           updated_at?: string
           user_id?: string | null
@@ -443,6 +452,48 @@ export type Database = {
           stock?: number
           title?: string
           type?: Database["public"]["Enums"]["package_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          created_at: string
+          credentials: Json
+          description: string | null
+          icon_name: string
+          id: string
+          is_enabled: boolean
+          is_live_mode: boolean
+          name: string
+          order_index: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credentials?: Json
+          description?: string | null
+          icon_name?: string
+          id?: string
+          is_enabled?: boolean
+          is_live_mode?: boolean
+          name: string
+          order_index?: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credentials?: Json
+          description?: string | null
+          icon_name?: string
+          id?: string
+          is_enabled?: boolean
+          is_live_mode?: boolean
+          name?: string
+          order_index?: number
+          slug?: string
           updated_at?: string
         }
         Relationships: []
