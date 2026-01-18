@@ -38,23 +38,26 @@ const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0, 
     >
       {/* Hotel Image Side Panel */}
       {hotelImageUrl && (
-        <div className="relative w-28 md:w-36 flex-shrink-0 bg-gradient-to-b from-primary/10 to-primary/5">
-          {/* Badge at top */}
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1">
-            <div className="w-10 h-10 rounded-lg bg-secondary/90 flex items-center justify-center shadow-lg">
-              <MakkahIcon className="w-6 h-6 text-secondary-foreground" />
-            </div>
-            <span className="text-xs font-semibold text-center text-foreground/80 leading-tight px-1">
-              Hotels Near<br />Masjid al-Haram
-            </span>
-          </div>
-          
-          {/* Hotel Image */}
+        <div className="relative w-40 md:w-48 lg:w-56 flex-shrink-0 overflow-hidden">
+          {/* Hotel Image - Full bleed */}
           <img 
             src={hotelImageUrl} 
             alt="Hotel" 
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover"
           />
+          
+          {/* Gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
+          
+          {/* Badge at top */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-xl bg-secondary/95 flex items-center justify-center shadow-lg backdrop-blur-sm">
+              <MakkahIcon className="w-7 h-7 text-secondary-foreground" />
+            </div>
+            <span className="text-xs font-bold text-center text-white leading-tight px-2 drop-shadow-lg">
+              Hotels Near<br />Masjid al-Haram
+            </span>
+          </div>
           
           {/* Map Link Overlay */}
           {hotelMapLink && (
@@ -62,9 +65,9 @@ const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0, 
               href={hotelMapLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 bg-white/90 hover:bg-white text-primary px-3 py-1.5 rounded-full text-xs font-medium shadow-md transition-all hover:shadow-lg"
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/95 hover:bg-white text-primary px-4 py-2 rounded-full text-sm font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105"
             >
-              <MapPin className="w-3 h-3" />
+              <MapPin className="w-4 h-4" />
               View Map
             </a>
           )}
