@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,17 @@ const PackageComparisonDrawer = ({
   onRemove,
   onBookNow 
 }: PackageComparisonDrawerProps) => {
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   // Get all unique inclusions across all packages
   const allInclusions = [...new Set(packages.flatMap(pkg => pkg.includes || []))];
   const allExclusions = [...new Set(packages.flatMap(pkg => pkg.exclusions || []))];

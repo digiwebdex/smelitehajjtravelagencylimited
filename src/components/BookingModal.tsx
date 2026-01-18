@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
@@ -72,6 +72,17 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       nationality: "Bangladeshi",
     },
   });
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   const validateField = (field: keyof FormErrors, value: string | number) => {
     try {
