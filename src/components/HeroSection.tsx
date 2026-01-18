@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
 import { motion, AnimatePresence } from "framer-motion";
 import FloatingIslamicPatterns from "./FloatingIslamicPatterns";
+import MakkahIcon from "./icons/MakkahIcon";
+import MadinahIcon from "./icons/MadinahIcon";
 import {
   Dialog,
   DialogContent,
@@ -360,32 +362,30 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Arabic Calligraphy Decorative Elements - Right Side */}
+      {/* Makkah & Madinah Icons - Right Side */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ 
-          opacity: 0.2, 
+          opacity: 0.25, 
           x: mousePosition.x * 20,
           y: mousePosition.y * 15
         }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="absolute right-4 top-1/4 hidden lg:flex flex-col items-center pointer-events-none"
+        className="absolute right-4 top-1/4 hidden lg:flex flex-col items-center gap-8 pointer-events-none"
       >
         <motion.div 
           animate={{ x: mousePosition.x * 10, y: mousePosition.y * 8 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="font-thuluth text-secondary text-6xl lg:text-8xl leading-none select-none drop-shadow-lg" 
-          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}
+          className="text-secondary drop-shadow-lg"
         >
-          ﷲ
+          <MakkahIcon size={80} className="drop-shadow-[2px_2px_4px_rgba(0,0,0,0.3)]" />
         </motion.div>
         <motion.div 
           animate={{ x: mousePosition.x * 15, y: mousePosition.y * 12 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="font-calligraphy text-secondary/80 text-4xl lg:text-6xl leading-none mt-6 select-none drop-shadow-md" 
-          style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.2)' }}
+          className="text-secondary/80 drop-shadow-md"
         >
-          ﷴ
+          <MadinahIcon size={72} className="drop-shadow-[1px_1px_3px_rgba(0,0,0,0.2)]" />
         </motion.div>
       </motion.div>
 
