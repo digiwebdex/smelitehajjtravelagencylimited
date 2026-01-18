@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,17 @@ interface PackageDetailsModalProps {
 }
 
 const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: PackageDetailsModalProps) => {
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!package_info) return null;
 
   const handleBookNow = () => {
@@ -44,8 +56,11 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] p-0 overflow-hidden"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
