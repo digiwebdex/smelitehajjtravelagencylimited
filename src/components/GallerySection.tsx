@@ -370,6 +370,11 @@ const GallerySection = () => {
                     alt={image.alt_text || "Gallery image"}
                     loading="lazy"
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                      target.classList.add("opacity-50");
+                    }}
                   />
                   
                   {/* Gradient Overlay */}
@@ -434,6 +439,11 @@ const GallerySection = () => {
                           alt={image.alt_text || "Gallery image"}
                           loading="lazy"
                           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder.svg";
+                            target.classList.add("opacity-50");
+                          }}
                         />
                         {/* Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
@@ -481,6 +491,10 @@ const GallerySection = () => {
                       src={image.image_url}
                       alt={image.alt_text || `Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
                     />
                     {currentSlide === index && (
                       <div className="absolute inset-0 border-2 border-secondary rounded-xl" />
