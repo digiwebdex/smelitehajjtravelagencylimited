@@ -118,6 +118,24 @@ const GallerySection = () => {
     };
   }, [carouselApi, onSelect]);
 
+  // Keyboard navigation for carousel
+  useEffect(() => {
+    if (viewMode !== "carousel" || !carouselApi) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        carouselApi.scrollPrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        carouselApi.scrollNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [viewMode, carouselApi]);
+
   const scrollToSlide = (index: number) => {
     if (carouselApi) {
       carouselApi.scrollTo(index);
