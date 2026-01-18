@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { motion } from "framer-motion";
 import {
   Carousel,
   CarouselContent,
@@ -89,7 +90,13 @@ const TestimonialsSection = () => {
     <IslamicBorder>
       <section className="py-24 bg-gradient-to-b from-background to-muted overflow-hidden">
       <div className="container">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-center mb-16"
+        >
           <span className="text-secondary font-semibold uppercase tracking-wider">
             Testimonials
           </span>
@@ -101,67 +108,85 @@ const TestimonialsSection = () => {
             Read authentic experiences from our valued pilgrims who trusted us 
             with their sacred journey.
           </p>
-        </div>
+        </motion.div>
 
-        <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
-          className="w-full max-w-6xl mx-auto"
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <CarouselContent className="-ml-4">
-            {testimonials.map((testimonial) => (
-              <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                <div className="bg-card rounded-2xl p-6 shadow-elegant h-full flex flex-col relative group hover:shadow-lg transition-all duration-300">
-                  <Quote className="w-10 h-10 text-secondary/30 absolute top-4 right-4" />
-                  
-                  {/* Rating */}
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-secondary fill-secondary" />
-                    ))}
-                  </div>
-
-                  {/* Testimonial Text */}
-                  <p className="text-foreground/80 text-sm leading-relaxed flex-grow mb-6">
-                    "{testimonial.quote}"
-                  </p>
-
-                  {/* Author */}
-                  <div className="flex items-center gap-4 pt-4 border-t border-border">
-                    <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center overflow-hidden">
-                      {testimonial.avatar_url ? (
-                        <img src={testimonial.avatar_url} alt={testimonial.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-primary-foreground font-heading font-bold">
-                          {getInitials(testimonial.name)}
-                        </span>
-                      )}
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full max-w-6xl mx-auto"
+          >
+            <CarouselContent className="-ml-4">
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem key={testimonial.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -4,
+                      boxShadow: "0 12px 32px -8px rgba(0, 0, 0, 0.15)"
+                    }}
+                    className="bg-card rounded-2xl p-6 shadow-elegant h-full flex flex-col relative group transition-colors duration-300 cursor-pointer"
+                  >
+                    <Quote className="w-10 h-10 text-secondary/30 absolute top-4 right-4" />
+                    
+                    {/* Rating */}
+                    <div className="flex gap-1 mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-secondary fill-secondary" />
+                      ))}
                     </div>
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground">
-                        {testimonial.name}
-                      </h4>
-                      {testimonial.location && (
-                        <p className="text-xs text-muted-foreground">
-                          {testimonial.location}
-                        </p>
-                      )}
-                      {testimonial.package_name && (
-                        <p className="text-xs text-secondary font-medium">
-                          {testimonial.package_name}
-                        </p>
-                      )}
+
+                    {/* Testimonial Text */}
+                    <p className="text-foreground/80 text-sm leading-relaxed flex-grow mb-6">
+                      "{testimonial.quote}"
+                    </p>
+
+                    {/* Author */}
+                    <div className="flex items-center gap-4 pt-4 border-t border-border">
+                      <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center overflow-hidden">
+                        {testimonial.avatar_url ? (
+                          <img src={testimonial.avatar_url} alt={testimonial.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-primary-foreground font-heading font-bold">
+                            {getInitials(testimonial.name)}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-semibold text-foreground">
+                          {testimonial.name}
+                        </h4>
+                        {testimonial.location && (
+                          <p className="text-xs text-muted-foreground">
+                            {testimonial.location}
+                          </p>
+                        )}
+                        {testimonial.package_name && (
+                          <p className="text-xs text-secondary font-medium">
+                            {testimonial.package_name}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" />
-        </Carousel>
+                  </motion.div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden md:flex -left-12" />
+            <CarouselNext className="hidden md:flex -right-12" />
+          </Carousel>
+        </motion.div>
       </div>
       </section>
     </IslamicBorder>

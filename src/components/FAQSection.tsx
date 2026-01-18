@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { motion } from "framer-motion";
 import {
   Accordion,
   AccordionContent,
@@ -86,7 +87,13 @@ const FAQSection = () => {
     <IslamicBorder>
       <section className="py-24 bg-background">
       <div className="container">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-center mb-16"
+        >
           <span className="text-secondary font-semibold uppercase tracking-wider">
             Have Questions?
           </span>
@@ -97,28 +104,39 @@ const FAQSection = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Find answers to common questions about our Hajj and Umrah services.
           </p>
-        </div>
+        </motion.div>
 
         <div className="max-w-3xl mx-auto">
           <Accordion type="single" collapsible className="w-full space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem
+              <motion.div
                 key={faq.id}
-                value={`item-${index}`}
-                className="bg-card rounded-xl px-6 shadow-elegant border-none data-[state=open]:shadow-lg transition-shadow"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.1,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
               >
-                <AccordionTrigger className="hover:no-underline py-6 text-left">
-                  <div className="flex items-start gap-4">
-                    <HelpCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
-                    <span className="font-heading font-semibold text-foreground">
-                      {faq.question}
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-6 pl-9 text-muted-foreground leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <AccordionItem
+                  value={`item-${index}`}
+                  className="bg-card rounded-xl px-6 shadow-elegant border-none data-[state=open]:shadow-lg transition-shadow hover:shadow-md"
+                >
+                  <AccordionTrigger className="hover:no-underline py-6 text-left">
+                    <div className="flex items-start gap-4">
+                      <HelpCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+                      <span className="font-heading font-semibold text-foreground">
+                        {faq.question}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-6 pl-9 text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
             ))}
           </Accordion>
         </div>
