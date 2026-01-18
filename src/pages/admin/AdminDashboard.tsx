@@ -35,6 +35,7 @@ import AdminPaymentMethods from "@/components/admin/AdminPaymentMethods";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminOverview from "@/components/admin/AdminOverview";
+import AdminGallery from "@/components/admin/AdminGallery";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -183,6 +184,8 @@ const AdminDashboard = () => {
         return <AdminTeam />;
       case "faq":
         return <AdminFAQ />;
+      case "gallery":
+        return <AdminGallery />;
       case "visa":
         return <AdminVisa />;
       case "contact":

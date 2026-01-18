@@ -279,6 +279,69 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_images: {
+        Row: {
+          alt_text: string
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          alt_text?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gallery_settings: {
+        Row: {
+          background_color: string | null
+          created_at: string
+          id: string
+          is_enabled: boolean
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       hero_content: {
         Row: {
           background_image_url: string | null

@@ -15,7 +15,8 @@ import {
   Scale,
   LayoutDashboard,
   BarChart3,
-  Layers
+  Layers,
+  Images
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const menuItems = [
   { value: "testimonials", label: "Testimonials", icon: MessageSquare },
   { value: "team", label: "Team", icon: Users },
   { value: "faq", label: "FAQ", icon: HelpCircle },
+  { value: "gallery", label: "Gallery", icon: Images },
   { value: "visa", label: "Visa", icon: Globe },
   { value: "contact", label: "Contact", icon: Phone },
   { value: "offices", label: "Offices", icon: Building2 },
