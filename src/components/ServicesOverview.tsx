@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plane, Hotel, Shield, Users, Clock, HeartHandshake, LucideIcon } from "lucide-react";
+import { 
+  Plane, 
+  Hotel, 
+  Shield, 
+  Users, 
+  Clock, 
+  HeartHandshake, 
+  LucideIcon,
+  FileCheck,
+  Bus,
+  Headset,
+  Building2,
+  PlaneTakeoff
+} from "lucide-react";
 import IslamicBorder from "./IslamicBorder";
 
 interface Service {
@@ -11,14 +24,29 @@ interface Service {
   order_index: number;
 }
 
+// Extended icon map with more travel/pilgrimage relevant icons
 const iconMap: Record<string, LucideIcon> = {
   Plane,
+  PlaneTakeoff,
   Hotel,
+  Building: Building2,
+  Building2,
   Shield,
+  FileCheck,
   Users,
   Clock,
+  Headset,
+  Headphones: Headset,
   HeartHandshake,
+  Bus,
 };
+
+// Consistent icon container component
+const ServiceIcon = ({ icon: Icon }: { icon: LucideIcon }) => (
+  <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/90 shadow-md">
+    <Icon className="w-7 h-7 text-primary-foreground" strokeWidth={1.5} />
+  </div>
+);
 
 const ServicesOverview = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -93,9 +121,7 @@ const ServicesOverview = () => {
                 className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-all duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="w-14 h-14 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-elegant">
-                  <Icon className="w-7 h-7 text-primary-foreground" />
-                </div>
+                <ServiceIcon icon={Icon} />
                 <div>
                   <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
                     {service.title}
