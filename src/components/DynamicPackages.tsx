@@ -121,35 +121,56 @@ const ExpandablePackageCard = ({
             </div>
           </div>
 
-          {/* Header with gradient */}
-          <CardHeader className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6 pb-14">
-          <div className="relative z-10">
-            <h3 className="font-heading text-xl font-bold whitespace-nowrap mb-3">{pkg.title}</h3>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="bg-white/20 text-white border-0 whitespace-nowrap">
-                {pkg.duration_days} Days
-              </Badge>
-              {pkg.hotel_rating && (
-                <div className="flex items-center gap-0.5">
-                  {Array.from({ length: pkg.hotel_rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-secondary fill-secondary" />
-                  ))}
-                </div>
-              )}
-              {pkg.stock < 10 && (
-                <Badge className="bg-secondary/80 text-secondary-foreground whitespace-nowrap">
-                  Only {pkg.stock} left
-                </Badge>
-              )}
+          {/* Header with gradient and decorative elements */}
+          <CardHeader className="relative bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-6 pb-14 overflow-hidden">
+            {/* Decorative Islamic geometric pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-32 h-32 border-[3px] border-white/40 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute top-4 right-4 w-20 h-20 border-[2px] border-white/30 rounded-full" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 border-[2px] border-white/20 rounded-full translate-y-1/2 -translate-x-1/2" />
+              {/* Star pattern */}
+              <svg className="absolute top-2 left-2 w-8 h-8 text-white/20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
+              <svg className="absolute bottom-8 right-8 w-6 h-6 text-white/15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+              </svg>
             </div>
-          </div>
-          
-          {/* Price badge */}
-          <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold">
-            <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
-            <span className="text-xs block opacity-80">per person</span>
-          </div>
-        </CardHeader>
+            
+            {/* Mosque silhouette decorative element */}
+            <div className="absolute bottom-0 left-0 right-0 h-8 opacity-5">
+              <svg viewBox="0 0 200 40" className="w-full h-full" preserveAspectRatio="xMidYMax slice">
+                <path fill="currentColor" d="M0,40 L0,30 Q10,30 10,25 L10,20 Q10,15 15,15 L15,10 Q15,5 20,5 Q25,5 25,10 L25,15 Q30,15 30,20 L30,25 Q30,30 40,30 L40,40 Z M50,40 L50,35 Q60,35 60,30 L60,25 Q60,20 65,20 L65,15 Q65,10 70,10 Q75,10 75,15 L75,20 Q80,20 80,25 L80,30 Q80,35 90,35 L90,40 Z M100,40 L100,25 Q110,25 110,20 L110,15 Q110,5 120,5 Q130,5 130,15 L130,20 Q130,25 140,25 L140,40 Z M150,40 L150,30 Q160,30 160,25 L160,20 Q160,15 165,15 L165,10 Q165,5 170,5 Q175,5 175,10 L175,15 Q180,15 180,20 L180,25 Q180,30 190,30 L190,40 Z" />
+              </svg>
+            </div>
+
+            <div className="relative z-10">
+              <h3 className="font-heading text-xl font-bold whitespace-nowrap mb-3">{pkg.title}</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="bg-white/20 text-white border-0 whitespace-nowrap">
+                  {pkg.duration_days} Days
+                </Badge>
+                {pkg.hotel_rating && (
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: pkg.hotel_rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-secondary fill-secondary" />
+                    ))}
+                  </div>
+                )}
+                {pkg.stock < 10 && (
+                  <Badge className="bg-secondary/80 text-secondary-foreground whitespace-nowrap">
+                    Only {pkg.stock} left
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
+            {/* Price badge */}
+            <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold z-10">
+              <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
+              <span className="text-xs block opacity-80">per person</span>
+            </div>
+          </CardHeader>
 
         <CardContent className="flex-1 pt-8 pb-4">
           {pkg.description && (
