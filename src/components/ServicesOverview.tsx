@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
+import MakkahIcon from "./icons/MakkahIcon";
+import MadinahIcon from "./icons/MadinahIcon";
 
 interface Service {
   id: string;
@@ -42,10 +44,25 @@ const iconMap: Record<string, LucideIcon> = {
   Bus,
 };
 
-// Consistent icon container component
+// Custom icon names for Makkah and Madinah
+const customIconMap: Record<string, React.FC<{ size?: number; className?: string }>> = {
+  Makkah: MakkahIcon,
+  Madinah: MadinahIcon,
+  Kaaba: MakkahIcon,
+  Mosque: MadinahIcon,
+};
+
+// Consistent icon container component for Lucide icons
 const ServiceIcon = ({ icon: Icon }: { icon: LucideIcon }) => (
   <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/90 shadow-md">
     <Icon className="w-7 h-7 text-primary-foreground" strokeWidth={1.5} />
+  </div>
+);
+
+// Custom icon container component for Makkah/Madinah icons
+const CustomServiceIcon = ({ icon: Icon }: { icon: React.FC<{ size?: number; className?: string }> }) => (
+  <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/90 shadow-md">
+    <Icon size={28} className="text-primary-foreground" />
   </div>
 );
 
@@ -79,8 +96,16 @@ const ServicesOverview = () => {
     setLoading(false);
   };
 
-  const getIcon = (iconName: string): LucideIcon => {
-    return iconMap[iconName] || Plane;
+  const getIcon = (iconName: string): LucideIcon | null => {
+    return iconMap[iconName] || null;
+  };
+
+  const getCustomIcon = (iconName: string): React.FC<{ size?: number; className?: string }> | null => {
+    return customIconMap[iconName] || null;
+  };
+
+  const isCustomIcon = (iconName: string): boolean => {
+    return iconName in customIconMap;
   };
 
   if (loading) {
@@ -115,7 +140,10 @@ const ServicesOverview = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => {
-            const Icon = getIcon(service.icon_name);
+            const isCustom = isCustomIcon(service.icon_name);
+            const CustomIcon = isCustom ? getCustomIcon(service.icon_name) : null;
+            const LucideIconComponent = !isCustom ? (getIcon(service.icon_name) || Plane) : null;
+            
             return (
               <motion.div
                 key={service.id}
@@ -137,7 +165,11 @@ const ServicesOverview = () => {
                 }}
                 className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-colors duration-300 cursor-pointer"
               >
-                <ServiceIcon icon={Icon} />
+                {isCustom && CustomIcon ? (
+                  <CustomServiceIcon icon={CustomIcon} />
+                ) : LucideIconComponent ? (
+                  <ServiceIcon icon={LucideIconComponent} />
+                ) : null}
                 <div>
                   <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
                     {service.title}
