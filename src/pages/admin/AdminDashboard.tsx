@@ -20,7 +20,6 @@ import AdminPackageSections from "@/components/admin/AdminPackageSections";
 import AdminRevenue from "@/components/admin/AdminRevenue";
 import AdminMenu from "@/components/admin/AdminMenu";
 import AdminHero from "@/components/admin/AdminHero";
-import AdminAbout from "@/components/admin/AdminAbout";
 import AdminServices from "@/components/admin/AdminServices";
 import AdminTestimonials from "@/components/admin/AdminTestimonials";
 import AdminTeam from "@/components/admin/AdminTeam";
@@ -37,9 +36,6 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileNav from "@/components/admin/AdminMobileNav";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminGallery from "@/components/admin/AdminGallery";
-import AdminSectionManager from "@/components/admin/AdminSectionManager";
-import AdminThemeSettings from "@/components/admin/AdminThemeSettings";
-import AdminTerminal from "@/components/admin/AdminTerminal";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -164,10 +160,6 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case "overview":
         return <AdminOverview />;
-      case "sections":
-        return <AdminSectionManager />;
-      case "theme":
-        return <AdminThemeSettings />;
       case "bookings":
         return <AdminBookings onUpdate={fetchStats} />;
       case "packages":
@@ -184,8 +176,6 @@ const AdminDashboard = () => {
         return <AdminMenu />;
       case "hero":
         return <AdminHero />;
-      case "about":
-        return <AdminAbout />;
       case "services":
         return <AdminServices />;
       case "testimonials":
@@ -196,8 +186,6 @@ const AdminDashboard = () => {
         return <AdminFAQ />;
       case "gallery":
         return <AdminGallery />;
-      case "terminal":
-        return <AdminTerminal />;
       case "visa":
         return <AdminVisa />;
       case "contact":

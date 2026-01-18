@@ -16,10 +16,7 @@ import {
   LayoutDashboard,
   BarChart3,
   Layers,
-  Images,
-  Terminal,
-  Palette,
-  Info
+  Images
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,8 +31,6 @@ interface AdminMobileNavProps {
 
 const menuItems = [
   { value: "overview", label: "Overview", icon: BarChart3 },
-  { value: "sections", label: "Sections", icon: Layers },
-  { value: "theme", label: "Theme", icon: Palette },
   { value: "bookings", label: "Bookings", icon: Package },
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "package-sections", label: "Package Sections", icon: Layers },
@@ -44,13 +39,11 @@ const menuItems = [
   { value: "notifications", label: "Notifications", icon: Bell },
   { value: "menu", label: "Menu", icon: MenuIcon },
   { value: "hero", label: "Hero", icon: Image },
-  { value: "about", label: "About", icon: Info },
   { value: "services", label: "Services", icon: Settings },
   { value: "testimonials", label: "Testimonials", icon: MessageSquare },
   { value: "team", label: "Team", icon: Users },
   { value: "faq", label: "FAQ", icon: HelpCircle },
   { value: "gallery", label: "Gallery", icon: Images },
-  { value: "terminal", label: "Terminal", icon: Terminal },
   { value: "visa", label: "Visa", icon: Globe },
   { value: "contact", label: "Contact", icon: Phone },
   { value: "offices", label: "Offices", icon: Building2 },

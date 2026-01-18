@@ -14,60 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      about_content: {
-        Row: {
-          created_at: string
-          history_text: string | null
-          history_title: string | null
-          id: string
-          image_url: string | null
-          mission_text: string | null
-          mission_title: string | null
-          stats: Json | null
-          subtitle: string | null
-          title: string
-          updated_at: string
-          values_items: Json | null
-          values_title: string | null
-          vision_text: string | null
-          vision_title: string | null
-        }
-        Insert: {
-          created_at?: string
-          history_text?: string | null
-          history_title?: string | null
-          id?: string
-          image_url?: string | null
-          mission_text?: string | null
-          mission_title?: string | null
-          stats?: Json | null
-          subtitle?: string | null
-          title?: string
-          updated_at?: string
-          values_items?: Json | null
-          values_title?: string | null
-          vision_text?: string | null
-          vision_title?: string | null
-        }
-        Update: {
-          created_at?: string
-          history_text?: string | null
-          history_title?: string | null
-          id?: string
-          image_url?: string | null
-          mission_text?: string | null
-          mission_title?: string | null
-          stats?: Json | null
-          subtitle?: string | null
-          title?: string
-          updated_at?: string
-          values_items?: Json | null
-          values_title?: string | null
-          vision_text?: string | null
-          vision_title?: string | null
-        }
-        Relationships: []
-      }
       booking_documents: {
         Row: {
           booking_id: string
@@ -827,55 +773,43 @@ export type Database = {
       section_settings: {
         Row: {
           badge_text: string | null
-          bg_color: string | null
           created_at: string
-          custom_css: string | null
           description: string | null
           id: string
           image_url: string | null
           is_active: boolean
-          order_index: number | null
           section_key: string
           stats: Json | null
           subtitle: string | null
           success_rate: string | null
-          text_color: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           badge_text?: string | null
-          bg_color?: string | null
           created_at?: string
-          custom_css?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
-          order_index?: number | null
           section_key: string
           stats?: Json | null
           subtitle?: string | null
           success_rate?: string | null
-          text_color?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           badge_text?: string | null
-          bg_color?: string | null
           created_at?: string
-          custom_css?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
-          order_index?: number | null
           section_key?: string
           stats?: Json | null
           subtitle?: string | null
           success_rate?: string | null
-          text_color?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -980,48 +914,6 @@ export type Database = {
         }
         Relationships: []
       }
-      terminal_content: {
-        Row: {
-          bg_color: string | null
-          created_at: string
-          font_size: string | null
-          id: string
-          is_enabled: boolean | null
-          order_index: number | null
-          terminal_text: string | null
-          text_color: string | null
-          title: string | null
-          typing_animation: boolean | null
-          updated_at: string
-        }
-        Insert: {
-          bg_color?: string | null
-          created_at?: string
-          font_size?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          order_index?: number | null
-          terminal_text?: string | null
-          text_color?: string | null
-          title?: string | null
-          typing_animation?: boolean | null
-          updated_at?: string
-        }
-        Update: {
-          bg_color?: string | null
-          created_at?: string
-          font_size?: string | null
-          id?: string
-          is_enabled?: boolean | null
-          order_index?: number | null
-          terminal_text?: string | null
-          text_color?: string | null
-          title?: string | null
-          typing_animation?: boolean | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
       testimonials: {
         Row: {
           avatar_url: string | null
@@ -1060,51 +952,6 @@ export type Database = {
           package_name?: string | null
           quote?: string
           rating?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      theme_settings: {
-        Row: {
-          accent_color: string | null
-          background_color: string | null
-          border_radius: string | null
-          created_at: string
-          dark_mode_enabled: boolean | null
-          font_family: string | null
-          heading_font: string | null
-          id: string
-          primary_color: string | null
-          secondary_color: string | null
-          text_color: string | null
-          updated_at: string
-        }
-        Insert: {
-          accent_color?: string | null
-          background_color?: string | null
-          border_radius?: string | null
-          created_at?: string
-          dark_mode_enabled?: boolean | null
-          font_family?: string | null
-          heading_font?: string | null
-          id?: string
-          primary_color?: string | null
-          secondary_color?: string | null
-          text_color?: string | null
-          updated_at?: string
-        }
-        Update: {
-          accent_color?: string | null
-          background_color?: string | null
-          border_radius?: string | null
-          created_at?: string
-          dark_mode_enabled?: boolean | null
-          font_family?: string | null
-          heading_font?: string | null
-          id?: string
-          primary_color?: string | null
-          secondary_color?: string | null
-          text_color?: string | null
           updated_at?: string
         }
         Relationships: []

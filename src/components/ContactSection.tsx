@@ -160,24 +160,11 @@ const ContactSection = () => {
                     <h3 className="font-heading font-bold text-sm text-foreground mb-2">
                       {info.title}
                     </h3>
-                    {info.type === 'address' ? (
-                      <a 
-                        href="https://maps.app.goo.gl/sH15fPhiGdKLARod9?g_st=aw"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground text-xs leading-relaxed hover:text-primary transition-colors block"
-                      >
-                        {info.details.map((detail, idx) => (
-                          <span key={idx} className="block">{detail}</span>
-                        ))}
-                      </a>
-                    ) : (
-                      info.details.map((detail, idx) => (
-                        <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
-                          {detail}
-                        </p>
-                      ))
-                    )}
+                    {info.details.map((detail, idx) => (
+                      <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
+                        {detail}
+                      </p>
+                    ))}
                   </motion.div>
                 );
               })}
@@ -365,36 +352,15 @@ const ContactSection = () => {
           transition={{ delay: 0.4 }}
           className="mt-12 bg-card rounded-2xl overflow-hidden shadow-elegant"
         >
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-secondary" />
-              <span className="font-heading font-semibold text-foreground">Our Location</span>
-            </div>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="gap-2 hover:bg-secondary hover:text-secondary-foreground hover:border-secondary"
-            >
-              <a 
-                href="https://maps.app.goo.gl/sH15fPhiGdKLARod9?g_st=aw"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MapPin className="w-4 h-4" />
-                Get Directions
-              </a>
-            </Button>
-          </div>
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.5484611458387!2d90.39729221498282!3d23.79416879319868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c7098c3c9039%3A0x9e8f0b93e7b3e0a2!2sBright%20Expeditions!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.5484611458387!2d90.39729221498282!3d23.79416879319868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c709be6be7b5%3A0x7e53f4e8b8be1a24!2sBanani%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
             width="100%"
             height="300"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="Bright Expeditions Office Location - Banani, Dhaka"
+            title="SM Elite Hajj Head Office Location - Banani, Dhaka"
             className="w-full"
           />
         </motion.div>
