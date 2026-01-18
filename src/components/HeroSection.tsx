@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
 import { motion, AnimatePresence } from "framer-motion";
+import FloatingIslamicPatterns from "./FloatingIslamicPatterns";
 import {
   Dialog,
   DialogContent,
@@ -253,6 +254,9 @@ const HeroSection = () => {
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Floating Islamic Geometric Patterns */}
+      <FloatingIslamicPatterns mousePosition={mousePosition} />
 
       {/* Arabic Calligraphy Decorative Elements - Left Side */}
       <motion.div
