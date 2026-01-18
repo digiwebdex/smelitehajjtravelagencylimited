@@ -84,135 +84,142 @@ const TeamSection = () => {
         {/* Decorative background */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
       
-      <div className="container relative z-10">
-        {/* Management Board */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="inline-flex items-center gap-2 text-secondary font-semibold uppercase tracking-wider">
-            <Users className="w-4 h-4" />
-            Meet Our Team
-          </span>
-          <h2 className="font-calligraphy text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mt-3 mb-2">
-            Management Board
-          </h2>
-          <span className="font-thuluth text-secondary/60 text-2xl md:text-3xl block mb-6">فريقنا</span>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Our dedicated team of experienced professionals ensures your sacred journey 
-            is comfortable, safe, and spiritually fulfilling.
-          </p>
-        </motion.div>
+        <div className="container relative z-10">
+          {/* Management Board */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="inline-flex items-center gap-2 text-secondary font-semibold uppercase tracking-wider">
+              <Users className="w-4 h-4" />
+              Meet Our Team
+            </span>
+            <h2 className="font-calligraphy text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mt-3 mb-2">
+              Management Board
+            </h2>
+            <span className="font-thuluth text-secondary/60 text-2xl md:text-3xl block mb-6">فريقنا</span>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+              Our dedicated team of experienced professionals ensures your sacred journey 
+              is comfortable, safe, and spiritually fulfilling.
+            </p>
+          </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24"
-        >
-          {managementTeam.map((member) => (
-            <motion.div
-              key={member.id}
-              variants={cardVariants}
-              whileHover={{ y: -8 }}
-              className="bg-card rounded-2xl p-8 shadow-elegant hover:shadow-lg transition-all duration-300 group text-center relative overflow-hidden"
-            >
-              {/* Decorative corner */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full" />
-              
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-24"
+          >
+            {managementTeam.map((member) => (
               <motion.div
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="w-28 h-28 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-elegant relative z-10 overflow-hidden"
+                key={member.id}
+                variants={cardVariants}
+                whileHover={{ y: -8 }}
+                className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden"
               >
-                {member.avatar_url ? (
-                  <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-heading font-bold text-primary-foreground">
-                    {getInitials(member.name)}
-                  </span>
-                )}
-              </motion.div>
-              <h3 className="font-heading font-bold text-xl text-foreground mb-2">
-                {member.name}
-              </h3>
-              <p className="text-secondary font-semibold text-sm mb-4 uppercase tracking-wide">
-                {member.role}
-              </p>
-              {member.qualifications && (
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {member.qualifications}
-                </p>
-              )}
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Shariah Board */}
-        {shariahBoard.length > 0 && (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-12"
-            >
-              <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground mb-2">
-                Shariah Board
-              </h2>
-              <span className="font-thuluth text-secondary/60 text-xl md:text-2xl block mb-4">مجلس الشريعة</span>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Our Shariah advisors ensure all our services comply with Islamic principles.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
-            >
-              {shariahBoard.map((member) => (
-                <motion.div
-                  key={member.id}
-                  variants={cardVariants}
-                  whileHover={{ y: -8 }}
-                  className="bg-gradient-to-br from-muted to-card rounded-2xl p-8 shadow-elegant hover:shadow-lg transition-all duration-300 group flex items-center gap-6"
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 shadow-gold overflow-hidden"
-                  >
-                    {member.avatar_url ? (
-                      <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-2xl font-heading font-bold text-secondary-foreground">
+                {/* Square Image Container */}
+                <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                  {member.avatar_url ? (
+                    <motion.img 
+                      src={member.avatar_url} 
+                      alt={member.name} 
+                      className="w-full h-full object-cover"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-primary">
+                      <span className="text-6xl font-heading font-bold text-primary-foreground">
                         {getInitials(member.name)}
                       </span>
-                    )}
-                  </motion.div>
-                  <div>
-                    <h3 className="font-heading font-bold text-xl text-foreground mb-1">
-                      {member.name}
-                    </h3>
-                    <p className="text-primary font-semibold text-sm mb-2 uppercase tracking-wide">
-                      {member.role}
-                    </p>
-                    {member.qualifications && (
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {member.qualifications}
+                    </div>
+                  )}
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                
+                {/* Content */}
+                <div className="p-6">
+                  <h3 className="font-heading font-bold text-xl text-foreground mb-2">
+                    {member.name}
+                  </h3>
+                  <p className="text-secondary font-semibold text-sm uppercase tracking-wide">
+                    {member.role}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Shariah Board */}
+          {shariahBoard.length > 0 && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-center mb-12"
+              >
+                <h2 className="font-calligraphy text-3xl md:text-4xl font-bold text-foreground mb-2">
+                  Shariah Board
+                </h2>
+                <span className="font-thuluth text-secondary/60 text-xl md:text-2xl block mb-4">مجلس الشريعة</span>
+                <p className="text-muted-foreground max-w-xl mx-auto">
+                  Our Shariah advisors ensure all our services comply with Islamic principles.
+                </p>
+              </motion.div>
+
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+              >
+                {shariahBoard.map((member) => (
+                  <motion.div
+                    key={member.id}
+                    variants={cardVariants}
+                    whileHover={{ y: -8 }}
+                    className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex"
+                  >
+                    {/* Square Image Container */}
+                    <div className="relative w-40 h-40 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5">
+                      {member.avatar_url ? (
+                        <motion.img 
+                          src={member.avatar_url} 
+                          alt={member.name} 
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-secondary">
+                          <span className="text-3xl font-heading font-bold text-secondary-foreground">
+                            {getInitials(member.name)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="p-6 flex flex-col justify-center">
+                      <h3 className="font-heading font-bold text-xl text-foreground mb-2">
+                        {member.name}
+                      </h3>
+                      <p className="text-primary font-semibold text-sm uppercase tracking-wide">
+                        {member.role}
                       </p>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </>
+          )}
+        </div>
       </section>
     </IslamicBorder>
   );
