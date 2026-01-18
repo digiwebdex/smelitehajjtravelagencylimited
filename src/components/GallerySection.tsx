@@ -408,7 +408,7 @@ const GallerySection = () => {
             >
               <Carousel
                 opts={{
-                  align: "start",
+                  align: "center",
                   loop: true,
                   dragFree: true,
                   skipSnaps: false,
@@ -416,11 +416,11 @@ const GallerySection = () => {
                 }}
                 plugins={[autoplayPlugin]}
                 setApi={setCarouselApi}
-                className="w-full touch-pan-y"
+                className="w-full max-w-full touch-pan-y"
               >
-                <CarouselContent className="-ml-6">
+                <CarouselContent className="-ml-4">
                   {images.map((image, index) => (
-                    <CarouselItem key={image.id} className="pl-6 md:basis-1/2 lg:basis-1/3">
+                    <CarouselItem key={image.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
