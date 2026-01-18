@@ -39,14 +39,22 @@ interface Package {
   id: string;
   title: string;
   description: string | null;
+  full_description: string | null;
   type: string;
   price: number;
   duration_days: number;
   includes: string[] | null;
+  exclusions: string[] | null;
   hotel_rating: number | null;
+  hotel_type: string | null;
+  transport_type: string | null;
+  flight_type: string | null;
+  special_notes: string | null;
   stock: number;
   is_active: boolean;
   image_url: string | null;
+  show_view_details: boolean;
+  show_book_now: boolean;
 }
 
 interface AdminPackagesProps {
@@ -66,14 +74,22 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    full_description: "",
     type: "hajj" as "hajj" | "umrah",
     price: 0,
     duration_days: 7,
     includes: "",
+    exclusions: "",
     hotel_rating: 5,
+    hotel_type: "",
+    transport_type: "",
+    flight_type: "",
+    special_notes: "",
     stock: 50,
     is_active: true,
     image_url: "",
+    show_view_details: true,
+    show_book_now: true,
   });
 
   useEffect(() => {
@@ -96,14 +112,22 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
     setFormData({
       title: "",
       description: "",
+      full_description: "",
       type: "hajj",
       price: 0,
       duration_days: 7,
       includes: "",
+      exclusions: "",
       hotel_rating: 5,
+      hotel_type: "",
+      transport_type: "",
+      flight_type: "",
+      special_notes: "",
       stock: 50,
       is_active: true,
       image_url: "",
+      show_view_details: true,
+      show_book_now: true,
     });
     setEditingPackage(null);
   };
@@ -113,14 +137,22 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
     setFormData({
       title: pkg.title,
       description: pkg.description || "",
+      full_description: pkg.full_description || "",
       type: pkg.type as "hajj" | "umrah",
       price: pkg.price,
       duration_days: pkg.duration_days,
       includes: pkg.includes?.join("\n") || "",
+      exclusions: pkg.exclusions?.join("\n") || "",
       hotel_rating: pkg.hotel_rating || 5,
+      hotel_type: pkg.hotel_type || "",
+      transport_type: pkg.transport_type || "",
+      flight_type: pkg.flight_type || "",
+      special_notes: pkg.special_notes || "",
       stock: pkg.stock,
       is_active: pkg.is_active,
       image_url: pkg.image_url || "",
+      show_view_details: pkg.show_view_details ?? true,
+      show_book_now: pkg.show_book_now ?? true,
     });
     setIsDialogOpen(true);
   };
@@ -131,14 +163,22 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
     const packageData = {
       title: formData.title,
       description: formData.description || null,
+      full_description: formData.full_description || null,
       type: formData.type,
       price: formData.price,
       duration_days: formData.duration_days,
       includes: formData.includes.split("\n").filter(Boolean),
+      exclusions: formData.exclusions.split("\n").filter(Boolean),
       hotel_rating: formData.hotel_rating,
+      hotel_type: formData.hotel_type || null,
+      transport_type: formData.transport_type || null,
+      flight_type: formData.flight_type || null,
+      special_notes: formData.special_notes || null,
       stock: formData.stock,
       is_active: formData.is_active,
       image_url: formData.image_url || null,
+      show_view_details: formData.show_view_details,
+      show_book_now: formData.show_book_now,
     };
 
     let error;
@@ -318,23 +358,87 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Short Description (card preview)</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={2}
+                    placeholder="Brief description shown on package card"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="includes">Includes (one per line)</Label>
+                  <Label htmlFor="full_description">Full Description (details modal)</Label>
+                  <Textarea
+                    id="full_description"
+                    value={formData.full_description}
+                    onChange={(e) => setFormData({ ...formData, full_description: e.target.value })}
+                    rows={4}
+                    placeholder="Detailed description shown when viewing package details"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hotel_type">Hotel Type</Label>
+                    <Input
+                      id="hotel_type"
+                      value={formData.hotel_type}
+                      onChange={(e) => setFormData({ ...formData, hotel_type: e.target.value })}
+                      placeholder="e.g., 5-star Luxury"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="transport_type">Transport Type</Label>
+                    <Input
+                      id="transport_type"
+                      value={formData.transport_type}
+                      onChange={(e) => setFormData({ ...formData, transport_type: e.target.value })}
+                      placeholder="e.g., AC Bus"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="flight_type">Flight Type</Label>
+                    <Input
+                      id="flight_type"
+                      value={formData.flight_type}
+                      onChange={(e) => setFormData({ ...formData, flight_type: e.target.value })}
+                      placeholder="e.g., Economy"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="includes">Inclusions (one per line)</Label>
                   <Textarea
                     id="includes"
                     value={formData.includes}
                     onChange={(e) => setFormData({ ...formData, includes: e.target.value })}
                     placeholder="Round-trip flights&#10;5-star hotel&#10;Visa processing"
                     rows={4}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="exclusions">Exclusions (one per line)</Label>
+                  <Textarea
+                    id="exclusions"
+                    value={formData.exclusions}
+                    onChange={(e) => setFormData({ ...formData, exclusions: e.target.value })}
+                    placeholder="Personal expenses&#10;Tips&#10;Extra baggage"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="special_notes">Special Notes / Conditions</Label>
+                  <Textarea
+                    id="special_notes"
+                    value={formData.special_notes}
+                    onChange={(e) => setFormData({ ...formData, special_notes: e.target.value })}
+                    rows={3}
+                    placeholder="Any special conditions or notes for this package"
                   />
                 </div>
 
@@ -347,15 +451,38 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                   placeholder="https://example.com/package-image.jpg"
                 />
 
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="active"
-                    checked={formData.is_active}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, is_active: checked })
-                    }
-                  />
-                  <Label htmlFor="active">Active (visible to customers)</Label>
+                <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium text-sm">Visibility Controls</h4>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="active"
+                      checked={formData.is_active}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, is_active: checked })
+                      }
+                    />
+                    <Label htmlFor="active">Package Active (visible to customers)</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="show_view_details"
+                      checked={formData.show_view_details}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, show_view_details: checked })
+                      }
+                    />
+                    <Label htmlFor="show_view_details">Show "View Details" Button</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="show_book_now"
+                      checked={formData.show_book_now}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, show_book_now: checked })
+                      }
+                    />
+                    <Label htmlFor="show_book_now">Show "Book Now" Button</Label>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">

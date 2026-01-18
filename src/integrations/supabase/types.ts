@@ -508,14 +508,22 @@ export type Database = {
           created_at: string
           description: string | null
           duration_days: number
+          exclusions: string[] | null
+          flight_type: string | null
+          full_description: string | null
           hotel_rating: number | null
+          hotel_type: string | null
           id: string
           image_url: string | null
           includes: string[] | null
           is_active: boolean
           price: number
+          show_book_now: boolean | null
+          show_view_details: boolean | null
+          special_notes: string | null
           stock: number
           title: string
+          transport_type: string | null
           type: Database["public"]["Enums"]["package_type"]
           updated_at: string
         }
@@ -523,14 +531,22 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_days?: number
+          exclusions?: string[] | null
+          flight_type?: string | null
+          full_description?: string | null
           hotel_rating?: number | null
+          hotel_type?: string | null
           id?: string
           image_url?: string | null
           includes?: string[] | null
           is_active?: boolean
           price: number
+          show_book_now?: boolean | null
+          show_view_details?: boolean | null
+          special_notes?: string | null
           stock?: number
           title: string
+          transport_type?: string | null
           type: Database["public"]["Enums"]["package_type"]
           updated_at?: string
         }
@@ -538,14 +554,22 @@ export type Database = {
           created_at?: string
           description?: string | null
           duration_days?: number
+          exclusions?: string[] | null
+          flight_type?: string | null
+          full_description?: string | null
           hotel_rating?: number | null
+          hotel_type?: string | null
           id?: string
           image_url?: string | null
           includes?: string[] | null
           is_active?: boolean
           price?: number
+          show_book_now?: boolean | null
+          show_view_details?: boolean | null
+          special_notes?: string | null
           stock?: number
           title?: string
+          transport_type?: string | null
           type?: Database["public"]["Enums"]["package_type"]
           updated_at?: string
         }

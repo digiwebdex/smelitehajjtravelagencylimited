@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, MapPin, Star, Users, Check, ArrowUpDown, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, MapPin, Star, Users, Check, ArrowUpDown, Filter, ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import BookingModal from "./BookingModal";
+import PackageDetailsModal from "./PackageDetailsModal";
 import { formatCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
@@ -20,12 +21,20 @@ interface Package {
   id: string;
   title: string;
   description: string | null;
+  full_description: string | null;
   type: string;
   price: number;
   duration_days: number;
   includes: string[] | null;
+  exclusions: string[] | null;
   hotel_rating: number | null;
+  hotel_type: string | null;
+  transport_type: string | null;
+  flight_type: string | null;
+  special_notes: string | null;
   stock: number;
+  show_view_details: boolean;
+  show_book_now: boolean;
 }
 
 interface DynamicPackagesProps {
@@ -40,11 +49,13 @@ const VISIBLE_FEATURES_COUNT = 6;
 const ExpandablePackageCard = ({ 
   pkg, 
   index, 
-  onBookNow 
+  onBookNow,
+  onViewDetails
 }: { 
   pkg: Package; 
   index: number; 
   onBookNow: (pkg: Package) => void;
+  onViewDetails: (pkg: Package) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const features = pkg.includes || [];
@@ -151,13 +162,31 @@ const ExpandablePackageCard = ({
           )}
         </CardContent>
 
-        <CardFooter className="pt-0">
-          <Button 
-            onClick={() => onBookNow(pkg)}
-            className="w-full bg-gradient-primary hover:opacity-90 shadow-gold group-hover:scale-105 transition-transform"
-          >
-            Book Now
-          </Button>
+        <CardFooter className="pt-0 flex flex-col gap-2">
+          {pkg.show_view_details !== false && (
+            <Button 
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails(pkg);
+              }}
+              className="w-full group-hover:border-primary transition-colors"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Details
+            </Button>
+          )}
+          {pkg.show_book_now !== false && (
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onBookNow(pkg);
+              }}
+              className="w-full bg-gradient-primary hover:opacity-90 shadow-gold group-hover:scale-105 transition-transform"
+            >
+              Book Now
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </motion.div>
@@ -168,7 +197,8 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("price-asc");
 
   useEffect(() => {
@@ -183,7 +213,7 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
       .eq("is_active", true);
 
     if (!error && data) {
-      setPackages(data);
+      setPackages(data as Package[]);
     }
     setLoading(false);
   };
@@ -209,7 +239,18 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
 
   const handleBookNow = (pkg: Package) => {
     setSelectedPackage(pkg);
-    setIsModalOpen(true);
+    setIsBookingModalOpen(true);
+  };
+
+  const handleViewDetails = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleBookFromDetails = (pkg: Package) => {
+    setIsDetailsModalOpen(false);
+    setSelectedPackage(pkg);
+    setIsBookingModalOpen(true);
   };
 
   if (loading) {
@@ -275,14 +316,22 @@ const DynamicPackages = ({ type }: DynamicPackagesProps) => {
             pkg={pkg}
             index={index}
             onBookNow={handleBookNow}
+            onViewDetails={handleViewDetails}
           />
         ))}
       </div>
 
       <BookingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
         package_info={selectedPackage}
+      />
+
+      <PackageDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        package_info={selectedPackage}
+        onBookNow={handleBookFromDetails}
       />
     </>
   );
