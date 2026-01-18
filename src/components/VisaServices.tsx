@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { ArrowRight, Globe, Eye, Filter, X, Search } from "lucide-react";
+import { ArrowRight, Globe, Eye, Filter, X, Search, Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface VisaCountry {
   id: string;
@@ -43,6 +46,16 @@ const VisaServices = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showAllCountries, setShowAllCountries] = useState(false);
   const [isAllCountriesModalOpen, setIsAllCountriesModalOpen] = useState(false);
+  const [showInquiryForm, setShowInquiryForm] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    country: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchCountries();
@@ -470,54 +483,186 @@ const VisaServices = () => {
       </section>
 
       {/* All Countries Modal */}
-      <Dialog open={isAllCountriesModalOpen} onOpenChange={setIsAllCountriesModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+      <Dialog open={isAllCountriesModalOpen} onOpenChange={(open) => {
+        setIsAllCountriesModalOpen(open);
+        if (!open) setShowInquiryForm(false);
+      }}>
+        <DialogContent className="max-w-5xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
               <Globe className="w-6 h-6 text-primary" />
               All Visa Processing Countries
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {countries.map((country) => (
-                <div
-                  key={country.id}
-                  className="group bg-muted rounded-xl p-4 hover:bg-muted/80 transition-all cursor-pointer relative"
-                  onClick={() => {
-                    setIsAllCountriesModalOpen(false);
-                    setSelectedCountry(country);
-                    setIsDetailsModalOpen(true);
-                  }}
-                >
-                  {country.is_featured && (
-                    <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
-                      ⭐ Popular
-                    </Badge>
-                  )}
-                  <div className="flex items-center gap-3 mb-2">
-                    <img 
-                      src={`https://flagcdn.com/w40/${getCountryCode(country.country_name)}.png`}
-                      alt={`${country.country_name} flag`}
-                      className="w-8 h-6 object-cover rounded shadow-sm"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.parentElement!.innerHTML = country.flag_emoji;
+          
+          <div className="flex gap-6">
+            {/* Countries Grid */}
+            <div className={`transition-all duration-300 ${showInquiryForm ? 'w-1/2' : 'w-full'}`}>
+              <ScrollArea className="h-[55vh] pr-4">
+                <div className={`grid gap-4 ${showInquiryForm ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+                  {countries.map((country) => (
+                    <div
+                      key={country.id}
+                      className="group bg-muted rounded-xl p-4 hover:bg-muted/80 transition-all cursor-pointer relative"
+                      onClick={() => {
+                        setIsAllCountriesModalOpen(false);
+                        setSelectedCountry(country);
+                        setIsDetailsModalOpen(true);
                       }}
-                    />
-                    <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {country.country_name}
-                    </h4>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">⏱️ {country.processing_time}</span>
-                    <span className="font-semibold text-secondary">৳{country.price.toLocaleString()}</span>
-                  </div>
+                    >
+                      {country.is_featured && (
+                        <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
+                          ⭐ Popular
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-3 mb-2">
+                        <img 
+                          src={`https://flagcdn.com/w40/${getCountryCode(country.country_name)}.png`}
+                          alt={`${country.country_name} flag`}
+                          className="w-8 h-6 object-cover rounded shadow-sm"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.parentElement!.innerHTML = country.flag_emoji;
+                          }}
+                        />
+                        <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {country.country_name}
+                        </h4>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">⏱️ {country.processing_time}</span>
+                        <span className="font-semibold text-secondary">৳{country.price.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </ScrollArea>
             </div>
-          </ScrollArea>
+
+            {/* Inquiry Form */}
+            {showInquiryForm && (
+              <div className="w-1/2 border-l border-border pl-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    Visa Inquiry
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Have questions? We'll get back to you soon.</p>
+                </div>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsSubmitting(true);
+                  
+                  // Simulate form submission
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  
+                  toast({
+                    title: "Inquiry Submitted!",
+                    description: "We'll contact you shortly regarding your visa inquiry.",
+                  });
+                  
+                  setInquiryForm({ name: "", email: "", phone: "", country: "", message: "" });
+                  setShowInquiryForm(false);
+                  setIsSubmitting(false);
+                }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="inquiry-name">Full Name *</Label>
+                    <Input
+                      id="inquiry-name"
+                      placeholder="Your full name"
+                      value={inquiryForm.name}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inquiry-email">Email *</Label>
+                    <Input
+                      id="inquiry-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={inquiryForm.email}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, email: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inquiry-phone">Phone Number</Label>
+                    <Input
+                      id="inquiry-phone"
+                      placeholder="+880 1XXX-XXXXXX"
+                      value={inquiryForm.phone}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, phone: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inquiry-country">Country of Interest</Label>
+                    <Select
+                      value={inquiryForm.country}
+                      onValueChange={(value) => setInquiryForm(prev => ({ ...prev, country: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((c) => (
+                          <SelectItem key={c.id} value={c.country_name}>
+                            {c.flag_emoji} {c.country_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inquiry-message">Your Message *</Label>
+                    <Textarea
+                      id="inquiry-message"
+                      placeholder="Tell us about your visa requirements..."
+                      value={inquiryForm.message}
+                      onChange={(e) => setInquiryForm(prev => ({ ...prev, message: e.target.value }))}
+                      required
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowInquiryForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        "Sending..."
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {/* Toggle Inquiry Form Button */}
+          {!showInquiryForm && (
+            <div className="pt-4 border-t border-border">
+              <Button
+                onClick={() => setShowInquiryForm(true)}
+                variant="outline"
+                className="w-full"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Have Questions? Contact Us
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
