@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import AdminBookings from "@/components/admin/AdminBookings";
 import AdminPackages from "@/components/admin/AdminPackages";
+import AdminPackageSections from "@/components/admin/AdminPackageSections";
 import AdminRevenue from "@/components/admin/AdminRevenue";
 import AdminMenu from "@/components/admin/AdminMenu";
 import AdminHero from "@/components/admin/AdminHero";
@@ -162,6 +163,8 @@ const AdminDashboard = () => {
         return <AdminBookings onUpdate={fetchStats} />;
       case "packages":
         return <AdminPackages onUpdate={fetchStats} />;
+      case "package-sections":
+        return <AdminPackageSections />;
       case "revenue":
         return <AdminRevenue />;
       case "payments":

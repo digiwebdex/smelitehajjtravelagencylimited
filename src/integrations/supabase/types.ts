@@ -649,31 +649,40 @@ export type Database = {
       }
       section_settings: {
         Row: {
+          badge_text: string | null
           created_at: string
           description: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           section_key: string
+          stats: Json | null
           subtitle: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          badge_text?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           section_key: string
+          stats?: Json | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          badge_text?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           section_key?: string
+          stats?: Json | null
           subtitle?: string | null
           title?: string | null
           updated_at?: string

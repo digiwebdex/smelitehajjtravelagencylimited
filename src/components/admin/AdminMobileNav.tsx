@@ -14,7 +14,8 @@ import {
   Bell,
   Scale,
   LayoutDashboard,
-  BarChart3
+  BarChart3,
+  Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const menuItems = [
   { value: "overview", label: "Overview", icon: BarChart3 },
   { value: "bookings", label: "Bookings", icon: Package },
   { value: "packages", label: "Packages", icon: LayoutDashboard },
+  { value: "package-sections", label: "Package Sections", icon: Layers },
   { value: "revenue", label: "Revenue", icon: Wallet },
   { value: "payments", label: "Payments", icon: Wallet },
   { value: "notifications", label: "Notifications", icon: Bell },
