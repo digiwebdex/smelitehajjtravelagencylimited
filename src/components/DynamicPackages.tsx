@@ -196,14 +196,10 @@ const ExpandablePackageCard = ({
               </div>
             </div>
             
-            {/* Price badge with animated gradient */}
-            <div className="absolute -bottom-5 right-4 bg-secondary px-4 py-2 rounded-lg shadow-gold z-10 overflow-hidden group/price">
-              {/* Shimmer effect on price badge */}
-              <div className="absolute inset-0 -translate-x-full group-hover/price:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              <span className="text-2xl font-bold relative bg-gradient-to-r from-secondary-foreground via-white to-secondary-foreground bg-[length:200%_auto] animate-[gradient-x_3s_ease-in-out_infinite] bg-clip-text text-transparent">
-                {formatCurrency(pkg.price)}
-              </span>
-              <span className="text-xs block opacity-80 text-secondary-foreground">per person</span>
+            {/* Price badge */}
+            <div className="absolute -bottom-5 right-4 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg shadow-gold z-10">
+              <span className="text-2xl font-bold">{formatCurrency(pkg.price)}</span>
+              <span className="text-xs block opacity-80">per person</span>
             </div>
           </CardHeader>
 
