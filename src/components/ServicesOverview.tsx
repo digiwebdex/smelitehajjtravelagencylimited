@@ -14,6 +14,7 @@ import {
   Building2,
   PlaneTakeoff
 } from "lucide-react";
+import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
 
 interface Service {
@@ -116,10 +117,17 @@ const ServicesOverview = () => {
           {services.map((service, index) => {
             const Icon = getIcon(service.icon_name);
             return (
-              <div
+              <motion.div
                 key={service.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ 
+                  duration: 0.5, 
+                  delay: index * 0.1,
+                  ease: [0.25, 0.46, 0.45, 0.94]
+                }}
                 className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-all duration-300"
-                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <ServiceIcon icon={Icon} />
                 <div>
@@ -130,7 +138,7 @@ const ServicesOverview = () => {
                     {service.description}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
