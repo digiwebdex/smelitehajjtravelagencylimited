@@ -830,6 +830,7 @@ export type Database = {
           flag_emoji: string
           id: string
           is_active: boolean
+          is_featured: boolean
           order_index: number
           price: number
           processing_time: string
@@ -845,6 +846,7 @@ export type Database = {
           flag_emoji: string
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           order_index?: number
           price: number
           processing_time: string
@@ -860,6 +862,7 @@ export type Database = {
           flag_emoji?: string
           id?: string
           is_active?: boolean
+          is_featured?: boolean
           order_index?: number
           price?: number
           processing_time?: string

@@ -22,6 +22,7 @@ interface VisaCountry {
   documents_needed?: string[] | null;
   description?: string | null;
   validity_period?: string | null;
+  is_featured?: boolean;
 }
 
 type ProcessingTimeFilter = "all" | "fast" | "medium" | "slow";
@@ -376,6 +377,15 @@ const VisaServices = () => {
               }}
               className="group bg-card rounded-2xl p-6 shadow-elegant hover:shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden"
             >
+              {/* Featured badge */}
+              {country.is_featured && (
+                <div className="absolute top-3 right-3 z-20">
+                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md text-xs font-semibold">
+                    ⭐ Popular
+                  </Badge>
+                </div>
+              )}
+              
               {/* Hover gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               

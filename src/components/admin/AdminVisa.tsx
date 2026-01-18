@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, FileText, ClipboardList, GripVertical } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, ClipboardList, GripVertical, Star } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,6 +37,7 @@ interface VisaCountry {
   price: number;
   order_index: number;
   is_active: boolean;
+  is_featured: boolean;
   requirements: string[] | null;
   documents_needed: string[] | null;
   description: string | null;
@@ -48,9 +49,10 @@ interface SortableRowProps {
   onEdit: (item: VisaCountry) => void;
   onDelete: (id: string) => void;
   onToggleActive: (item: VisaCountry) => void;
+  onToggleFeatured: (item: VisaCountry) => void;
 }
 
-const SortableRow = ({ item, onEdit, onDelete, onToggleActive }: SortableRowProps) => {
+const SortableRow = ({ item, onEdit, onDelete, onToggleActive, onToggleFeatured }: SortableRowProps) => {
   const {
     attributes,
     listeners,
@@ -78,7 +80,16 @@ const SortableRow = ({ item, onEdit, onDelete, onToggleActive }: SortableRowProp
         </button>
       </TableCell>
       <TableCell className="text-2xl">{item.flag_emoji}</TableCell>
-      <TableCell className="font-medium">{item.country_name}</TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          {item.country_name}
+          {item.is_featured && (
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
+              ⭐ Popular
+            </Badge>
+          )}
+        </div>
+      </TableCell>
       <TableCell>{item.processing_time}</TableCell>
       <TableCell>৳{item.price.toLocaleString()}</TableCell>
       <TableCell>
@@ -90,6 +101,15 @@ const SortableRow = ({ item, onEdit, onDelete, onToggleActive }: SortableRowProp
         <Badge variant="secondary" className="text-xs">
           {item.documents_needed?.length || 0} items
         </Badge>
+      </TableCell>
+      <TableCell>
+        <button
+          onClick={() => onToggleFeatured(item)}
+          className={`p-1 rounded transition-colors ${item.is_featured ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+          title={item.is_featured ? "Remove from featured" : "Mark as featured"}
+        >
+          <Star className={`w-5 h-5 ${item.is_featured ? 'fill-current' : ''}`} />
+        </button>
       </TableCell>
       <TableCell>
         <Switch checked={item.is_active} onCheckedChange={() => onToggleActive(item)} />
@@ -228,6 +248,11 @@ const AdminVisa = () => {
     fetchCountries();
   };
 
+  const toggleFeatured = async (item: VisaCountry) => {
+    await supabase.from("visa_countries").update({ is_featured: !item.is_featured }).eq("id", item.id);
+    fetchCountries();
+  };
+
   if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
   return (
@@ -341,6 +366,7 @@ const AdminVisa = () => {
                 <TableHead>Price</TableHead>
                 <TableHead>Requirements</TableHead>
                 <TableHead>Documents</TableHead>
+                <TableHead>Featured</TableHead>
                 <TableHead>Active</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -357,6 +383,7 @@ const AdminVisa = () => {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onToggleActive={toggleActive}
+                    onToggleFeatured={toggleFeatured}
                   />
                 ))}
               </SortableContext>
