@@ -1,9 +1,8 @@
-import { Check, Star, ArrowRight, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Check, Star, ArrowRight, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import MakkahIcon from "./icons/MakkahIcon";
 
 interface PackageCardProps {
   name: string;
@@ -12,13 +11,11 @@ interface PackageCardProps {
   isPopular?: boolean;
   flightDate?: string;
   index?: number;
-  hotelImageUrl?: string;
-  hotelMapLink?: string;
 }
 
 const VISIBLE_FEATURES_COUNT = 6;
 
-const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0, hotelImageUrl, hotelMapLink }: PackageCardProps) => {
+const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0 }: PackageCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasMoreFeatures = features.length > VISIBLE_FEATURES_COUNT;
   const visibleFeatures = isExpanded ? features : features.slice(0, VISIBLE_FEATURES_COUNT);
@@ -36,44 +33,6 @@ const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0, 
         isPopular && "ring-2 ring-secondary scale-105 z-10"
       )}
     >
-      {/* Hotel Image Side Panel */}
-      {hotelImageUrl && (
-        <div className="relative w-40 md:w-48 lg:w-56 flex-shrink-0 overflow-hidden">
-          {/* Hotel Image - Full bleed */}
-          <img 
-            src={hotelImageUrl} 
-            alt="Hotel" 
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          
-          {/* Gradient overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40" />
-          
-          {/* Badge at top */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-xl bg-secondary/95 flex items-center justify-center shadow-lg backdrop-blur-sm">
-              <MakkahIcon className="w-7 h-7 text-secondary-foreground" />
-            </div>
-            <span className="text-xs font-bold text-center text-white leading-tight px-2 drop-shadow-lg">
-              Hotels Near<br />Masjid al-Haram
-            </span>
-          </div>
-          
-          {/* Map Link Overlay */}
-          {hotelMapLink && (
-            <a 
-              href={hotelMapLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/95 hover:bg-white text-primary px-4 py-2 rounded-full text-sm font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105"
-            >
-              <MapPin className="w-4 h-4" />
-              View Map
-            </a>
-          )}
-        </div>
-      )}
-
       {/* Main Card Content */}
       <div className="flex-1 flex flex-col">
         {isPopular && (
