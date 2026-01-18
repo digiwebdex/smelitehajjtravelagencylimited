@@ -20,6 +20,7 @@ import AdminPackageSections from "@/components/admin/AdminPackageSections";
 import AdminRevenue from "@/components/admin/AdminRevenue";
 import AdminMenu from "@/components/admin/AdminMenu";
 import AdminHero from "@/components/admin/AdminHero";
+import AdminAbout from "@/components/admin/AdminAbout";
 import AdminServices from "@/components/admin/AdminServices";
 import AdminTestimonials from "@/components/admin/AdminTestimonials";
 import AdminTeam from "@/components/admin/AdminTeam";
@@ -183,6 +184,8 @@ const AdminDashboard = () => {
         return <AdminMenu />;
       case "hero":
         return <AdminHero />;
+      case "about":
+        return <AdminAbout />;
       case "services":
         return <AdminServices />;
       case "testimonials":

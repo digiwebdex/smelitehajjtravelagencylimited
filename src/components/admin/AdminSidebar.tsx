@@ -19,7 +19,8 @@ import {
   Layers,
   Images,
   Terminal,
-  Palette
+  Palette,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ const menuItems = [
   { value: "notifications", label: "Notifications", icon: Bell },
   { value: "menu", label: "Menu", icon: Menu },
   { value: "hero", label: "Hero", icon: Image },
+  { value: "about", label: "About", icon: Info },
   { value: "services", label: "Services", icon: Settings },
   { value: "testimonials", label: "Testimonials", icon: MessageSquare },
   { value: "team", label: "Team", icon: Users },

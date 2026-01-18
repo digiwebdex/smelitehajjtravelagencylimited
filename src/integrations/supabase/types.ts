@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_content: {
+        Row: {
+          created_at: string
+          history_text: string | null
+          history_title: string | null
+          id: string
+          image_url: string | null
+          mission_text: string | null
+          mission_title: string | null
+          stats: Json | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+          values_items: Json | null
+          values_title: string | null
+          vision_text: string | null
+          vision_title: string | null
+        }
+        Insert: {
+          created_at?: string
+          history_text?: string | null
+          history_title?: string | null
+          id?: string
+          image_url?: string | null
+          mission_text?: string | null
+          mission_title?: string | null
+          stats?: Json | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          values_items?: Json | null
+          values_title?: string | null
+          vision_text?: string | null
+          vision_title?: string | null
+        }
+        Update: {
+          created_at?: string
+          history_text?: string | null
+          history_title?: string | null
+          id?: string
+          image_url?: string | null
+          mission_text?: string | null
+          mission_title?: string | null
+          stats?: Json | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          values_items?: Json | null
+          values_title?: string | null
+          vision_text?: string | null
+          vision_title?: string | null
+        }
+        Relationships: []
+      }
       booking_documents: {
         Row: {
           booking_id: string

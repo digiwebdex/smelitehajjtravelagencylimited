@@ -12,6 +12,7 @@ import FAQSection from "@/components/FAQSection";
 import ContactSection from "@/components/ContactSection";
 import GallerySection from "@/components/GallerySection";
 import TerminalSection from "@/components/TerminalSection";
+import AboutSection from "@/components/AboutSection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
@@ -28,6 +29,7 @@ interface SectionSetting {
 const SECTION_COMPONENTS: Record<string, React.ComponentType<{ style?: React.CSSProperties; className?: string }>> = {
   hero: HeroSection,
   services: ServicesOverview,
+  about: AboutSection,
   hajj: HajjPackages,
   umrah: UmrahPackages,
   visa: VisaServices,
@@ -42,16 +44,17 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType<{ style?: React.CSS
 // Default section order (fallback)
 const DEFAULT_SECTIONS: SectionSetting[] = [
   { section_key: 'hero', is_active: true, order_index: 1, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'services', is_active: true, order_index: 2, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'hajj', is_active: true, order_index: 3, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'umrah', is_active: true, order_index: 4, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'visa', is_active: true, order_index: 5, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'gallery', is_active: true, order_index: 6, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'testimonials', is_active: true, order_index: 7, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'team', is_active: true, order_index: 8, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'faq', is_active: true, order_index: 9, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'terminal', is_active: true, order_index: 10, bg_color: null, text_color: null, custom_css: null },
-  { section_key: 'contact', is_active: true, order_index: 11, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'about', is_active: true, order_index: 2, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'services', is_active: true, order_index: 3, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'hajj', is_active: true, order_index: 4, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'umrah', is_active: true, order_index: 5, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'visa', is_active: true, order_index: 6, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'gallery', is_active: true, order_index: 7, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'testimonials', is_active: true, order_index: 8, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'team', is_active: true, order_index: 9, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'faq', is_active: true, order_index: 10, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'terminal', is_active: true, order_index: 11, bg_color: null, text_color: null, custom_css: null },
+  { section_key: 'contact', is_active: true, order_index: 12, bg_color: null, text_color: null, custom_css: null },
 ];
 
 const Index = () => {
