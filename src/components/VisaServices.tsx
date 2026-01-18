@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Globe } from "lucide-react";
+import { ArrowRight, Globe, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
 import VisaApplicationModal from "./VisaApplicationModal";
+import VisaDetailsModal from "./VisaDetailsModal";
 
 interface VisaCountry {
   id: string;
@@ -13,6 +14,10 @@ interface VisaCountry {
   processing_time: string;
   price: number;
   order_index: number;
+  requirements?: string[] | null;
+  documents_needed?: string[] | null;
+  description?: string | null;
+  validity_period?: string | null;
 }
 
 const VisaServices = () => {
@@ -20,6 +25,7 @@ const VisaServices = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<VisaCountry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCountries();
@@ -219,18 +225,33 @@ const VisaServices = () => {
                 <p className="text-sm font-semibold text-secondary mb-4">
                   From ৳{country.price.toLocaleString()}
                 </p>
-                <Button
-                  size="sm"
-                  className="w-full bg-gradient-primary text-primary-foreground transition-all duration-300 hover:opacity-90"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedCountry(country);
-                    setIsModalOpen(true);
-                  }}
-                >
-                  Apply Now
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 transition-all duration-300"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCountry(country);
+                      setIsDetailsModalOpen(true);
+                    }}
+                  >
+                    <Eye className="w-4 h-4 mr-1" />
+                    Details
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="flex-1 bg-gradient-primary text-primary-foreground transition-all duration-300 hover:opacity-90"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCountry(country);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    Apply
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -262,6 +283,21 @@ const VisaServices = () => {
           setSelectedCountry(null);
         }}
         country={selectedCountry}
+      />
+
+      <VisaDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedCountry(null);
+        }}
+        country={selectedCountry}
+        onApply={(country) => {
+          setIsDetailsModalOpen(false);
+          setSelectedCountry(country);
+          setIsModalOpen(true);
+        }}
+        getCountryCode={getCountryCode}
       />
     </IslamicBorder>
   );
