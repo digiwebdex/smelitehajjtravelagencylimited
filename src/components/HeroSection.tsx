@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronDown, Play, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import FloatingIslamicPatterns from "./FloatingIslamicPatterns";
 import {
   Dialog,
@@ -58,20 +58,6 @@ const HeroSection = () => {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  // Scroll-based parallax
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"]
-  });
-  
-  // Parallax transforms
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.4, 0.7]);
 
   useEffect(() => {
     fetchHeroContent();
@@ -231,14 +217,13 @@ const HeroSection = () => {
 
   return (
     <section 
-      ref={sectionRef}
       id="home" 
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Background Image with Ken Burns + Scroll Parallax Effect */}
+      {/* Background Image with Ken Burns Effect */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`bg-${currentSlide}`}
@@ -247,15 +232,13 @@ const HeroSection = () => {
           exit={{ opacity: 0 }}
           transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] as const }}
           className="absolute inset-0"
-          style={{ y: backgroundY }}
         >
-          {/* Ken Burns zoom effect + scroll scale on the image */}
+          {/* Ken Burns zoom effect on the image */}
           <motion.img
             key={`img-${currentSlide}`}
             src={backgroundImage}
             alt="Hero background"
             className="w-full h-full object-cover"
-            style={{ scale: backgroundScale }}
             initial={{ scale: 1 }}
             animate={{ 
               scale: 1.15,
@@ -265,11 +248,7 @@ const HeroSection = () => {
               }
             }}
           />
-          {/* Dynamic overlay that darkens on scroll */}
-          <motion.div 
-            className="absolute inset-0 bg-gradient-hero" 
-            style={{ opacity: overlayOpacity }}
-          />
+          <div className="absolute inset-0 bg-gradient-hero" />
           <div className="absolute inset-0 opacity-20">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
           </div>
@@ -404,11 +383,8 @@ const HeroSection = () => {
         </div>
       )}
 
-      {/* Content with scroll parallax */}
-      <motion.div 
-        className="relative z-10 container text-center text-primary-foreground pt-32 pb-20"
-        style={{ y: contentY, opacity: contentOpacity }}
-      >
+      {/* Content */}
+      <div className="relative z-10 container text-center text-primary-foreground pt-32 pb-20">
         <AnimatePresence mode="wait">
           <motion.div
             key={`content-${currentSlide}`}
@@ -531,7 +507,7 @@ const HeroSection = () => {
           <span className="text-sm font-medium">Explore Packages</span>
           <ChevronDown className="w-6 h-6" />
         </motion.a>
-      </motion.div>
+      </div>
 
       {/* Video Modal */}
       <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
