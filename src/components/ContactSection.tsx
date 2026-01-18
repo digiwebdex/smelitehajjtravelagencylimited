@@ -160,11 +160,24 @@ const ContactSection = () => {
                     <h3 className="font-heading font-bold text-sm text-foreground mb-2">
                       {info.title}
                     </h3>
-                    {info.details.map((detail, idx) => (
-                      <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
-                        {detail}
-                      </p>
-                    ))}
+                    {info.type === 'address' ? (
+                      <a 
+                        href="https://maps.app.goo.gl/sH15fPhiGdKLARod9?g_st=aw"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground text-xs leading-relaxed hover:text-primary transition-colors block"
+                      >
+                        {info.details.map((detail, idx) => (
+                          <span key={idx} className="block">{detail}</span>
+                        ))}
+                      </a>
+                    ) : (
+                      info.details.map((detail, idx) => (
+                        <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
+                          {detail}
+                        </p>
+                      ))
+                    )}
                   </motion.div>
                 );
               })}
