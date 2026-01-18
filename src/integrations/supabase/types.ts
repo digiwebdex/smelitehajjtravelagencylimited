@@ -825,35 +825,47 @@ export type Database = {
         Row: {
           country_name: string
           created_at: string
+          description: string | null
+          documents_needed: string[] | null
           flag_emoji: string
           id: string
           is_active: boolean
           order_index: number
           price: number
           processing_time: string
+          requirements: string[] | null
           updated_at: string
+          validity_period: string | null
         }
         Insert: {
           country_name: string
           created_at?: string
+          description?: string | null
+          documents_needed?: string[] | null
           flag_emoji: string
           id?: string
           is_active?: boolean
           order_index?: number
           price: number
           processing_time: string
+          requirements?: string[] | null
           updated_at?: string
+          validity_period?: string | null
         }
         Update: {
           country_name?: string
           created_at?: string
+          description?: string | null
+          documents_needed?: string[] | null
           flag_emoji?: string
           id?: string
           is_active?: boolean
           order_index?: number
           price?: number
           processing_time?: string
+          requirements?: string[] | null
           updated_at?: string
+          validity_period?: string | null
         }
         Relationships: []
       }
