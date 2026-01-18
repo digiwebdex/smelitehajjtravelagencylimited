@@ -270,10 +270,13 @@ const GallerySection = () => {
                 opts={{
                   align: "start",
                   loop: true,
+                  dragFree: true,
+                  skipSnaps: false,
+                  containScroll: "trimSnaps",
                 }}
                 plugins={[autoplayPlugin]}
                 setApi={setCarouselApi}
-                className="w-full"
+                className="w-full touch-pan-y"
               >
                 <CarouselContent className="-ml-4">
                   {images.map((image) => (
