@@ -75,25 +75,25 @@ const ExpandablePackageCard = ({
     >
       <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 group border-border/50">
         {/* Header with gradient */}
-        <CardHeader className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6">
-          <div className="flex justify-between items-start">
-            <div>
+        <CardHeader className="relative bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-6 pb-8">
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
               <h3 className="font-heading text-xl font-bold">{pkg.title}</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <div className="flex flex-wrap items-center gap-2 mt-2">
+                <Badge variant="secondary" className="bg-white/20 text-white border-0 whitespace-nowrap">
                   {pkg.duration_days} Days
                 </Badge>
                 {pkg.hotel_rating && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     {Array.from({ length: pkg.hotel_rating }).map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-secondary text-secondary" />
+                      <Star key={i} className="w-4 h-4 fill-secondary text-secondary" />
                     ))}
                   </div>
                 )}
               </div>
             </div>
             {pkg.stock < 10 && (
-              <Badge className="bg-secondary text-secondary-foreground">
+              <Badge className="bg-secondary text-secondary-foreground whitespace-nowrap flex-shrink-0">
                 Only {pkg.stock} left
               </Badge>
             )}
