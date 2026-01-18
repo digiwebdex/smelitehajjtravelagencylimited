@@ -658,6 +658,7 @@ export type Database = {
           section_key: string
           stats: Json | null
           subtitle: string | null
+          success_rate: string | null
           title: string | null
           updated_at: string
         }
@@ -671,6 +672,7 @@ export type Database = {
           section_key: string
           stats?: Json | null
           subtitle?: string | null
+          success_rate?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -684,6 +686,7 @@ export type Database = {
           section_key?: string
           stats?: Json | null
           subtitle?: string | null
+          success_rate?: string | null
           title?: string | null
           updated_at?: string
         }

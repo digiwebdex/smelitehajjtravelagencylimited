@@ -25,6 +25,7 @@ interface SectionData {
   badge_text: string;
   image_url: string | null;
   stats: Stat[];
+  success_rate: string;
   is_active: boolean;
 }
 
@@ -69,6 +70,7 @@ const AdminPackageSections = () => {
         badge_text: (hajj as any).badge_text || "",
         image_url: (hajj as any).image_url || null,
         stats: (hajj as any).stats || [],
+        success_rate: (hajj as any).success_rate || "100%",
         is_active: hajj.is_active
       });
     }
@@ -83,6 +85,7 @@ const AdminPackageSections = () => {
         badge_text: (umrah as any).badge_text || "",
         image_url: (umrah as any).image_url || null,
         stats: (umrah as any).stats || [],
+        success_rate: (umrah as any).success_rate || "100%",
         is_active: umrah.is_active
       });
     }
@@ -101,6 +104,7 @@ const AdminPackageSections = () => {
         badge_text: sectionData.badge_text,
         image_url: sectionData.image_url,
         stats: sectionData.stats,
+        success_rate: sectionData.success_rate,
         is_active: sectionData.is_active
       } as any)
       .eq("id", sectionData.id);
@@ -191,16 +195,26 @@ const AdminPackageSections = () => {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Textarea
-            value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
-            placeholder="Enter section description..."
-            rows={3}
-          />
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Description</Label>
+            <Textarea
+              value={data.description}
+              onChange={(e) => setData({ ...data, description: e.target.value })}
+              placeholder="Enter section description..."
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Success Rate</Label>
+            <Input
+              value={data.success_rate}
+              onChange={(e) => setData({ ...data, success_rate: e.target.value })}
+              placeholder="e.g., 100%"
+            />
+            <p className="text-xs text-muted-foreground">Displayed on the floating badge</p>
+          </div>
         </div>
-
         <div className="space-y-2">
           <Label>Section Image</Label>
           <ImageUpload

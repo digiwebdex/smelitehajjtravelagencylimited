@@ -13,6 +13,7 @@ interface SectionSettings {
   badge_text: string;
   image_url: string | null;
   stats: { value: string; label: string }[];
+  success_rate: string;
 }
 
 const UmrahPackages = () => {
@@ -25,7 +26,8 @@ const UmrahPackages = () => {
     stats: [
       { value: "15+", label: "Umrah Years Experience" },
       { value: "3000+", label: "Happy Pilgrims" }
-    ]
+    ],
+    success_rate: "100%"
   });
 
   useEffect(() => {
@@ -43,7 +45,8 @@ const UmrahPackages = () => {
           description: data.description || settings.description,
           badge_text: (data as any).badge_text || settings.badge_text,
           image_url: (data as any).image_url || null,
-          stats: (data as any).stats || settings.stats
+          stats: (data as any).stats || settings.stats,
+          success_rate: (data as any).success_rate || "100%"
         });
       }
     };
@@ -131,7 +134,7 @@ const UmrahPackages = () => {
                 transition={{ delay: 0.3 }}
                 className="absolute -bottom-8 -left-8 bg-secondary text-secondary-foreground p-6 rounded-2xl shadow-gold"
               >
-                <div className="font-heading text-3xl font-bold">100%</div>
+                <div className="font-heading text-3xl font-bold">{settings.success_rate}</div>
                 <div className="text-sm font-medium">Success Rate</div>
               </motion.div>
               
