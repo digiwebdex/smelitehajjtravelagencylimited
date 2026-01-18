@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ChevronDown, Play, Star, X } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { ChevronDown, Play, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
@@ -10,7 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface HeroContent {
+interface HeroSlide {
+  id: string;
   title: string;
   subtitle?: string;
   description?: string;
@@ -22,10 +23,13 @@ interface HeroContent {
   background_image_url?: string;
   video_url?: string;
   stats?: { number: string; label: string }[];
+  slide_type?: string;
+  order_index?: number;
 }
 
-const HeroSection = () => {
-  const [content, setContent] = useState<HeroContent>({
+const defaultSlides: HeroSlide[] = [
+  {
+    id: "default-1",
     title: "Your Sacred Journey",
     subtitle: "Begins Here",
     description: "Experience the spiritual journey of a lifetime with SM Elite Hajj. We provide premium Hajj & Umrah packages with complete care and guidance.",
@@ -40,37 +44,78 @@ const HeroSection = () => {
       { number: "100%", label: "Satisfaction Rate" },
       { number: "24/7", label: "Support Available" },
     ],
-  });
+    slide_type: "general",
+    order_index: 0,
+  },
+];
+
+const HeroSection = () => {
+  const [slides, setSlides] = useState<HeroSlide[]>(defaultSlides);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
     fetchHeroContent();
   }, []);
+
+  // Auto-slide effect
+  useEffect(() => {
+    if (!isAutoPlaying || slides.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 6000); // 6 seconds per slide
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, slides.length]);
 
   const fetchHeroContent = async () => {
     const { data } = await supabase
       .from("hero_content")
       .select("*")
       .eq("is_active", true)
-      .limit(1)
-      .single();
+      .order("order_index", { ascending: true });
     
-    if (data) {
-      setContent({
-        title: data.title,
-        subtitle: data.subtitle || undefined,
-        description: data.description || undefined,
-        badge_text: data.badge_text || undefined,
-        primary_button_text: data.primary_button_text || undefined,
-        primary_button_link: data.primary_button_link || undefined,
-        secondary_button_text: data.secondary_button_text || undefined,
-        secondary_button_link: data.secondary_button_link || undefined,
-        background_image_url: data.background_image_url || undefined,
-        video_url: data.video_url || undefined,
-        stats: Array.isArray(data.stats) ? data.stats as { number: string; label: string }[] : undefined,
-      });
+    if (data && data.length > 0) {
+      const formattedSlides = data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        subtitle: item.subtitle || undefined,
+        description: item.description || undefined,
+        badge_text: item.badge_text || undefined,
+        primary_button_text: item.primary_button_text || undefined,
+        primary_button_link: item.primary_button_link || undefined,
+        secondary_button_text: item.secondary_button_text || undefined,
+        secondary_button_link: item.secondary_button_link || undefined,
+        background_image_url: item.background_image_url || undefined,
+        video_url: item.video_url || undefined,
+        stats: Array.isArray(item.stats) ? item.stats as { number: string; label: string }[] : undefined,
+        slide_type: (item as any).slide_type || "general",
+        order_index: (item as any).order_index || 0,
+      }));
+      setSlides(formattedSlides);
     }
   };
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    // Resume auto-play after 10 seconds of inactivity
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, []);
+
+  const goToPrevious = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, [slides.length]);
+
+  const goToNext = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, [slides.length]);
 
   const getEmbedUrl = (url: string) => {
     if (!url) return "";
@@ -92,25 +137,65 @@ const HeroSection = () => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const content = slides[currentSlide] || defaultSlides[0];
   const backgroundImage = content.background_image_url || heroImage;
+
+  // Text animation variants
+  const textVariants = {
+    hidden: { opacity: 0, y: -50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }
+    },
+    exit: { 
+      opacity: 0, 
+      y: 50,
+      transition: { duration: 0.3, ease: [0.55, 0.06, 0.68, 0.19] as const }
+    }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      }
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+      }
+    }
+  };
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image with Parallax Effect */}
-      <div className="absolute inset-0">
-        <motion.img
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          src={backgroundImage}
-          alt="The Holy Kaaba in Mecca"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-hero" />
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
-        </div>
-      </div>
+      {/* Background Image with Slide Transition */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`bg-${currentSlide}`}
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="absolute inset-0"
+        >
+          <img
+            src={backgroundImage}
+            alt="Hero background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-hero" />
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.5)_100%)]" />
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Arabic Calligraphy Decorative Elements - Left Side */}
       <motion.div
@@ -130,7 +215,7 @@ const HeroSection = () => {
         </div>
       </motion.div>
 
-      {/* Arabic Calligraphy Decorative Elements - Right Side - Allah & Muhammad */}
+      {/* Arabic Calligraphy Decorative Elements - Right Side */}
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 0.2, x: 0 }}
@@ -145,18 +230,6 @@ const HeroSection = () => {
         </div>
       </motion.div>
 
-      {/* Decorative Islamic Pattern Overlay - Top Right Corner */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.8 }}
-        className="absolute top-20 right-8 w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 hidden md:block pointer-events-none"
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full text-secondary fill-current">
-          <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" />
-        </svg>
-      </motion.div>
-
       {/* Floating Decorative Circles */}
       <motion.div
         animate={{ y: [-10, 10, -10] }}
@@ -169,130 +242,153 @@ const HeroSection = () => {
         className="absolute bottom-1/4 right-[15%] w-32 h-32 border border-secondary/20 rounded-full hidden lg:block"
       />
 
-      {/* Bottom Left Calligraphy Accent */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 0.1, y: 0 }}
-        transition={{ duration: 1, delay: 1 }}
-        className="absolute bottom-20 left-8 hidden lg:block pointer-events-none"
-      >
-        <div className="font-arabic text-secondary text-4xl lg:text-6xl select-none">
-          عيد مبارك
+      {/* Navigation Arrows */}
+      {slides.length > 1 && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-all group"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-all group"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
+          </button>
+        </>
+      )}
+
+      {/* Slide Indicators */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? "w-8 bg-secondary" 
+                  : "w-2 bg-primary-foreground/40 hover:bg-primary-foreground/60"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
-      </motion.div>
+      )}
 
       {/* Content */}
       <div className="relative z-10 container text-center text-primary-foreground pt-32 pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-4xl mx-auto"
-        >
-          {content.badge_text && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary/20 backdrop-blur-md rounded-full text-secondary font-medium mb-8 border border-secondary/30"
-            >
-              <Star className="w-4 h-4 fill-secondary" />
-              {content.badge_text}
-            </motion.span>
-          )}
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-arabic text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight tracking-wide"
-          >
-            {content.title}
-            <span className="block text-gradient-gold mt-2 font-kufi">{content.subtitle}</span>
-          </motion.h1>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-12 leading-relaxed"
-          >
-            {content.description}
-          </motion.p>
-
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+            key={`content-${currentSlide}`}
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="max-w-4xl mx-auto"
           >
-            <Button
-              size="lg"
-              onClick={() => scrollToSection(content.primary_button_link || "#hajj")}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-gold text-lg px-8 py-7 font-semibold group"
-            >
-              <span>{content.primary_button_text || "Explore Hajj Packages"}</span>
+            {content.badge_text && (
               <motion.span
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="ml-2"
+                variants={textVariants}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-secondary/20 backdrop-blur-md rounded-full text-secondary font-medium mb-8 border border-secondary/30"
               >
-                →
+                <Star className="w-4 h-4 fill-secondary" />
+                {content.badge_text}
               </motion.span>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => scrollToSection(content.secondary_button_link || "#umrah")}
-              className="border-2 border-primary-foreground/50 text-primary-foreground bg-primary-foreground/10 backdrop-blur-sm hover:bg-primary-foreground/20 text-lg px-8 py-7"
+            )}
+            
+            <motion.h1
+              variants={textVariants}
+              className="font-arabic text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight tracking-wide"
             >
-              {content.secondary_button_text || "View Umrah Packages"}
-            </Button>
-          </motion.div>
-
-          {/* Video CTA */}
-          {content.video_url && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              onClick={() => setIsVideoOpen(true)}
-              className="inline-flex items-center gap-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors group"
+              {content.title}
+              <motion.span 
+                variants={textVariants}
+                className="block text-gradient-gold mt-2 font-kufi"
+              >
+                {content.subtitle}
+              </motion.span>
+            </motion.h1>
+            
+            <motion.p
+              variants={textVariants}
+              className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto mb-12 leading-relaxed"
             >
-              <span className="w-14 h-14 rounded-full bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-primary-foreground/30 transition-all group-hover:scale-110">
-                <Play className="w-5 h-5 fill-current ml-1" />
-              </span>
-              <span className="font-medium">Watch Video</span>
-            </motion.button>
-          )}
+              {content.description}
+            </motion.p>
 
-          {/* Stats */}
-          {content.stats && content.stats.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-primary-foreground/20"
+              variants={textVariants}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
             >
-              {content.stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.9 + index * 0.1, duration: 0.5 }}
-                  className="text-center group"
+              <Button
+                size="lg"
+                onClick={() => scrollToSection(content.primary_button_link || "#hajj")}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-gold text-lg px-8 py-7 font-semibold group"
+              >
+                <span>{content.primary_button_text || "Explore Hajj Packages"}</span>
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="ml-2"
                 >
-                  <div className="font-kufi text-4xl md:text-5xl font-bold text-secondary mb-2 group-hover:scale-110 transition-transform">
-                    {stat.number}
-                  </div>
-                  <div className="text-primary-foreground/80 text-sm md:text-base">
-                    {stat.label}
-                  </div>
-                </motion.div>
-              ))}
+                  →
+                </motion.span>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => scrollToSection(content.secondary_button_link || "#umrah")}
+                className="border-2 border-primary-foreground/50 text-primary-foreground bg-primary-foreground/10 backdrop-blur-sm hover:bg-primary-foreground/20 text-lg px-8 py-7"
+              >
+                {content.secondary_button_text || "View Umrah Packages"}
+              </Button>
             </motion.div>
-          )}
-        </motion.div>
+
+            {/* Video CTA */}
+            {content.video_url && (
+              <motion.button
+                variants={textVariants}
+                onClick={() => setIsVideoOpen(true)}
+                className="inline-flex items-center gap-3 text-primary-foreground/80 hover:text-primary-foreground transition-colors group"
+              >
+                <span className="w-14 h-14 rounded-full bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-primary-foreground/30 transition-all group-hover:scale-110">
+                  <Play className="w-5 h-5 fill-current ml-1" />
+                </span>
+                <span className="font-medium">Watch Video</span>
+              </motion.button>
+            )}
+
+            {/* Stats */}
+            {content.stats && content.stats.length > 0 && (
+              <motion.div
+                variants={textVariants}
+                className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-12 border-t border-primary-foreground/20"
+              >
+                {content.stats.map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
+                    className="text-center group"
+                  >
+                    <div className="font-kufi text-4xl md:text-5xl font-bold text-secondary mb-2 group-hover:scale-110 transition-transform">
+                      {stat.number}
+                    </div>
+                    <div className="text-primary-foreground/80 text-sm md:text-base">
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Scroll Indicator */}
         <motion.a

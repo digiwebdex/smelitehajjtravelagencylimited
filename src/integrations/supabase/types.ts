@@ -287,10 +287,12 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          order_index: number
           primary_button_link: string | null
           primary_button_text: string | null
           secondary_button_link: string | null
           secondary_button_text: string | null
+          slide_type: string
           stats: Json | null
           subtitle: string | null
           title: string
@@ -304,10 +306,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          order_index?: number
           primary_button_link?: string | null
           primary_button_text?: string | null
           secondary_button_link?: string | null
           secondary_button_text?: string | null
+          slide_type?: string
           stats?: Json | null
           subtitle?: string | null
           title: string
@@ -321,10 +325,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          order_index?: number
           primary_button_link?: string | null
           primary_button_text?: string | null
           secondary_button_link?: string | null
           secondary_button_text?: string | null
+          slide_type?: string
           stats?: Json | null
           subtitle?: string | null
           title?: string
