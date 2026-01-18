@@ -58,13 +58,14 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
       <DialogContent 
-        className="max-w-2xl max-h-[90vh] p-0 overflow-hidden"
+        className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col"
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col max-h-[90vh]"
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
@@ -90,7 +91,7 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
               </div>
             </div>
 
-            <ScrollArea className="max-h-[60vh]">
+            <ScrollArea className="flex-1 overflow-auto">
               <div className="p-6 pt-8 space-y-6">
                 {/* Quick Info Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -215,7 +216,7 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
             </ScrollArea>
 
             {/* Footer with CTA */}
-            <div className="p-6 pt-4 border-t bg-background">
+            <div className="p-6 pt-4 border-t bg-background flex-shrink-0">
               <div className="flex gap-3">
                 <Button variant="outline" onClick={onClose} className="flex-1">
                   Close
