@@ -27,6 +27,7 @@ import {
 import { formatCurrency } from "@/lib/currency";
 import OrderTrackingModal from "@/components/OrderTrackingModal";
 import BookingDocumentUpload from "@/components/BookingDocumentUpload";
+import InstallmentDetails from "@/components/InstallmentDetails";
 import { cn } from "@/lib/utils";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
@@ -280,6 +281,9 @@ const MyBookings = () => {
                         </div>
                       </div>
                       
+                      {/* Installment Details */}
+                      <InstallmentDetails bookingId={booking.id} />
+
                       <div className="flex items-center justify-between mt-4 pt-4 border-t">
                         <p className="text-xs text-muted-foreground">
                           Booked on {new Date(booking.created_at).toLocaleDateString()}
