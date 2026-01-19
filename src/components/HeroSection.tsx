@@ -85,7 +85,7 @@ const HeroSection = () => {
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000); // 4 seconds per slide
+    }, 6000); // 6 seconds per slide
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, slides.length]);
