@@ -179,7 +179,7 @@ const TeamSection = () => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+                className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto"
               >
                 {shariahBoard.map((member) => (
                   <motion.div
@@ -189,7 +189,7 @@ const TeamSection = () => {
                     className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex"
                   >
                     {/* Square Image Container */}
-                    <div className="relative w-40 h-40 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5">
+                    <div className="relative w-48 h-48 md:w-56 md:h-56 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5">
                       {member.avatar_url ? (
                         <img 
                           src={member.avatar_url} 
@@ -198,25 +198,25 @@ const TeamSection = () => {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-secondary">
-                          <span className="text-3xl font-heading font-bold text-secondary-foreground">
+                          <span className="text-4xl md:text-5xl font-heading font-bold text-secondary-foreground">
                             {getInitials(member.name)}
                           </span>
                         </div>
                       )}
                       {/* Hover Overlay with Bio */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-3">
-                        <p className="text-white/90 text-xs leading-relaxed text-center line-clamp-5">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4">
+                        <p className="text-white/90 text-sm leading-relaxed text-center line-clamp-5">
                           {member.qualifications || "Shariah expert ensuring Islamic compliance."}
                         </p>
                       </div>
                     </div>
                     
                     {/* Content */}
-                    <div className="p-6 flex flex-col justify-center">
-                      <h3 className="font-heading font-bold text-xl text-foreground mb-2">
+                    <div className="p-6 md:p-8 flex flex-col justify-center">
+                      <h3 className="font-heading font-bold text-xl md:text-2xl text-foreground mb-2">
                         {member.name}
                       </h3>
-                      <p className="text-primary font-semibold text-sm uppercase tracking-wide">
+                      <p className="text-primary font-semibold text-sm md:text-base uppercase tracking-wide">
                         {member.role}
                       </p>
                     </div>
