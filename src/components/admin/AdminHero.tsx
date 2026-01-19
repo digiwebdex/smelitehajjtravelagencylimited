@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap, LayoutTemplate, Columns, AlignCenter } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,6 +34,7 @@ interface HeroSlide {
 interface SliderSettings {
   autoplayInterval: string;
   transitionSpeed: string;
+  layoutMode: "centered" | "split-screen";
 }
 
 const defaultSlide: Omit<HeroSlide, "id"> = {
@@ -62,6 +63,7 @@ const AdminHero = () => {
   const [sliderSettings, setSliderSettings] = useState<SliderSettings>({
     autoplayInterval: "6",
     transitionSpeed: "normal",
+    layoutMode: "split-screen",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const { uploadImage, uploading } = useImageUpload({
@@ -78,15 +80,18 @@ const AdminHero = () => {
     const { data } = await supabase
       .from("site_settings")
       .select("setting_key, setting_value")
-      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed"]);
+      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode"]);
 
     if (data) {
-      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal" };
+      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen" };
       data.forEach((item) => {
         if (item.setting_key === "hero_autoplay_interval") {
           settings.autoplayInterval = String(item.setting_value).replace(/"/g, "");
         } else if (item.setting_key === "hero_transition_speed") {
           settings.transitionSpeed = String(item.setting_value).replace(/"/g, "");
+        } else if (item.setting_key === "hero_layout_mode") {
+          const mode = String(item.setting_value).replace(/"/g, "");
+          settings.layoutMode = mode === "centered" ? "centered" : "split-screen";
         }
       });
       setSliderSettings(settings);
@@ -96,7 +101,8 @@ const AdminHero = () => {
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     
-    const updates = [
+    // Update existing settings
+    await Promise.all([
       supabase
         .from("site_settings")
         .update({ setting_value: JSON.stringify(sliderSettings.autoplayInterval) })
@@ -105,9 +111,29 @@ const AdminHero = () => {
         .from("site_settings")
         .update({ setting_value: JSON.stringify(sliderSettings.transitionSpeed) })
         .eq("setting_key", "hero_transition_speed"),
-    ];
+    ]);
 
-    await Promise.all(updates);
+    // Handle layout mode separately (upsert)
+    const { data: existingLayoutMode } = await supabase
+      .from("site_settings")
+      .select("id")
+      .eq("setting_key", "hero_layout_mode")
+      .single();
+
+    if (existingLayoutMode) {
+      await supabase
+        .from("site_settings")
+        .update({ setting_value: JSON.stringify(sliderSettings.layoutMode) })
+        .eq("setting_key", "hero_layout_mode");
+    } else {
+      await supabase
+        .from("site_settings")
+        .insert({ 
+          setting_key: "hero_layout_mode", 
+          setting_value: JSON.stringify(sliderSettings.layoutMode),
+          category: "hero"
+        });
+    }
     
     toast({ title: "Success", description: "Slider settings saved" });
     setSavingSettings(false);
@@ -316,7 +342,43 @@ const AdminHero = () => {
           </CardTitle>
           <CardDescription>Control how the hero slider behaves</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Layout Mode Toggle */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <LayoutTemplate className="w-4 h-4" />
+              Layout Mode
+            </Label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setSliderSettings({ ...sliderSettings, layoutMode: "split-screen" })}
+                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  sliderSettings.layoutMode === "split-screen" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-muted hover:border-muted-foreground/30"
+                }`}
+              >
+                <Columns className="w-8 h-8" />
+                <span className="font-medium text-sm">Split-Screen</span>
+                <span className="text-xs text-muted-foreground text-center">Content left, image right</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSliderSettings({ ...sliderSettings, layoutMode: "centered" })}
+                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  sliderSettings.layoutMode === "centered" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-muted hover:border-muted-foreground/30"
+                }`}
+              >
+                <AlignCenter className="w-8 h-8" />
+                <span className="font-medium text-sm">Full-Width Centered</span>
+                <span className="text-xs text-muted-foreground text-center">Classic centered layout</span>
+              </button>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
