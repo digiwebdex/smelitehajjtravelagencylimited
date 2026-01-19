@@ -33,13 +33,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import AdminTrackingStatus from "./AdminTrackingStatus";
 import AdminEMIManagement from "./AdminEMIManagement";
+import AdminBankTransferVerification from "./AdminBankTransferVerification";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
 
@@ -61,6 +62,8 @@ interface Booking {
   guest_name: string | null;
   guest_email: string | null;
   guest_phone: string | null;
+  bank_transaction_number: string | null;
+  bank_transfer_screenshot_url: string | null;
   profiles: {
     full_name: string | null;
     email: string | null;
@@ -84,6 +87,7 @@ const trackingStatusLabels: Record<TrackingStatus, string> = {
 const paymentStatusOptions = [
   { value: "pending", label: "Pending", icon: Clock, color: "bg-yellow-500" },
   { value: "pending_cash", label: "Cash Pending", icon: Banknote, color: "bg-orange-500" },
+  { value: "pending_verification", label: "Awaiting Verification", icon: Building, color: "bg-blue-500" },
   { value: "paid", label: "Paid", icon: CheckCircle, color: "bg-green-500" },
   { value: "partial", label: "Partial", icon: Calculator, color: "bg-blue-500" },
   { value: "emi_pending", label: "Installment Pending", icon: Calculator, color: "bg-purple-500" },
@@ -111,6 +115,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [trackingBooking, setTrackingBooking] = useState<Booking | null>(null);
   const [emiBooking, setEmiBooking] = useState<Booking | null>(null);
+  const [verifyBankTransferBooking, setVerifyBankTransferBooking] = useState<Booking | null>(null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
@@ -139,6 +144,8 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
         guest_name,
         guest_email,
         guest_phone,
+        bank_transaction_number,
+        bank_transfer_screenshot_url,
         packages (
           title,
           type
@@ -586,6 +593,18 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                             Mark Paid
                           </Button>
                         )}
+                        {/* Bank Transfer Verification Button */}
+                        {booking.payment_status === "pending_verification" && booking.payment_method === "bank_transfer" && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-6 text-xs gap-1 mt-1"
+                            onClick={() => setVerifyBankTransferBooking(booking)}
+                          >
+                            <ShieldCheck className="w-3 h-3" />
+                            Verify Payment
+                          </Button>
+                        )}
                         {/* Installment Button */}
                         <Button
                           size="sm"
@@ -800,6 +819,17 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           }}
         />
       )}
+
+      {/* Bank Transfer Verification Modal */}
+      <AdminBankTransferVerification
+        isOpen={!!verifyBankTransferBooking}
+        onClose={() => setVerifyBankTransferBooking(null)}
+        booking={verifyBankTransferBooking}
+        onVerified={() => {
+          fetchBookings();
+          onUpdate();
+        }}
+      />
     </>
   );
 };
