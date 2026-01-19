@@ -162,9 +162,9 @@ const ContactSection = () => {
                     <h3 className="font-heading font-bold text-sm text-secondary mb-2">
                       {info.title}
                     </h3>
-                    <div className="space-y-0.5">
+                    <div className="space-y-1">
                       {info.details.map((detail, idx) => (
-                        <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
+                        <p key={idx} className="text-muted-foreground text-xs leading-relaxed whitespace-nowrap">
                           {detail}
                         </p>
                       ))}
