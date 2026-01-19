@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin } from "lucide-react";
+import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -135,6 +135,15 @@ const Header = () => {
               <a href={`mailto:${contactDetails.email}`} className="flex items-center gap-2 hover:text-secondary transition-colors">
                 <Mail className="w-4 h-4" />
                 <span className="hidden sm:inline">{contactDetails.email}</span>
+              </a>
+              <a 
+                href={`https://wa.me/${contactDetails.whatsapp?.replace(/[^0-9]/g, '') || '8801867666888'}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-[#25D366] transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">WhatsApp</span>
               </a>
             </div>
             <div className="text-secondary font-medium">
