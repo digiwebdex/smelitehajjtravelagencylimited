@@ -86,7 +86,7 @@ const paymentStatusOptions = [
   { value: "pending_cash", label: "Cash Pending", icon: Banknote, color: "bg-orange-500" },
   { value: "paid", label: "Paid", icon: CheckCircle, color: "bg-green-500" },
   { value: "partial", label: "Partial", icon: Calculator, color: "bg-blue-500" },
-  { value: "emi_pending", label: "EMI Pending", icon: Calculator, color: "bg-purple-500" },
+  { value: "emi_pending", label: "Installment Pending", icon: Calculator, color: "bg-purple-500" },
   { value: "failed", label: "Failed", icon: XCircle, color: "bg-red-500" },
   { value: "refunded", label: "Refunded", icon: Wallet, color: "bg-purple-500" },
 ];
@@ -586,7 +586,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                             Mark Paid
                           </Button>
                         )}
-                        {/* EMI Button */}
+                        {/* Installment Button */}
                         <Button
                           size="sm"
                           variant="outline"
@@ -594,7 +594,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                           onClick={() => setEmiBooking(booking)}
                         >
                           <Calculator className="w-3 h-3" />
-                          EMI
+                          Installment
                         </Button>
                         {booking.transaction_id && (
                           <span className="text-xs text-muted-foreground font-mono">

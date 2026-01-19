@@ -305,7 +305,7 @@ const AdminEMIReport = () => {
 
   const summaryCards = [
     {
-      title: "Total EMI Plans",
+      title: "Total Installment Plans",
       value: summary.totalEMIPlans,
       icon: Users,
       color: "text-blue-500",
@@ -518,7 +518,7 @@ const AdminEMIReport = () => {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.customer_name}</TableCell>
                         <TableCell>{item.package_name}</TableCell>
-                        <TableCell>EMI #{item.installment_number}</TableCell>
+                        <TableCell>Installment #{item.installment_number}</TableCell>
                         <TableCell className="font-semibold">{formatCurrency(item.amount)}</TableCell>
                         <TableCell>{format(new Date(item.due_date), "dd MMM yyyy")}</TableCell>
                         <TableCell>

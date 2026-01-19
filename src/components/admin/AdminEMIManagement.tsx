@@ -427,7 +427,7 @@ const AdminEMIManagement = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-primary" />
-            EMI Payment Management
+            Installment Payment Management
           </DialogTitle>
           <DialogDescription>
             Total Booking Amount: <span className="font-bold text-primary">{formatCurrency(totalAmount)}</span>
@@ -446,7 +446,7 @@ const AdminEMIManagement = ({
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Calculator className="w-5 h-5" />
-                    Create EMI Plan
+                    Create Installment Plan
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -467,7 +467,7 @@ const AdminEMIManagement = ({
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="numberOfEmis">Number of EMIs</Label>
+                      <Label htmlFor="numberOfEmis">Number of Installments</Label>
                       <Select
                         value={numberOfEmis.toString()}
                         onValueChange={(v) => setNumberOfEmis(Number(v))}
@@ -503,7 +503,7 @@ const AdminEMIManagement = ({
                     </div>
                     <Separator />
                     <div className="flex justify-between text-lg">
-                      <span className="font-medium">Monthly EMI:</span>
+                      <span className="font-medium">Monthly Installment:</span>
                       <span className="font-bold text-primary">{formatCurrency(calculatedEmi)}</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -521,7 +521,7 @@ const AdminEMIManagement = ({
                     ) : (
                       <Plus className="w-4 h-4 mr-2" />
                     )}
-                    Create EMI Plan
+                    Create Installment Plan
                   </Button>
                 </CardContent>
               </Card>
@@ -533,7 +533,7 @@ const AdminEMIManagement = ({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4"
             >
-              {/* EMI Summary */}
+              {/* Installment Summary */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Card className="p-3">
                   <p className="text-xs text-muted-foreground">Total Amount</p>
@@ -544,7 +544,7 @@ const AdminEMIManagement = ({
                   <p className="text-lg font-bold text-green-600">{formatCurrency(emiPayment.advance_amount)}</p>
                 </Card>
                 <Card className="p-3">
-                  <p className="text-xs text-muted-foreground">EMI Progress</p>
+                  <p className="text-xs text-muted-foreground">Installment Progress</p>
                   <p className="text-lg font-bold">{emiPayment.paid_emis}/{emiPayment.number_of_emis}</p>
                 </Card>
                 <Card className="p-3">
@@ -594,7 +594,7 @@ const AdminEMIManagement = ({
                       {installments.map((installment) => (
                         <TableRow key={installment.id}>
                           <TableCell className="font-medium">
-                            EMI {installment.installment_number}
+                            Installment {installment.installment_number}
                           </TableCell>
                           <TableCell className="font-bold">
                             {formatCurrency(installment.amount)}
@@ -656,7 +656,7 @@ const AdminEMIManagement = ({
             <DialogHeader>
               <DialogTitle>Record Payment</DialogTitle>
               <DialogDescription>
-                EMI {payingInstallment?.installment_number} - {formatCurrency(payingInstallment?.amount || 0)}
+                Installment {payingInstallment?.installment_number} - {formatCurrency(payingInstallment?.amount || 0)}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

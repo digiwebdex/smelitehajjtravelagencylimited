@@ -43,7 +43,7 @@ const menuItems = [
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "package-sections", label: "Package Sections", icon: Layers },
   { value: "revenue", label: "Revenue", icon: Wallet },
-  { value: "emi-report", label: "EMI Report", icon: Calculator },
+  { value: "emi-report", label: "Installment Report", icon: Calculator },
   { value: "payments", label: "Payments", icon: Wallet },
   { value: "notifications", label: "Notifications", icon: Bell },
   { value: "sections", label: "Section Visibility", icon: Layers },
