@@ -34,7 +34,8 @@ import {
   Moon,
   Monitor,
   MousePointerClick,
-  Eye
+  Eye,
+  ExternalLink
 } from "lucide-react";
 import { CURRENCY } from "@/lib/currency";
 import ImageUpload from "./ImageUpload";
@@ -442,9 +443,21 @@ const AdminSettings = () => {
                       ⚠️ Invalid format. URL must start with "https://www.google.com/maps/embed?pb="
                     </p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Go to Google Maps → Search your location → Click "Share" → "Embed a map" → Copy the src URL from the iframe code
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open('https://www.google.com/maps', '_blank')}
+                      className="flex items-center gap-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Open Google Maps
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Search your location → Click "Share" → "Embed a map" → Copy the src URL
+                    </p>
+                  </div>
                 </div>
                 
                 {/* Map Preview - only show if valid URL */}
