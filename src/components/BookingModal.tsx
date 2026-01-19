@@ -536,8 +536,8 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                       type="number"
                       min="0"
                       max={package_info.price * formData.passengerCount - 1}
-                      value={advanceAmount}
-                      onChange={(e) => setAdvanceAmount(Number(e.target.value))}
+                      value={advanceAmount === 0 ? "" : advanceAmount}
+                      onChange={(e) => setAdvanceAmount(e.target.value === "" ? 0 : Number(e.target.value))}
                       placeholder="0"
                     />
                     <p className="text-xs text-muted-foreground">Optional upfront payment</p>
