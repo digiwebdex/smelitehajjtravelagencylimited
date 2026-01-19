@@ -159,14 +159,16 @@ const ContactSection = () => {
                     <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-elegant">
                       <Icon className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    <h3 className="font-heading font-bold text-sm text-foreground mb-2">
+                    <h3 className="font-heading font-bold text-sm text-secondary mb-2">
                       {info.title}
                     </h3>
-                    {info.details.map((detail, idx) => (
-                      <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
-                        {detail}
-                      </p>
-                    ))}
+                    <div className="space-y-0.5">
+                      {info.details.map((detail, idx) => (
+                        <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
+                          {detail}
+                        </p>
+                      ))}
+                    </div>
                   </motion.div>
                 );
               })}
