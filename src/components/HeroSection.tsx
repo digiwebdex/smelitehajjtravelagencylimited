@@ -529,12 +529,12 @@ const HeroSection = () => {
             
             <motion.h1
               variants={textVariants}
-              className="font-arabic text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight tracking-wide"
+              className="font-arabic text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-normal tracking-wide overflow-visible"
             >
               {content.title}
               <motion.span 
                 variants={textVariants}
-                className="block text-gradient-gold mt-2 font-kufi"
+                className="block text-gradient-gold mt-2 font-kufi pb-2"
               >
                 {content.subtitle}
               </motion.span>
