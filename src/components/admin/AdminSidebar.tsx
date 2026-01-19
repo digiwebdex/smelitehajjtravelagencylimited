@@ -17,7 +17,8 @@ import {
   ChevronLeft,
   BarChart3,
   Layers,
-  Images
+  Images,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const menuItems = [
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "package-sections", label: "Package Sections", icon: Layers },
   { value: "revenue", label: "Revenue", icon: Wallet },
+  { value: "emi-report", label: "EMI Report", icon: Calculator },
   { value: "payments", label: "Payments", icon: Wallet },
   { value: "notifications", label: "Notifications", icon: Bell },
   { value: "sections", label: "Section Visibility", icon: Layers },
