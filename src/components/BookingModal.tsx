@@ -26,6 +26,7 @@ import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
 import { z } from "zod";
 import PaymentMethodSelector from "./PaymentMethodSelector";
+import BankTransferDetails from "./BankTransferDetails";
 import { Separator } from "@/components/ui/separator";
 
 interface Package {
@@ -58,6 +59,17 @@ interface FormErrors {
   guestPhone?: string;
   passengerCount?: string;
   paymentMethod?: string;
+  transactionNumber?: string;
+  screenshot?: string;
+}
+
+interface BankDetails {
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  branch: string;
+  routing_number: string;
+  swift_code: string;
 }
 
 const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
@@ -69,6 +81,9 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
   const [paymentType, setPaymentType] = useState<"full" | "installment">("full");
   const [advanceAmount, setAdvanceAmount] = useState<number>(0);
   const [numberOfInstallments, setNumberOfInstallments] = useState<number>(3);
+  const [bankTransactionNumber, setBankTransactionNumber] = useState("");
+  const [bankScreenshot, setBankScreenshot] = useState<File | null>(null);
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [formData, setFormData] = useState({
     guestName: "",
     guestEmail: "",
@@ -84,6 +99,30 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       nationality: "Bangladeshi",
     },
   });
+
+  // Fetch bank details when bank_transfer is selected
+  useEffect(() => {
+    if (formData.paymentMethod === "bank_transfer" && !bankDetails) {
+      fetchBankDetails();
+    }
+  }, [formData.paymentMethod]);
+
+  const fetchBankDetails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("payment_methods")
+        .select("credentials")
+        .eq("slug", "bank_transfer")
+        .single();
+
+      if (error) throw error;
+      if (data?.credentials) {
+        setBankDetails(data.credentials as unknown as BankDetails);
+      }
+    } catch (error) {
+      console.error("Error fetching bank details:", error);
+    }
+  };
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -106,6 +145,33 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
         setErrors(prev => ({ ...prev, [field]: error.errors[0].message }));
       }
     }
+  };
+
+  const resetFormAndClose = () => {
+    onClose();
+    setFormData({
+      guestName: "",
+      guestEmail: "",
+      guestPhone: "",
+      passengerCount: 1,
+      travelDate: "",
+      notes: "",
+      paymentMethod: "",
+      passengerDetails: {
+        name: "",
+        passportNumber: "",
+        dateOfBirth: "",
+        nationality: "Bangladeshi",
+      },
+    });
+    setPaymentType("full");
+    setAdvanceAmount(0);
+    setNumberOfInstallments(3);
+    setBankTransactionNumber("");
+    setBankScreenshot(null);
+    setErrors({});
+    setTouched({});
+    setLoading(false);
   };
 
   const handleBlur = (field: string) => {
@@ -150,6 +216,26 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       }
     }
 
+    // Validate bank transfer specific fields
+    if (formData.paymentMethod === "bank_transfer") {
+      const bankErrors: FormErrors = {};
+      if (!bankTransactionNumber.trim()) {
+        bankErrors.transactionNumber = "Transaction number is required";
+      }
+      if (!bankScreenshot) {
+        bankErrors.screenshot = "Payment screenshot is required";
+      }
+      if (Object.keys(bankErrors).length > 0) {
+        setErrors(prev => ({ ...prev, ...bankErrors }));
+        toast({
+          title: "Validation Error",
+          description: "Please provide transaction number and screenshot.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     if (!package_info) return;
 
     setLoading(true);
@@ -168,7 +254,8 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       guest_email: formData.guestEmail.trim() || null,
       guest_phone: formData.guestPhone.trim(),
       payment_method: isInstallment ? "installment" : formData.paymentMethod,
-      payment_status: isInstallment ? "emi_pending" : (formData.paymentMethod === 'cash' ? 'pending_cash' : 'pending'),
+      payment_status: isInstallment ? "emi_pending" : (formData.paymentMethod === 'cash' ? 'pending_cash' : (formData.paymentMethod === 'bank_transfer' ? 'pending_verification' : 'pending')),
+      bank_transaction_number: formData.paymentMethod === "bank_transfer" ? bankTransactionNumber.trim() : null,
     }).select("id").single();
 
     if (error) {
@@ -249,29 +336,50 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
           title: "Booking Confirmed!",
           description: `Your installment plan has been created. ${numberOfInstallments} installments of ${formatCurrency(Math.ceil((totalPrice - advanceAmount) / numberOfInstallments))} each.`,
         });
-        onClose();
-        // Reset form
-        setFormData({
-          guestName: "",
-          guestEmail: "",
-          guestPhone: "",
-          passengerCount: 1,
-          travelDate: "",
-          notes: "",
-          paymentMethod: "",
-          passengerDetails: {
-            name: "",
-            passportNumber: "",
-            dateOfBirth: "",
-            nationality: "Bangladeshi",
-          },
+        resetFormAndClose();
+        return;
+      }
+
+      // Handle bank transfer - upload screenshot
+      if (formData.paymentMethod === "bank_transfer" && bankScreenshot) {
+        const fileExt = bankScreenshot.name.split(".").pop();
+        const fileName = `${bookingData.id}/bank-transfer-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("booking-documents")
+          .upload(fileName, bankScreenshot);
+
+        if (uploadError) {
+          console.error("Screenshot upload error:", uploadError);
+        } else {
+          // Get public URL and update booking
+          const { data: urlData } = supabase.storage
+            .from("booking-documents")
+            .getPublicUrl(fileName);
+
+          if (urlData?.publicUrl) {
+            await supabase
+              .from("bookings")
+              .update({ bank_transfer_screenshot_url: urlData.publicUrl })
+              .eq("id", bookingData.id);
+          }
+        }
+
+        toast({
+          title: "Booking Submitted!",
+          description: "Your bank transfer details have been submitted. We will verify your payment and confirm shortly.",
         });
-        setPaymentType("full");
-        setAdvanceAmount(0);
-        setNumberOfInstallments(3);
-        setErrors({});
-        setTouched({});
-        setLoading(false);
+        resetFormAndClose();
+        return;
+      }
+
+      // For cash payments
+      if (formData.paymentMethod === "cash") {
+        toast({
+          title: "Booking Confirmed!",
+          description: "Please visit our office to complete the cash payment.",
+        });
+        resetFormAndClose();
         return;
       }
 
@@ -283,30 +391,9 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       });
 
       if (paymentResult.success) {
-        // For cash payments or if redirect URL is not needed, close modal
-        if (formData.paymentMethod === 'cash' || !paymentResult.redirectUrl) {
-          onClose();
-          // Reset form
-          setFormData({
-            guestName: "",
-            guestEmail: "",
-            guestPhone: "",
-            passengerCount: 1,
-            travelDate: "",
-            notes: "",
-            paymentMethod: "",
-            passengerDetails: {
-              name: "",
-              passportNumber: "",
-              dateOfBirth: "",
-              nationality: "Bangladeshi",
-            },
-          });
-          setPaymentType("full");
-          setAdvanceAmount(0);
-          setNumberOfInstallments(3);
-          setErrors({});
-          setTouched({});
+        // For redirect payments, the hook handles the redirect
+        if (!paymentResult.redirectUrl) {
+          resetFormAndClose();
         }
         // For online payments, the hook handles the redirect
       } else {
@@ -619,12 +706,40 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                     if (touched.paymentMethod) {
                       setErrors(prev => ({ ...prev, paymentMethod: undefined }));
                     }
+                    // Clear bank transfer errors when switching away
+                    if (method !== "bank_transfer") {
+                      setErrors(prev => ({ ...prev, transactionNumber: undefined, screenshot: undefined }));
+                      setBankTransactionNumber("");
+                      setBankScreenshot(null);
+                    }
                   }}
                 />
                 {touched.paymentMethod && errors.paymentMethod && (
                   <p className="text-xs text-destructive flex items-center gap-1 mt-2">
                     <AlertCircle className="w-3 h-3" /> {errors.paymentMethod}
                   </p>
+                )}
+
+                {/* Bank Transfer Details */}
+                {formData.paymentMethod === "bank_transfer" && bankDetails && (
+                  <BankTransferDetails
+                    bankDetails={bankDetails}
+                    transactionNumber={bankTransactionNumber}
+                    onTransactionNumberChange={(value) => {
+                      setBankTransactionNumber(value);
+                      if (errors.transactionNumber) {
+                        setErrors(prev => ({ ...prev, transactionNumber: undefined }));
+                      }
+                    }}
+                    screenshotFile={bankScreenshot}
+                    onScreenshotChange={(file) => {
+                      setBankScreenshot(file);
+                      if (errors.screenshot) {
+                        setErrors(prev => ({ ...prev, screenshot: undefined }));
+                      }
+                    }}
+                    error={errors.transactionNumber || errors.screenshot}
+                  />
                 )}
               </>
             )}

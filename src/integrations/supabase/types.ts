@@ -154,6 +154,8 @@ export type Database = {
       bookings: {
         Row: {
           admin_notes: string | null
+          bank_transaction_number: string | null
+          bank_transfer_screenshot_url: string | null
           created_at: string
           guest_email: string | null
           guest_name: string | null
@@ -175,6 +177,8 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          bank_transaction_number?: string | null
+          bank_transfer_screenshot_url?: string | null
           created_at?: string
           guest_email?: string | null
           guest_name?: string | null
@@ -196,6 +200,8 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          bank_transaction_number?: string | null
+          bank_transfer_screenshot_url?: string | null
           created_at?: string
           guest_email?: string | null
           guest_name?: string | null

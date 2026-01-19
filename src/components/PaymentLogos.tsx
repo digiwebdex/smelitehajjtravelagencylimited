@@ -143,10 +143,42 @@ export const CashLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => 
   </svg>
 );
 
+export const BankTransferLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 100 100"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect width="100" height="100" rx="12" fill="#1E40AF" />
+    <path
+      d="M50 18L20 35V40H80V35L50 18Z"
+      fill="#60A5FA"
+    />
+    <rect x="25" y="45" width="10" height="25" fill="#FFFFFF" />
+    <rect x="45" y="45" width="10" height="25" fill="#FFFFFF" />
+    <rect x="65" y="45" width="10" height="25" fill="#FFFFFF" />
+    <rect x="20" y="72" width="60" height="8" rx="2" fill="#60A5FA" />
+    <text
+      x="50"
+      y="92"
+      textAnchor="middle"
+      fill="#FFFFFF"
+      fontSize="8"
+      fontWeight="600"
+      fontFamily="system-ui, sans-serif"
+    >
+      BANK
+    </text>
+  </svg>
+);
+
 // Map slug to logo component
 export const paymentLogoMap: Record<string, React.FC<LogoProps>> = {
   sslcommerz: SSLCommerzLogo,
   bkash: BkashLogo,
   nagad: NagadLogo,
   cash: CashLogo,
+  bank_transfer: BankTransferLogo,
 };
