@@ -252,18 +252,17 @@ const HeroSection = () => {
   const content = slides[currentSlide] || defaultSlides[0];
   const backgroundImage = content.background_image_url || heroImage;
 
-  // Text animation variants
+  // Text animation variants - animate from top to middle with fade
   const textVariants = {
-    hidden: { opacity: 0, y: -50 },
+    hidden: { opacity: 0, y: -60 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as const }
+      transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as const }
     },
     exit: { 
-      opacity: 0, 
-      y: 50,
-      transition: { duration: 0.3, ease: [0.55, 0.06, 0.68, 0.19] as const }
+      opacity: 0,
+      transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }
     }
   };
 
@@ -272,15 +271,15 @@ const HeroSection = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
+        staggerChildren: 0.12,
+        delayChildren: 0.2,
       }
     },
     exit: {
       opacity: 0,
       transition: {
-        staggerChildren: 0.05,
-        staggerDirection: -1,
+        duration: 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94] as const
       }
     }
   };
@@ -293,27 +292,27 @@ const HeroSection = () => {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Background Image with Ken Burns Effect */}
+      {/* Background Image with Slide from Right to Left */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`bg-${currentSlide}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as const }}
           className="absolute inset-0"
         >
-          {/* Ken Burns zoom effect on the image */}
+          {/* Smooth Ken Burns zoom effect on the image */}
           <motion.img
             key={`img-${currentSlide}`}
             src={backgroundImage}
             alt="Hero background"
             className="w-full h-full object-cover"
-            initial={{ scale: 1 }}
+            initial={{ scale: 1.05 }}
             animate={{ 
               scale: 1.15,
               transition: { 
-                duration: 8, 
+                duration: 10, 
                 ease: "linear"
               }
             }}
