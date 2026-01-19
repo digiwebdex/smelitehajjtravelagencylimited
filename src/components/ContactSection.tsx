@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Phone, Mail, MapPin, Clock, Send, MessageSquare, Building2, LucideIcon } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, MessageSquare, Building2, LucideIcon, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -171,8 +171,9 @@ const ContactSection = () => {
                     <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-elegant">
                       <Icon className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    <h3 className="font-heading font-bold text-sm text-secondary mb-2">
+                    <h3 className="font-heading font-bold text-sm text-secondary mb-2 flex items-center gap-1.5">
                       {info.title}
+                      {isClickable && <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />}
                     </h3>
                     <div className="space-y-1">
                       {info.details.map((detail, idx) => {
