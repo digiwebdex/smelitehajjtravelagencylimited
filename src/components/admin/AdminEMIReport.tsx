@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import {
@@ -34,6 +35,8 @@ import {
   Calendar,
   DollarSign,
   Users,
+  Download,
+  FileText,
 } from "lucide-react";
 import {
   Table,
@@ -43,6 +46,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface EMISummary {
   totalEMIPlans: number;
@@ -78,6 +84,8 @@ interface StatusDistribution {
 
 const AdminEMIReport = () => {
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
   const [summary, setSummary] = useState<EMISummary>({
     totalEMIPlans: 0,
     totalExpected: 0,
@@ -268,6 +276,190 @@ const AdminEMIReport = () => {
     },
   };
 
+  const exportToCSV = () => {
+    try {
+      setExporting(true);
+      
+      // Summary section
+      let csvContent = "INSTALLMENT REPORT\n";
+      csvContent += `Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}\n\n`;
+      
+      csvContent += "SUMMARY\n";
+      csvContent += `Total Installment Plans,${summary.totalEMIPlans}\n`;
+      csvContent += `Total Expected,${summary.totalExpected}\n`;
+      csvContent += `Total Collected,${summary.totalCollected}\n`;
+      csvContent += `Pending Amount,${summary.totalPending}\n`;
+      csvContent += `Overdue Amount,${summary.totalOverdue}\n`;
+      csvContent += `Overdue Count,${summary.overdueCount}\n`;
+      csvContent += `Collection Rate,${summary.collectionRate.toFixed(1)}%\n\n`;
+      
+      // Monthly trends
+      csvContent += "MONTHLY COLLECTION TRENDS\n";
+      csvContent += "Month,Expected,Collected\n";
+      monthlyTrends.forEach(trend => {
+        csvContent += `${trend.month},${trend.expected},${trend.collected}\n`;
+      });
+      csvContent += "\n";
+      
+      // Status distribution
+      csvContent += "PAYMENT STATUS DISTRIBUTION\n";
+      csvContent += "Status,Amount\n";
+      statusDistribution.forEach(item => {
+        csvContent += `${item.name},${item.value}\n`;
+      });
+      csvContent += "\n";
+      
+      // Overdue installments
+      if (overdueInstallments.length > 0) {
+        csvContent += "OVERDUE INSTALLMENTS\n";
+        csvContent += "Customer,Package,Installment,Amount,Due Date,Days Overdue\n";
+        overdueInstallments.forEach(item => {
+          const daysOverdue = Math.floor(
+            (new Date().getTime() - new Date(item.due_date).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          csvContent += `"${item.customer_name}","${item.package_name}",Installment #${item.installment_number},${item.amount},${format(new Date(item.due_date), "dd MMM yyyy")},${daysOverdue}\n`;
+        });
+      }
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `installment-report-${format(new Date(), "yyyy-MM-dd")}.csv`;
+      link.click();
+      
+      toast({
+        title: "Export Successful",
+        description: "CSV report downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("Error exporting CSV:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export CSV report.",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportToPDF = () => {
+    try {
+      setExporting(true);
+      
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      // Title
+      doc.setFontSize(20);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Installment Report", pageWidth / 2, 20, { align: "center" });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}`, pageWidth / 2, 28, { align: "center" });
+      
+      // Summary section
+      doc.setFontSize(14);
+      doc.setTextColor(40);
+      doc.text("Summary", 14, 42);
+      
+      autoTable(doc, {
+        startY: 46,
+        head: [["Metric", "Value"]],
+        body: [
+          ["Total Installment Plans", summary.totalEMIPlans.toString()],
+          ["Total Expected", `৳${summary.totalExpected.toLocaleString()}`],
+          ["Total Collected", `৳${summary.totalCollected.toLocaleString()}`],
+          ["Pending Amount", `৳${summary.totalPending.toLocaleString()}`],
+          ["Overdue Amount", `৳${summary.totalOverdue.toLocaleString()}`],
+          ["Overdue Count", `${summary.overdueCount} installments`],
+          ["Collection Rate", `${summary.collectionRate.toFixed(1)}%`],
+        ],
+        theme: "striped",
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+      
+      // Monthly trends
+      let yPos = (doc as any).lastAutoTable.finalY + 15;
+      doc.setFontSize(14);
+      doc.text("Monthly Collection Trends", 14, yPos);
+      
+      autoTable(doc, {
+        startY: yPos + 4,
+        head: [["Month", "Expected (৳)", "Collected (৳)"]],
+        body: monthlyTrends.map(trend => [
+          trend.month,
+          trend.expected.toLocaleString(),
+          trend.collected.toLocaleString(),
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+      
+      // Status distribution
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+      doc.setFontSize(14);
+      doc.text("Payment Status Distribution", 14, yPos);
+      
+      autoTable(doc, {
+        startY: yPos + 4,
+        head: [["Status", "Amount (৳)"]],
+        body: statusDistribution.map(item => [
+          item.name,
+          item.value.toLocaleString(),
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [59, 130, 246] },
+      });
+      
+      // Overdue installments (new page if needed)
+      if (overdueInstallments.length > 0) {
+        doc.addPage();
+        doc.setFontSize(14);
+        doc.text("Overdue Installments", 14, 20);
+        
+        autoTable(doc, {
+          startY: 24,
+          head: [["Customer", "Package", "Installment", "Amount (৳)", "Due Date", "Days Overdue"]],
+          body: overdueInstallments.map(item => {
+            const daysOverdue = Math.floor(
+              (new Date().getTime() - new Date(item.due_date).getTime()) / (1000 * 60 * 60 * 24)
+            );
+            return [
+              item.customer_name,
+              item.package_name,
+              `#${item.installment_number}`,
+              item.amount.toLocaleString(),
+              format(new Date(item.due_date), "dd MMM yyyy"),
+              `${daysOverdue} days`,
+            ];
+          }),
+          theme: "striped",
+          headStyles: { fillColor: [239, 68, 68] },
+        });
+      }
+      
+      // Save PDF
+      doc.save(`installment-report-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+      
+      toast({
+        title: "Export Successful",
+        description: "PDF report downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export PDF report.",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -337,6 +529,28 @@ const AdminEMIReport = () => {
 
   return (
     <div className="space-y-6">
+      {/* Export Buttons */}
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={exportToCSV}
+          disabled={exporting}
+          className="gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </Button>
+        <Button
+          variant="outline"
+          onClick={exportToPDF}
+          disabled={exporting}
+          className="gap-2"
+        >
+          <FileText className="w-4 h-4" />
+          Export PDF
+        </Button>
+      </div>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((card, index) => (
