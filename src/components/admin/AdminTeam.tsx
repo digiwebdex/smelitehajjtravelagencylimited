@@ -12,7 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import ImageUpload from "./ImageUpload";
-import { Plus, Edit, Trash2, User, Phone } from "lucide-react";
+import { Plus, Edit, Trash2, User } from "lucide-react";
+import WhatsAppIcon from "../icons/WhatsAppIcon";
 
 interface TeamMember {
   id: string;
@@ -131,8 +132,8 @@ const AdminTeam = () => {
               <TableCell>{item.role}</TableCell>
               <TableCell>
                 {item.whatsapp_number ? (
-                  <span className="flex items-center gap-1 text-accent text-sm">
-                    <Phone className="w-3 h-3" />
+                  <span className="flex items-center gap-1 text-[#25D366] text-sm">
+                    <WhatsAppIcon size={14} />
                     {item.whatsapp_number}
                   </span>
                 ) : (
