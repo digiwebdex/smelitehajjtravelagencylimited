@@ -1,9 +1,13 @@
 import { MessageCircle, ArrowUp } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const WhatsAppButton = () => {
+  const { contactDetails } = useSiteSettings();
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const whatsappNumber = "8801867666888";
+  
+  // Extract digits only from the WhatsApp number, fallback to default
+  const whatsappNumber = contactDetails.whatsapp?.replace(/[^0-9]/g, '') || "8801867666888";
   const defaultMessage = "Assalamu Alaikum! I'm interested in your Hajj/Umrah packages. Please provide more information.";
 
   useEffect(() => {
