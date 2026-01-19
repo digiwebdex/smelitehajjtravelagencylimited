@@ -16,6 +16,7 @@ interface ContactInfo {
   details: string[];
   type: string;
   order_index: number;
+  map_link: string | null;
 }
 
 interface OfficeLocation {
@@ -66,13 +67,14 @@ const ContactSection = () => {
       setContactInfo(data.map(item => ({
         ...item,
         details: Array.isArray(item.details) ? item.details as string[] : [],
+        map_link: (item as any).map_link || null,
       })));
     } else {
       setContactInfo([
-        { id: "1", icon_name: "Phone", title: "Call Us", details: ["+880 1234-567890", "+880 9876-543210"], type: "phone", order_index: 0 },
-        { id: "2", icon_name: "Mail", title: "Email Us", details: ["info@smelitehajj.com", "support@smelitehajj.com"], type: "email", order_index: 1 },
-        { id: "3", icon_name: "MapPin", title: "Visit Us", details: ["Savar, Dhaka", "Bangladesh"], type: "address", order_index: 2 },
-        { id: "4", icon_name: "Clock", title: "Office Hours", details: ["Sat - Thu: 9AM - 8PM", "Friday: Closed"], type: "hours", order_index: 3 },
+        { id: "1", icon_name: "Phone", title: "Call Us", details: ["+880 1234-567890", "+880 9876-543210"], type: "phone", order_index: 0, map_link: null },
+        { id: "2", icon_name: "Mail", title: "Email Us", details: ["info@smelitehajj.com", "support@smelitehajj.com"], type: "email", order_index: 1, map_link: null },
+        { id: "3", icon_name: "MapPin", title: "Visit Us", details: ["Savar, Dhaka", "Bangladesh"], type: "address", order_index: 2, map_link: "https://maps.app.goo.gl/mCw1xq8ehdYoV6ud6" },
+        { id: "4", icon_name: "Clock", title: "Office Hours", details: ["Sat - Thu: 9AM - 8PM", "Friday: Closed"], type: "hours", order_index: 3, map_link: null },
       ]);
     }
   };
@@ -146,6 +148,15 @@ const ContactSection = () => {
             <div className="grid grid-cols-2 gap-4">
               {contactInfo.map((info, index) => {
                 const Icon = getIcon(info.icon_name);
+                const isClickable = info.type === 'address' && info.map_link;
+                
+                const CardWrapper = isClickable ? 'a' : 'div';
+                const cardProps = isClickable ? {
+                  href: info.map_link!,
+                  target: "_blank",
+                  rel: "noopener noreferrer"
+                } : {};
+                
                 return (
                   <motion.div
                     key={info.id}
@@ -154,7 +165,8 @@ const ContactSection = () => {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ y: -3 }}
-                    className="bg-card rounded-xl p-4 shadow-elegant hover:shadow-lg transition-all duration-300 group"
+                    className={`bg-card rounded-xl p-4 shadow-elegant hover:shadow-lg transition-all duration-300 group ${isClickable ? 'cursor-pointer' : ''}`}
+                    onClick={isClickable ? () => window.open(info.map_link!, '_blank') : undefined}
                   >
                     <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-elegant">
                       <Icon className="w-5 h-5 text-primary-foreground" />
