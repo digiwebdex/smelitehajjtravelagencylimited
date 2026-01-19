@@ -165,14 +165,63 @@ const ContactSection = () => {
                     <div className="space-y-1">
                       {info.details.map((detail, idx) => {
                         const parts = detail.split(':');
+                        const isPhone = info.type === 'phone';
+                        const isEmail = info.type === 'email';
+                        
                         if (parts.length === 2) {
+                          const label = parts[0].trim();
+                          const value = parts[1].trim();
+                          const phoneNumber = value.replace(/\s/g, '');
+                          
                           return (
                             <p key={idx} className="text-muted-foreground text-xs leading-relaxed grid grid-cols-[auto_1fr] gap-1">
-                              <span>{parts[0].trim()}:</span>
-                              <span className="text-left">{parts[1].trim()}</span>
+                              <span>{label}:</span>
+                              {isPhone ? (
+                                <a 
+                                  href={`tel:${phoneNumber}`} 
+                                  className="text-left hover:text-primary transition-colors cursor-pointer"
+                                >
+                                  {value}
+                                </a>
+                              ) : isEmail ? (
+                                <a 
+                                  href={`mailto:${value}`} 
+                                  className="text-left hover:text-primary transition-colors cursor-pointer"
+                                >
+                                  {value}
+                                </a>
+                              ) : (
+                                <span className="text-left">{value}</span>
+                              )}
                             </p>
                           );
                         }
+                        
+                        // Handle plain values without labels
+                        if (isPhone) {
+                          const phoneNumber = detail.replace(/\s/g, '');
+                          return (
+                            <a 
+                              key={idx} 
+                              href={`tel:${phoneNumber}`}
+                              className="block text-muted-foreground text-xs leading-relaxed hover:text-primary transition-colors cursor-pointer"
+                            >
+                              {detail}
+                            </a>
+                          );
+                        }
+                        if (isEmail) {
+                          return (
+                            <a 
+                              key={idx} 
+                              href={`mailto:${detail}`}
+                              className="block text-muted-foreground text-xs leading-relaxed hover:text-primary transition-colors cursor-pointer"
+                            >
+                              {detail}
+                            </a>
+                          );
+                        }
+                        
                         return (
                           <p key={idx} className="text-muted-foreground text-xs leading-relaxed">
                             {detail}
