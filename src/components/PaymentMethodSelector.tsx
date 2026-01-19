@@ -76,79 +76,83 @@ const PaymentMethodSelector = ({ selectedMethod, onSelect }: PaymentMethodSelect
     }
   };
 
+  const handleSelect = (slug: string) => {
+    onSelect(slug);
+  };
+
   return (
     <div className="space-y-3">
       <Label className="text-base font-medium">Select Payment Method</Label>
-      <RadioGroup
-        value={selectedMethod || undefined}
-        onValueChange={onSelect}
-        className="grid gap-3"
-      >
+      <div className="grid gap-3">
         {paymentMethods.map((method) => {
           const LogoComponent = paymentLogoMap[method.slug];
           const isSelected = selectedMethod === method.slug;
 
           return (
-            <Card
+            <div
               key={method.id}
-              className={`cursor-pointer transition-all duration-200 ${
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelect(method.slug);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelect(method.slug);
+                }
+              }}
+              className={`cursor-pointer transition-all duration-200 rounded-lg border bg-card text-card-foreground shadow-sm p-4 ${
                 isSelected 
                   ? 'border-primary ring-2 ring-primary/20 shadow-md' 
-                  : 'hover:border-primary/50 hover:shadow-sm'
+                  : 'hover:border-primary/50 hover:shadow-sm border-border'
               }`}
-              onClick={() => onSelect(method.slug)}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <RadioGroupItem 
-                      value={method.slug} 
-                      id={method.id} 
-                      className="sr-only"
-                    />
-                    {LogoComponent ? (
-                      <div className={`rounded-xl overflow-hidden shadow-sm transition-transform duration-200 ${
-                        isSelected ? 'scale-105 ring-2 ring-primary/30' : ''
-                      }`}>
-                        <LogoComponent size={48} />
-                      </div>
-                    ) : (
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-primary/10' : 'bg-muted'
-                      }`}>
-                        <CreditCard className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-                      </div>
-                    )}
-                    {isSelected && (
-                      <div className="absolute -top-1 -right-1 bg-primary rounded-full p-0.5">
-                        <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Label 
-                        htmlFor={method.id} 
-                        className={`font-semibold cursor-pointer transition-colors ${
-                          isSelected ? 'text-primary' : ''
-                        }`}
-                      >
-                        {method.name}
-                      </Label>
-                      {getPaymentBadge(method.slug)}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  {LogoComponent ? (
+                    <div className={`rounded-xl overflow-hidden shadow-sm transition-transform duration-200 ${
+                      isSelected ? 'scale-105 ring-2 ring-primary/30' : ''
+                    }`}>
+                      <LogoComponent size={48} />
                     </div>
-                    {method.description && (
-                      <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">
-                        {method.description}
-                      </p>
-                    )}
-                  </div>
+                  ) : (
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                      isSelected ? 'bg-primary/10' : 'bg-muted'
+                    }`}>
+                      <CreditCard className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                  )}
+                  {isSelected && (
+                    <div className="absolute -top-1 -right-1 bg-primary rounded-full p-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span 
+                      className={`font-semibold transition-colors ${
+                        isSelected ? 'text-primary' : ''
+                      }`}
+                    >
+                      {method.name}
+                    </span>
+                    {getPaymentBadge(method.slug)}
+                  </div>
+                  {method.description && (
+                    <p className="text-sm text-muted-foreground mt-0.5 line-clamp-1">
+                      {method.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           );
         })}
-      </RadioGroup>
+      </div>
     </div>
   );
 };
