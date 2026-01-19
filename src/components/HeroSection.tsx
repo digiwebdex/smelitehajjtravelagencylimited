@@ -507,7 +507,7 @@ const HeroSection = () => {
         <HeroSkeleton />
       ) : layoutMode === "centered" ? (
         /* Full-Width Centered Layout */
-        <div className="relative z-10 container text-center text-primary-foreground pt-32 pb-20">
+        <div className="relative z-10 container text-center text-primary-foreground pt-40 md:pt-44 lg:pt-48 pb-20">
           <AnimatePresence mode="wait">
             <motion.div
               key={`content-centered-${currentSlide}`}
@@ -653,7 +653,7 @@ const HeroSection = () => {
         </div>
       ) : (
         /* Split-Screen Layout */
-        <div className="relative z-10 w-full min-h-screen flex items-center">
+        <div className="relative z-10 w-full min-h-screen flex items-center pt-24 md:pt-28 lg:pt-32">
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               {/* Left Side - Content */}
@@ -664,7 +664,7 @@ const HeroSection = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="text-left text-primary-foreground pt-24 lg:pt-0 order-2 lg:order-1"
+                  className="text-left text-primary-foreground order-2 lg:order-1"
                 >
                   {/* Badge */}
                   {content.badge_text && (
