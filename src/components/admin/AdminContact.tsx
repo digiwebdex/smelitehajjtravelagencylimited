@@ -18,6 +18,7 @@ interface ContactInfo {
   details: string[];
   order_index: number;
   is_active: boolean;
+  map_link: string | null;
 }
 
 const CONTACT_ICONS = ["Phone", "Mail", "MapPin", "Clock", "Globe", "MessageCircle"];
@@ -29,7 +30,7 @@ const AdminContact = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ContactInfo | null>(null);
   const [formData, setFormData] = useState({
-    type: "phone", icon_name: "Phone", title: "", details: [""]
+    type: "phone", icon_name: "Phone", title: "", details: [""], map_link: ""
   });
 
   useEffect(() => {
@@ -41,7 +42,8 @@ const AdminContact = () => {
     if (!error && data) {
       setContacts(data.map(c => ({
         ...c,
-        details: Array.isArray(c.details) ? c.details as string[] : []
+        details: Array.isArray(c.details) ? c.details as string[] : [],
+        map_link: (c as any).map_link || null,
       })));
     }
     setLoading(false);
@@ -50,7 +52,11 @@ const AdminContact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const payload = { ...formData, details: formData.details.filter(d => d.trim()) };
+    const payload = { 
+      ...formData, 
+      details: formData.details.filter(d => d.trim()),
+      map_link: formData.map_link || null
+    };
     
     if (editingItem) {
       const { error } = await supabase.from("contact_info").update(payload).eq("id", editingItem.id);
@@ -70,14 +76,15 @@ const AdminContact = () => {
   };
 
   const resetForm = () => {
-    setFormData({ type: "phone", icon_name: "Phone", title: "", details: [""] });
+    setFormData({ type: "phone", icon_name: "Phone", title: "", details: [""], map_link: "" });
   };
 
   const handleEdit = (item: ContactInfo) => {
     setEditingItem(item);
     setFormData({
       type: item.type, icon_name: item.icon_name, title: item.title,
-      details: item.details.length ? item.details : [""]
+      details: item.details.length ? item.details : [""],
+      map_link: item.map_link || ""
     });
     setIsDialogOpen(true);
   };
@@ -156,6 +163,19 @@ const AdminContact = () => {
                   </div>
                 ))}
               </div>
+              {formData.type === 'address' && (
+                <div>
+                  <label className="text-sm font-medium">Map Link (Google Maps URL)</label>
+                  <Input 
+                    value={formData.map_link} 
+                    onChange={(e) => setFormData({ ...formData, map_link: e.target.value })} 
+                    placeholder="e.g., https://maps.app.goo.gl/..." 
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Paste the Google Maps share link for this address
+                  </p>
+                </div>
+              )}
               <Button type="submit" className="w-full">{editingItem ? "Update" : "Create"}</Button>
             </form>
           </DialogContent>

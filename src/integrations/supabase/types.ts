@@ -232,6 +232,7 @@ export type Database = {
           icon_name: string
           id: string
           is_active: boolean
+          map_link: string | null
           order_index: number
           title: string
           type: string
@@ -243,6 +244,7 @@ export type Database = {
           icon_name: string
           id?: string
           is_active?: boolean
+          map_link?: string | null
           order_index?: number
           title: string
           type: string
@@ -254,6 +256,7 @@ export type Database = {
           icon_name?: string
           id?: string
           is_active?: boolean
+          map_link?: string | null
           order_index?: number
           title?: string
           type?: string
