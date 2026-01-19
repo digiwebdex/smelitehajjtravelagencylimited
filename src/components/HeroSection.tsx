@@ -328,12 +328,16 @@ const HeroSection = () => {
         <AnimatePresence initial={false}>
           <motion.div
             key={`bg-${currentSlide}`}
-            initial={{ opacity: 0, x: -60 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 60 }}
-            transition={{ type: "tween", duration: transitionDuration, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              type: "tween",
+              duration: transitionDuration,
+              ease: [0.25, 0.46, 0.45, 0.94] as const,
+            }}
             className="absolute inset-0"
-            style={{ willChange: "transform, opacity" }}
+            style={{ willChange: "opacity" }}
           >
             <motion.img
               key={`img-${currentSlide}`}
@@ -341,13 +345,30 @@ const HeroSection = () => {
               alt="Hero background"
               className="w-full h-full object-cover"
               draggable={false}
-              initial={{ scale: 1.02 }}
+              style={{
+                willChange: "transform",
+                transformOrigin: "center",
+                backfaceVisibility: "hidden",
+              }}
+              initial={{ scale: 1.06 }}
               animate={{
-                scale: 1.08,
-                transition: {
-                  duration: autoplayInterval / 1000,
-                  ease: "linear",
-                },
+                scale: [
+                  1.06,
+                  1.06,
+                  1.09,
+                ],
+              }}
+              transition={{
+                duration: autoplayInterval / 1000,
+                ease: "linear",
+                times: [
+                  0,
+                  Math.min(
+                    transitionDuration / Math.max(autoplayInterval / 1000, 0.001),
+                    0.35
+                  ),
+                  1,
+                ],
               }}
             />
             <div className="absolute inset-0 bg-gradient-hero" />
