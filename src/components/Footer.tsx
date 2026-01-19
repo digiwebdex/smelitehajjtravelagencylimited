@@ -30,6 +30,8 @@ interface FooterContent {
   social_links: SocialLink[];
   contact_address?: string;
   contact_address_2?: string;
+  address_label_1?: string;
+  address_label_2?: string;
   contact_phones?: string[];
   contact_email?: string;
 }
@@ -60,6 +62,8 @@ const Footer = () => {
     social_links: [],
     contact_address: "",
     contact_address_2: "",
+    address_label_1: "Head Office",
+    address_label_2: "Branch Office",
     contact_phones: [],
     contact_email: "",
   });
@@ -86,16 +90,19 @@ const Footer = () => {
       .maybeSingle();
     
     if (data) {
+      const dataRecord = data as Record<string, unknown>;
       setContent({
         company_description: data.company_description || "",
         copyright_text: data.copyright_text || "",
         quick_links: Array.isArray(data.quick_links) ? (data.quick_links as unknown as FooterLink[]) : content.quick_links,
         services_links: Array.isArray(data.services_links) ? (data.services_links as unknown as ServiceLink[]) : content.services_links,
         social_links: Array.isArray(data.social_links) ? (data.social_links as unknown as SocialLink[]) : [],
-        contact_address: (data as Record<string, unknown>).contact_address as string || "",
-        contact_address_2: (data as Record<string, unknown>).contact_address_2 as string || "",
-        contact_phones: Array.isArray((data as Record<string, unknown>).contact_phones) ? (data as Record<string, unknown>).contact_phones as string[] : [],
-        contact_email: (data as Record<string, unknown>).contact_email as string || "",
+        contact_address: dataRecord.contact_address as string || "",
+        contact_address_2: dataRecord.contact_address_2 as string || "",
+        address_label_1: dataRecord.address_label_1 as string || "Head Office",
+        address_label_2: dataRecord.address_label_2 as string || "Branch Office",
+        contact_phones: Array.isArray(dataRecord.contact_phones) ? dataRecord.contact_phones as string[] : [],
+        contact_email: dataRecord.contact_email as string || "",
       });
     }
   };
@@ -105,6 +112,8 @@ const Footer = () => {
   const displayCopyright = content.copyright_text || `© ${currentYear} ${companyInfo.name}. All rights reserved.`;
   const displayAddress = content.contact_address || contactDetails.address;
   const displayAddress2 = content.contact_address_2 || "";
+  const displayAddressLabel1 = content.address_label_1 || "Head Office";
+  const displayAddressLabel2 = content.address_label_2 || "Branch Office";
   const displayPhones = content.contact_phones?.length ? content.contact_phones : [contactDetails.phone];
   const displayEmail = content.contact_email || contactDetails.email;
   const displaySocialLinks = content.social_links?.length ? content.social_links : buildSocialLinks();
@@ -256,7 +265,7 @@ const Footer = () => {
                     <Building2 className="w-5 h-5 text-secondary" />
                   </div>
                   <div className="text-primary-foreground/80 text-sm pt-1">
-                    <span className="text-secondary font-medium text-xs uppercase tracking-wide">Head Office</span>
+                    <span className="text-secondary font-medium text-xs uppercase tracking-wide">{displayAddressLabel1}</span>
                     <div className="mt-1">{displayAddress}</div>
                   </div>
                 </li>
@@ -267,7 +276,7 @@ const Footer = () => {
                     <Building className="w-5 h-5 text-secondary" />
                   </div>
                   <div className="text-primary-foreground/80 text-sm pt-1">
-                    <span className="text-secondary font-medium text-xs uppercase tracking-wide">Branch Office</span>
+                    <span className="text-secondary font-medium text-xs uppercase tracking-wide">{displayAddressLabel2}</span>
                     <div className="mt-1">{displayAddress2}</div>
                   </div>
                 </li>

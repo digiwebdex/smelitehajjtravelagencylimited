@@ -293,6 +293,8 @@ export type Database = {
       }
       footer_content: {
         Row: {
+          address_label_1: string | null
+          address_label_2: string | null
           company_description: string | null
           contact_address: string | null
           contact_address_2: string | null
@@ -307,6 +309,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address_label_1?: string | null
+          address_label_2?: string | null
           company_description?: string | null
           contact_address?: string | null
           contact_address_2?: string | null
@@ -321,6 +325,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address_label_1?: string | null
+          address_label_2?: string | null
           company_description?: string | null
           contact_address?: string | null
           contact_address_2?: string | null
