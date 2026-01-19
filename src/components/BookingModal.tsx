@@ -588,6 +588,24 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                     × {numberOfInstallments} installment(s)
                   </p>
                 </div>
+
+                <Separator />
+
+                {/* Payment Method for Installment */}
+                <PaymentMethodSelector
+                  selectedMethod={formData.paymentMethod}
+                  onSelect={(method) => {
+                    setFormData({ ...formData, paymentMethod: method });
+                    if (touched.paymentMethod) {
+                      setErrors(prev => ({ ...prev, paymentMethod: undefined }));
+                    }
+                  }}
+                />
+                {touched.paymentMethod && errors.paymentMethod && (
+                  <p className="text-xs text-destructive flex items-center gap-1 mt-2">
+                    <AlertCircle className="w-3 h-3" /> {errors.paymentMethod}
+                  </p>
+                )}
               </motion.div>
             )}
 
