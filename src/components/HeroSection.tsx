@@ -263,11 +263,10 @@ const HeroSection = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: 80, filter: "blur(8px)" },
+    hidden: { opacity: 0, x: 80 },
     visible: {
       opacity: 1,
       x: 0,
-      filter: "blur(0px)",
       transition: { 
         duration: transitionDuration * 0.8, 
         ease: [0.22, 1, 0.36, 1] as const,
@@ -277,7 +276,6 @@ const HeroSection = () => {
     exit: {
       opacity: 0,
       x: -80,
-      filter: "blur(8px)",
       transition: { 
         duration: transitionDuration * 0.4, 
         ease: [0.22, 1, 0.36, 1] as const
