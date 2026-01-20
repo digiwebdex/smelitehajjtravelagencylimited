@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         heading: ['Playfair Display', 'serif'],
+        display: ['Raleway', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
         arabic: ['Amiri', 'serif'],
         kufi: ['Reem Kufi', 'sans-serif'],
