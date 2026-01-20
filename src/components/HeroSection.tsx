@@ -249,16 +249,16 @@ const HeroSection = () => {
   const backgroundImage = content.background_image_url || heroImage;
   const isLight = heroTheme === "light";
 
-  // Animation variants
+  // Animation variants - slow motion effect
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.15, delayChildren: 0.2 },
     },
     exit: {
       opacity: 0,
-      transition: { duration: transitionDuration * 0.3 },
+      transition: { duration: transitionDuration * 0.6 },
     },
   };
 
@@ -268,17 +268,17 @@ const HeroSection = () => {
       opacity: 1,
       y: 0,
       transition: { 
-        duration: transitionDuration * 0.8, 
-        ease: [0.22, 1, 0.36, 1] as const,
-        opacity: { duration: transitionDuration * 0.5 }
+        duration: transitionDuration * 1.5, 
+        ease: [0.16, 1, 0.3, 1] as const,
+        opacity: { duration: transitionDuration * 1.2 }
       },
     },
     exit: {
       opacity: 0,
       y: -40,
       transition: { 
-        duration: transitionDuration * 0.4, 
-        ease: [0.22, 1, 0.36, 1] as const
+        duration: transitionDuration * 0.8, 
+        ease: [0.16, 1, 0.3, 1] as const
       },
     },
   };
@@ -290,9 +290,9 @@ const HeroSection = () => {
       opacity: 1,
       scale: 1,
       transition: { 
-        duration: transitionDuration * 1, 
-        ease: [0.22, 1, 0.36, 1] as const,
-        opacity: { duration: transitionDuration * 0.6 }
+        duration: transitionDuration * 1.8, 
+        ease: [0.16, 1, 0.3, 1] as const,
+        opacity: { duration: transitionDuration * 1.4 }
       }
     },
     exit: { 
@@ -300,8 +300,8 @@ const HeroSection = () => {
       opacity: 0,
       scale: 0.98,
       transition: { 
-        duration: transitionDuration * 0.5, 
-        ease: [0.22, 1, 0.36, 1] as const
+        duration: transitionDuration * 1, 
+        ease: [0.16, 1, 0.3, 1] as const
       }
     },
   };
