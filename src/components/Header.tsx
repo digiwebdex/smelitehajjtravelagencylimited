@@ -235,35 +235,40 @@ const Header = () => {
             </button>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation - Only show user actions, not full menu */}
           {isMenuOpen && (
             <div className="lg:hidden mt-4 pb-4 border-t border-border pt-4 animate-fade-up">
-              <div className="flex flex-col gap-4">
-                {menuItems.map((link) => (
-                  <a
-                    key={link.id}
-                    href={link.href}
-                    className="text-foreground hover:text-primary font-medium py-2"
-                    onClick={(e) => handleSmoothScroll(e, link.href)}
-                  >
-                    {link.label}
-                  </a>
-                ))}
-                <div className="flex flex-col gap-2 mt-4">
-                  <Link to="/track-order" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="outline" className="w-full gap-2">
-                      <MapPin className="w-4 h-4" />
-                      Track Order
+              <div className="flex flex-col gap-2">
+                <Link to="/track-order" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Track Order
+                  </Button>
+                </Link>
+                {user && (
+                  <>
+                    <Button variant="outline" className="w-full gap-2" onClick={() => { navigate("/my-bookings"); setIsMenuOpen(false); }}>
+                      My Bookings
                     </Button>
-                  </Link>
-                  {appearance.show_book_now_button !== false && (
-                    <a href="#hajj">
-                      <Button className="bg-gradient-primary w-full">
-                        Book Now
+                    {isAdmin && (
+                      <Button variant="outline" className="w-full gap-2" onClick={() => { navigate("/admin"); setIsMenuOpen(false); }}>
+                        <LayoutDashboard className="w-4 h-4" />
+                        Admin Dashboard
                       </Button>
-                    </a>
-                  )}
-                </div>
+                    )}
+                    <Button variant="ghost" className="w-full gap-2 text-destructive" onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </Button>
+                  </>
+                )}
+                {appearance.show_book_now_button !== false && (
+                  <a href="#hajj" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="bg-gradient-primary w-full">
+                      Book Now
+                    </Button>
+                  </a>
+                )}
               </div>
             </div>
           )}
