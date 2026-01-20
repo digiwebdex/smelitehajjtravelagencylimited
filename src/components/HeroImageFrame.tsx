@@ -97,7 +97,7 @@ const HeroImageFrame = ({
           <motion.img
             src={imageSrc}
             alt={alt}
-            className="w-full h-[450px] xl:h-[550px] object-cover"
+            className="w-full h-[320px] xl:h-[400px] object-cover"
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1 }}

@@ -451,7 +451,7 @@ const HeroSection = () => {
               {/* Title */}
               <motion.h1
                 variants={itemVariants}
-                className={`font-arabic text-3xl md:text-5xl lg:text-6xl font-bold mb-4 leading-normal tracking-wide overflow-visible ${textPrimary}`}
+                className={`font-arabic text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-normal tracking-wide overflow-visible ${textPrimary}`}
               >
                 <span className="inline-block">{content.title}</span>
                 {content.subtitle && (
