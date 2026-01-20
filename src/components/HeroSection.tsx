@@ -263,10 +263,10 @@ const HeroSection = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: 80 },
+    hidden: { opacity: 0, y: -60 },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: { 
         duration: transitionDuration * 0.8, 
         ease: [0.22, 1, 0.36, 1] as const,
@@ -275,7 +275,7 @@ const HeroSection = () => {
     },
     exit: {
       opacity: 0,
-      x: -80,
+      y: -40,
       transition: { 
         duration: transitionDuration * 0.4, 
         ease: [0.22, 1, 0.36, 1] as const
