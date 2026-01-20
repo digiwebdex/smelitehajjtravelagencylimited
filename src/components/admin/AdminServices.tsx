@@ -9,7 +9,24 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Service {
   id: string;
@@ -31,6 +48,80 @@ interface ParentCompanySettings {
   is_enabled: boolean;
 }
 
+interface SortableRowProps {
+  item: Service;
+  onEdit: (item: Service) => void;
+  onDelete: (id: string) => void;
+  onToggleActive: (item: Service) => void;
+  onMoveUp: (item: Service) => void;
+  onMoveDown: (item: Service) => void;
+  isFirst: boolean;
+  isLast: boolean;
+}
+
+const SortableRow = ({ item, onEdit, onDelete, onToggleActive, onMoveUp, onMoveDown, isFirst, isLast }: SortableRowProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <button
+            className="cursor-grab hover:bg-muted p-1 rounded touch-none"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <div className="flex flex-col gap-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={() => onMoveUp(item)}
+              disabled={isFirst}
+            >
+              <ArrowUp className="w-3 h-3" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={() => onMoveDown(item)}
+              disabled={isLast}
+            >
+              <ArrowDown className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>{item.icon_name}</TableCell>
+      <TableCell className="font-medium">{item.title}</TableCell>
+      <TableCell className="hidden md:table-cell text-muted-foreground truncate max-w-xs">{item.description}</TableCell>
+      <TableCell><Switch checked={item.is_active} onCheckedChange={() => onToggleActive(item)} /></TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => onEdit(item)}><Edit className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 const AdminServices = () => {
   const { toast } = useToast();
   const [services, setServices] = useState<Service[]>([]);
@@ -44,6 +135,13 @@ const AdminServices = () => {
     is_enabled: false
   });
   const [savingParentCompany, setSavingParentCompany] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchServices();
@@ -76,7 +174,6 @@ const AdminServices = () => {
       is_enabled: parentCompany.is_enabled
     };
     
-    // Check if setting exists
     const { data: existing } = await supabase
       .from("site_settings")
       .select("id")
@@ -125,6 +222,55 @@ const AdminServices = () => {
     setLoading(false);
   };
 
+  const updateOrderInDatabase = async (reorderedServices: Service[]) => {
+    const updates = reorderedServices.map((service, index) => ({
+      id: service.id,
+      order_index: index
+    }));
+
+    for (const update of updates) {
+      await supabase
+        .from("services")
+        .update({ order_index: update.order_index })
+        .eq("id", update.id);
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = services.findIndex((item) => item.id === active.id);
+      const newIndex = services.findIndex((item) => item.id === over.id);
+
+      const reorderedServices = arrayMove(services, oldIndex, newIndex);
+      setServices(reorderedServices);
+      
+      await updateOrderInDatabase(reorderedServices);
+      toast({ title: "Success", description: "Service order updated" });
+    }
+  };
+
+  const handleMoveUp = async (item: Service) => {
+    const currentIndex = services.findIndex((s) => s.id === item.id);
+    if (currentIndex > 0) {
+      const reorderedServices = arrayMove(services, currentIndex, currentIndex - 1);
+      setServices(reorderedServices);
+      await updateOrderInDatabase(reorderedServices);
+      toast({ title: "Success", description: "Service moved up" });
+    }
+  };
+
+  const handleMoveDown = async (item: Service) => {
+    const currentIndex = services.findIndex((s) => s.id === item.id);
+    if (currentIndex < services.length - 1) {
+      const reorderedServices = arrayMove(services, currentIndex, currentIndex + 1);
+      setServices(reorderedServices);
+      await updateOrderInDatabase(reorderedServices);
+      toast({ title: "Success", description: "Service moved down" });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -140,7 +286,7 @@ const AdminServices = () => {
         toast({ title: "Success", description: "Service updated" });
       }
     } else {
-      const maxOrder = Math.max(...services.map(s => s.order_index), 0);
+      const maxOrder = Math.max(...services.map(s => s.order_index), -1);
       const { error } = await supabase
         .from("services")
         .insert({ ...formData, order_index: maxOrder + 1 });
@@ -189,7 +335,7 @@ const AdminServices = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Services</CardTitle>
-          <CardDescription>Manage "Why Choose Us" section services</CardDescription>
+          <CardDescription>Manage "Why Choose Us" section services. Drag to reorder or use arrow buttons.</CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
@@ -241,33 +387,41 @@ const AdminServices = () => {
         </Dialog>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Icon</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="hidden md:table-cell">Description</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {services.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>{item.icon_name}</TableCell>
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell className="hidden md:table-cell text-muted-foreground truncate max-w-xs">{item.description}</TableCell>
-                <TableCell><Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} /></TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </div>
-                </TableCell>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-20">Order</TableHead>
+                <TableHead>Icon</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead className="hidden md:table-cell">Description</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              <SortableContext items={services.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                {services.map((item, index) => (
+                  <SortableRow
+                    key={item.id}
+                    item={item}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleActive={toggleActive}
+                    onMoveUp={handleMoveUp}
+                    onMoveDown={handleMoveDown}
+                    isFirst={index === 0}
+                    isLast={index === services.length - 1}
+                  />
+                ))}
+              </SortableContext>
+            </TableBody>
+          </Table>
+        </DndContext>
         {services.length === 0 && <p className="text-center text-muted-foreground py-8">No services yet.</p>}
       </CardContent>
 
