@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import IslamicBorder from "./IslamicBorder";
+import OptimizedImage from "./ui/optimized-image";
 
 interface Testimonial {
   id: string;
@@ -152,7 +153,12 @@ const TestimonialsSection = () => {
                     <div className="flex items-center gap-4 pt-4 border-t border-border">
                       <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center overflow-hidden">
                         {testimonial.avatar_url ? (
-                          <img src={testimonial.avatar_url} alt={testimonial.name} loading="lazy" className="w-full h-full object-cover" />
+                          <OptimizedImage 
+                            src={testimonial.avatar_url} 
+                            alt={testimonial.name} 
+                            className="w-full h-full rounded-full"
+                            sizes="48px"
+                          />
                         ) : (
                           <span className="text-primary-foreground font-heading font-bold">
                             {getInitials(testimonial.name)}

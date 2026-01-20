@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Grid3X3, SlidersHorizontal, Pause, Play, Maximize, Minimize, ZoomIn, ZoomOut, RotateCcw, Sparkles, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/ui/optimized-image";
 import {
   Carousel,
   CarouselContent,
@@ -404,11 +405,11 @@ const GallerySection = () => {
                   onClick={() => setSelectedImage(image)}
                 >
                   {/* Image */}
-                  <img
+                  <OptimizedImage
                     src={image.image_url}
                     alt={image.alt_text || "Gallery image"}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                    className="w-full h-full"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
                   
                   {/* Gradient Overlay */}
@@ -468,11 +469,11 @@ const GallerySection = () => {
                         className="group relative aspect-[4/3] overflow-hidden rounded-2xl cursor-pointer bg-muted shadow-elegant"
                         onClick={() => setSelectedImage(image)}
                       >
-                        <img
+                        <OptimizedImage
                           src={image.image_url}
                           alt={image.alt_text || "Gallery image"}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                          className="w-full h-full"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         {/* Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />

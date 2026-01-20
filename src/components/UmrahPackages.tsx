@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import DynamicPackages from "./DynamicPackages";
 import IslamicBorder from "./IslamicBorder";
+import OptimizedImage from "./ui/optimized-image";
 import medinaImage from "@/assets/medina-mosque.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -118,11 +119,11 @@ const UmrahPackages = () => {
               className="relative"
             >
               <div className="relative rounded-3xl overflow-hidden shadow-lg">
-                <img
+                <OptimizedImage
                   src={settings.image_url || medinaImage}
                   alt="Masjid al-Nabawi in Medina"
-                  loading="lazy"
-                  className="w-full h-[400px] object-cover"
+                  className="w-full h-[400px]"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
               </div>

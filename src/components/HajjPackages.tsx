@@ -3,6 +3,7 @@ import { Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import DynamicPackages from "./DynamicPackages";
 import IslamicBorder from "./IslamicBorder";
+import OptimizedImage from "./ui/optimized-image";
 import makkahHaram from "@/assets/makkah-haram.jpg";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -72,11 +73,11 @@ const HajjPackages = () => {
               className="relative order-2 lg:order-1"
             >
               <div className="relative rounded-3xl overflow-hidden shadow-lg">
-                <img
+                <OptimizedImage
                   src={settings.image_url || makkahHaram}
                   alt="Masjid al-Haram in Makkah"
-                  loading="lazy"
-                  className="w-full h-[400px] object-cover"
+                  className="w-full h-[400px]"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
               </div>

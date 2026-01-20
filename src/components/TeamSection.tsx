@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import IslamicBorder from "./IslamicBorder";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
+import OptimizedImage from "./ui/optimized-image";
 interface TeamMember {
   id: string;
   name: string;
@@ -124,11 +125,11 @@ const TeamSection = () => {
                 {/* Square Image Container */}
                 <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                   {member.avatar_url ? (
-                    <img 
+                    <OptimizedImage 
                       src={member.avatar_url} 
                       alt={member.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-primary">
@@ -204,11 +205,11 @@ const TeamSection = () => {
                     {/* Square Image Container */}
                     <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5">
                       {member.avatar_url ? (
-                        <img 
+                        <OptimizedImage 
                           src={member.avatar_url} 
                           alt={member.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-secondary">
