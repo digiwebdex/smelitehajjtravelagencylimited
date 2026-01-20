@@ -173,7 +173,7 @@ const Footer = () => {
       </motion.button>
 
       <div className="container py-20 relative z-10">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr] gap-12">
           {/* About */}
           <div>
             <div className="flex items-center gap-3 mb-6">
