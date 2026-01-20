@@ -200,9 +200,6 @@ const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
-                      My Bookings
-                    </DropdownMenuItem>
                     {isAdmin && (
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -258,12 +255,6 @@ const Header = () => {
                   </Link>
                   {user && (
                     <>
-                      <Link to="/my-bookings" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" className="w-full gap-2">
-                          <User className="w-4 h-4" />
-                          My Bookings
-                        </Button>
-                      </Link>
                       {isAdmin && (
                         <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                           <Button variant="outline" className="w-full gap-2">
