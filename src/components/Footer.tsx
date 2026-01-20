@@ -258,6 +258,18 @@ const Footer = () => {
                   </div>
                 </li>
               )}
+              {/* Email - Below Branch Office */}
+              <li className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-secondary" />
+                </div>
+                <a 
+                  href={`mailto:${displayEmail}`}
+                  className="text-primary-foreground/80 text-sm pt-2 hover:text-secondary transition-colors"
+                >
+                  {displayEmail}
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -314,18 +326,6 @@ const Footer = () => {
                   )}
                 </>
               )}
-              {/* Email */}
-              <li className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-secondary" />
-                </div>
-                <a 
-                  href={`mailto:${displayEmail}`}
-                  className="text-primary-foreground/80 text-sm pt-2 hover:text-secondary transition-colors"
-                >
-                  {displayEmail}
-                </a>
-              </li>
             </ul>
           </div>
         </div>
