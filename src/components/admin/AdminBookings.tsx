@@ -530,8 +530,8 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Booking ID</TableHead>
                   <TableHead>Date</TableHead>
+                  <TableHead>Booking ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Package</TableHead>
                   <TableHead>Passengers</TableHead>
@@ -547,11 +547,11 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                   const customerInfo = getCustomerInfo(booking);
                   return (
                   <TableRow key={booking.id}>
-                    <TableCell className="font-mono text-xs">
-                      {booking.id.slice(0, 8).toUpperCase()}
-                    </TableCell>
                     <TableCell className="text-xs whitespace-nowrap">
                       {format(new Date(booking.created_at), "MMM dd, yyyy")}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs">
+                      {booking.id.slice(0, 8).toUpperCase()}
                     </TableCell>
                     <TableCell>
                       <div>
