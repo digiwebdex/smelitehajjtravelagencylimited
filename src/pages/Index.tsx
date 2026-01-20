@@ -13,6 +13,7 @@ import ContactSection from "@/components/ContactSection";
 import GallerySection from "@/components/GallerySection";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import MobileCTABar from "@/components/MobileCTABar";
 
 interface SectionVisibility {
   [key: string]: boolean;
@@ -86,6 +87,7 @@ const Index = () => {
       </main>
       <Footer />
       <WhatsAppButton />
+      <MobileCTABar />
     </div>
   );
 };
