@@ -157,14 +157,14 @@ const Header = () => {
           <div className="flex items-center justify-between">
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-              className="flex items-center gap-3 group cursor-pointer"
+              className="flex items-center gap-2 sm:gap-3 group cursor-pointer"
             >
               <img 
                 src={logoSrc} 
                 alt={companyInfo.name} 
-                className={`object-contain ring-2 ring-primary/20 rounded-lg p-1 bg-white shadow-elegant group-hover:ring-primary/40 transition-all duration-300 ${isScrolled ? 'h-10 w-auto' : 'h-14 w-auto'}`}
+                className={`object-contain ring-2 ring-primary/20 rounded-lg p-1 bg-white shadow-elegant group-hover:ring-primary/40 transition-all duration-300 ${isScrolled ? 'h-10 w-auto' : 'h-12 sm:h-14 w-auto'}`}
               />
-              <span className={`font-calligraphy font-bold text-primary hidden sm:inline group-hover:text-primary/80 transition-all duration-300 ${isScrolled ? 'text-xl' : 'text-2xl'}`}>
+              <span className={`font-calligraphy font-bold text-primary group-hover:text-primary/80 transition-all duration-300 ${isScrolled ? 'text-base sm:text-xl' : 'text-lg sm:text-2xl'}`}>
                 {companyInfo.name}
               </span>
             </button>
