@@ -130,10 +130,10 @@ const TeamSection = () => {
                     key={member.id}
                     variants={cardVariants}
                     whileHover={{ y: -8 }}
-                    className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex border-b-4 border-secondary"
+                    className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex border-4 border-primary"
                   >
-                    {/* Square Image Container with green border */}
-                    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 border-4 border-primary rounded-l-2xl">
+                    {/* Square Image Container */}
+                    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5">
                       {member.avatar_url ? (
                         <OptimizedImage 
                           src={member.avatar_url} 
@@ -200,10 +200,10 @@ const TeamSection = () => {
                 key={member.id}
                 variants={cardVariants}
                 whileHover={{ y: -8 }}
-                className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden border-b-4 border-secondary"
+                className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden border-4 border-primary"
               >
-                {/* Square Image Container with green border */}
-                <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 border-4 border-primary rounded-t-2xl">
+                {/* Square Image Container */}
+                <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
                   {member.avatar_url ? (
                     <OptimizedImage 
                       src={member.avatar_url} 
