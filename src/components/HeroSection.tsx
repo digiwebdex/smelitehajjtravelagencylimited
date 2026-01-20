@@ -4,13 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import FloatingIslamicPatterns from "./FloatingIslamicPatterns";
-import FloatingParticles from "./FloatingParticles";
+import { motion, AnimatePresence } from "framer-motion";
 import HeroServiceTiles from "./HeroServiceTiles";
 import HeroImageFrame from "./HeroImageFrame";
-import MakkahIcon from "./icons/MakkahIcon";
-import MadinahIcon from "./icons/MadinahIcon";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +59,6 @@ const HeroSection = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [autoplayInterval, setAutoplayInterval] = useState(6000);
   const [transitionDuration, setTransitionDuration] = useState(0.9);
@@ -72,14 +67,7 @@ const HeroSection = () => {
   const [layoutMode, setLayoutMode] = useState<"centered" | "split-screen">("split-screen");
   const [heroTheme, setHeroTheme] = useState<"dark" | "light">("dark");
   const [showServiceTiles, setShowServiceTiles] = useState(true);
-  const [showFloatingPatterns, setShowFloatingPatterns] = useState(true);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
-  
-  // Mouse parallax values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const parallaxX = useTransform(mouseX, [-1, 1], [-20, 20]);
-  const parallaxY = useTransform(mouseY, [-1, 1], [-15, 15]);
 
   useEffect(() => {
     fetchHeroContent();
@@ -95,8 +83,7 @@ const HeroSection = () => {
         "hero_transition_speed", 
         "hero_layout_mode",
         "hero_theme",
-        "hero_show_service_tiles",
-        "hero_show_floating_patterns"
+        "hero_show_service_tiles"
       ]);
 
     if (data) {
@@ -122,27 +109,10 @@ const HeroSection = () => {
           case "hero_show_service_tiles":
             setShowServiceTiles(value !== "false");
             break;
-          case "hero_show_floating_patterns":
-            setShowFloatingPatterns(value !== "false");
-            break;
         }
       });
     }
   };
-
-  // Mouse parallax effect
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2;
-      const y = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMousePosition({ x, y });
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
 
   // Progress bar & auto-slide
   useEffect(() => {
@@ -388,7 +358,7 @@ const HeroSection = () => {
           {/* Base gradient layer */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
           
-          {/* Animated background image */}
+          {/* Background image */}
           <AnimatePresence mode="wait">
             <motion.div
               key={`bg-${currentSlide}`}
@@ -398,89 +368,19 @@ const HeroSection = () => {
               exit="exit"
               className="absolute inset-0 z-[2]"
             >
-              <motion.div
-                className="absolute inset-0"
-                style={{ x: parallaxX, y: parallaxY }}
-              >
-                <img
-                  src={backgroundImage}
-                  alt="Hero background"
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-              </motion.div>
+              <img
+                src={backgroundImage}
+                alt="Hero background"
+                className="w-full h-full object-cover"
+                draggable={false}
+              />
             </motion.div>
           </AnimatePresence>
 
           {/* Overlay gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/50 to-transparent z-[3]" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-transparent to-primary/60 z-[3]" />
-          
-          {/* Animated mesh gradient overlay */}
-          <motion.div 
-            className="absolute inset-0 z-[4] opacity-30"
-            animate={{
-              background: [
-                "radial-gradient(circle at 20% 50%, hsl(42 78% 55% / 0.15) 0%, transparent 50%)",
-                "radial-gradient(circle at 80% 50%, hsl(42 78% 55% / 0.15) 0%, transparent 50%)",
-                "radial-gradient(circle at 50% 80%, hsl(42 78% 55% / 0.15) 0%, transparent 50%)",
-                "radial-gradient(circle at 20% 50%, hsl(42 78% 55% / 0.15) 0%, transparent 50%)",
-              ],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-          />
-
-          {/* Noise texture overlay */}
-          <div 
-            className="absolute inset-0 z-[5] opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-            }}
-          />
         </div>
-      )}
-
-      {/* Floating patterns - only show in dark theme or if enabled */}
-      {!isLight && showFloatingPatterns && (
-        <>
-          <FloatingIslamicPatterns mousePosition={mousePosition} />
-          <FloatingParticles mousePosition={mousePosition} />
-        </>
-      )}
-
-      {/* Decorative Elements - Only for dark theme */}
-      {!isLight && (
-        <>
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 0.12, x: mousePosition.x * -15, y: mousePosition.y * -10 }}
-            transition={{ duration: 0.3 }}
-            className="absolute left-0 top-0 h-full w-32 md:w-48 lg:w-64 hidden md:flex flex-col justify-center items-center pointer-events-none z-[6]"
-          >
-            <motion.div animate={{ x: mousePosition.x * -8, y: mousePosition.y * -5 }} className="font-arabic text-secondary text-6xl md:text-7xl lg:text-9xl leading-none writing-vertical-rl transform rotate-180 select-none opacity-60">
-              بِسْمِ اللَّهِ
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 0.2, x: mousePosition.x * 20, y: mousePosition.y * 15 }}
-            className="absolute right-4 top-1/4 hidden lg:flex flex-col items-center gap-8 pointer-events-none z-[6]"
-          >
-            <motion.div animate={{ x: mousePosition.x * 10, y: mousePosition.y * 8 }} className="text-secondary drop-shadow-lg">
-              <MakkahIcon size={80} />
-            </motion.div>
-            <motion.div animate={{ x: mousePosition.x * 15, y: mousePosition.y * 12 }} className="text-secondary/80">
-              <MadinahIcon size={72} />
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            animate={{ y: [-10, 10, -10], x: mousePosition.x * 25 }}
-            transition={{ y: { duration: 6, repeat: Infinity }, x: { duration: 0.4 } }}
-            className="absolute top-1/4 left-[15%] w-20 h-20 border border-secondary/20 rounded-full hidden lg:block z-[6]"
-          />
-        </>
       )}
 
       {/* Premium Navigation Controls */}
@@ -889,8 +789,6 @@ const HeroSection = () => {
                     alt="Hero feature"
                     theme={heroTheme}
                     frameStyle="modern"
-                    parallaxX={parallaxX}
-                    parallaxY={parallaxY}
                   />
                 </AnimatePresence>
               </div>
