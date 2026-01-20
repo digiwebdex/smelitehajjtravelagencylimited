@@ -263,32 +263,48 @@ const HeroSection = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: 50, filter: "blur(10px)" },
+    hidden: { opacity: 0, x: 80, filter: "blur(8px)" },
     visible: {
       opacity: 1,
       x: 0,
       filter: "blur(0px)",
-      transition: { duration: transitionDuration * 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const },
+      transition: { 
+        duration: transitionDuration * 0.8, 
+        ease: [0.22, 1, 0.36, 1] as const,
+        opacity: { duration: transitionDuration * 0.5 }
+      },
     },
     exit: {
       opacity: 0,
-      x: -50,
-      filter: "blur(5px)",
-      transition: { duration: transitionDuration * 0.3 },
+      x: -80,
+      filter: "blur(8px)",
+      transition: { 
+        duration: transitionDuration * 0.4, 
+        ease: [0.22, 1, 0.36, 1] as const
+      },
     },
   };
 
   const imageVariants = {
-    initial: { x: 100, opacity: 0 },
+    initial: { x: 120, opacity: 0, scale: 1.05 },
     animate: { 
       x: 0, 
       opacity: 1,
-      transition: { duration: transitionDuration * 1.2, ease: [0.25, 0.46, 0.45, 0.94] as const }
+      scale: 1,
+      transition: { 
+        duration: transitionDuration * 1, 
+        ease: [0.22, 1, 0.36, 1] as const,
+        opacity: { duration: transitionDuration * 0.6 }
+      }
     },
     exit: { 
-      x: -100, 
+      x: -120, 
       opacity: 0,
-      transition: { duration: transitionDuration * 0.5 }
+      scale: 0.98,
+      transition: { 
+        duration: transitionDuration * 0.5, 
+        ease: [0.22, 1, 0.36, 1] as const
+      }
     },
   };
 
