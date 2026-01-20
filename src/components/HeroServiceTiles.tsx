@@ -89,7 +89,7 @@ const HeroServiceTiles = ({ tiles = defaultTiles, theme = "light" }: HeroService
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-nowrap justify-center gap-3 md:gap-4"
+      className="flex flex-col sm:flex-row flex-wrap sm:flex-nowrap justify-center items-center gap-3 md:gap-4"
     >
       {tiles.map((tile) => (
         <motion.button
