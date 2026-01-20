@@ -21,9 +21,15 @@ interface Service {
 }
 
 const AVAILABLE_ICONS = [
-  "Plane", "Hotel", "Shield", "Users", "Clock", "HeartHandshake",
-  "Star", "Map", "Globe", "Award", "CheckCircle", "Compass"
+  "Plane", "PlaneTakeoff", "Hotel", "Shield", "Users", "Clock", "HeartHandshake",
+  "Star", "Map", "Globe", "Award", "CheckCircle", "Compass", "Ticket", "Bus", "Headset", "FileCheck"
 ];
+
+interface ParentCompanySettings {
+  button_text: string;
+  button_link: string;
+  is_enabled: boolean;
+}
 
 const AdminServices = () => {
   const { toast } = useToast();
@@ -32,10 +38,80 @@ const AdminServices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Service | null>(null);
   const [formData, setFormData] = useState({ icon_name: "Star", title: "", description: "" });
+  const [parentCompany, setParentCompany] = useState<ParentCompanySettings>({
+    button_text: "Visit Parent Company",
+    button_link: "",
+    is_enabled: false
+  });
+  const [savingParentCompany, setSavingParentCompany] = useState(false);
 
   useEffect(() => {
     fetchServices();
+    fetchParentCompanySettings();
   }, []);
+
+  const fetchParentCompanySettings = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("setting_key", "parent_company")
+      .single();
+    
+    if (data?.setting_value) {
+      const settings = data.setting_value as unknown as ParentCompanySettings;
+      setParentCompany({
+        button_text: settings.button_text || "Visit Parent Company",
+        button_link: settings.button_link || "",
+        is_enabled: settings.is_enabled ?? false
+      });
+    }
+  };
+
+  const saveParentCompanySettings = async () => {
+    setSavingParentCompany(true);
+    
+    const settingValue = {
+      button_text: parentCompany.button_text,
+      button_link: parentCompany.button_link,
+      is_enabled: parentCompany.is_enabled
+    };
+    
+    // Check if setting exists
+    const { data: existing } = await supabase
+      .from("site_settings")
+      .select("id")
+      .eq("setting_key", "parent_company")
+      .single();
+    
+    if (existing) {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ setting_value: settingValue })
+        .eq("setting_key", "parent_company");
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Success", description: "Parent company settings saved" });
+      }
+    } else {
+      const { error } = await supabase
+        .from("site_settings")
+        .insert([{ 
+          setting_key: "parent_company", 
+          category: "services",
+          setting_value: settingValue
+        }]);
+      
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Success", description: "Parent company settings saved" });
+      }
+    }
+    
+    setSavingParentCompany(false);
+  };
 
   const fetchServices = async () => {
     const { data, error } = await supabase
@@ -193,6 +269,43 @@ const AdminServices = () => {
           </TableBody>
         </Table>
         {services.length === 0 && <p className="text-center text-muted-foreground py-8">No services yet.</p>}
+      </CardContent>
+
+      {/* Parent Company Settings */}
+      <CardHeader className="border-t">
+        <CardTitle className="text-lg">Parent Company Button</CardTitle>
+        <CardDescription>Configure the "Visit Parent Company" button shown below services</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Switch 
+            checked={parentCompany.is_enabled} 
+            onCheckedChange={(checked) => setParentCompany({ ...parentCompany, is_enabled: checked })}
+          />
+          <span className="text-sm font-medium">Show Parent Company Button</span>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium">Button Text</label>
+            <Input
+              value={parentCompany.button_text}
+              onChange={(e) => setParentCompany({ ...parentCompany, button_text: e.target.value })}
+              placeholder="Visit Parent Company"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Website Link</label>
+            <Input
+              value={parentCompany.button_link}
+              onChange={(e) => setParentCompany({ ...parentCompany, button_link: e.target.value })}
+              placeholder="https://example.com"
+              type="url"
+            />
+          </div>
+        </div>
+        <Button onClick={saveParentCompanySettings} disabled={savingParentCompany}>
+          {savingParentCompany ? "Saving..." : "Save Parent Company Settings"}
+        </Button>
       </CardContent>
     </Card>
   );

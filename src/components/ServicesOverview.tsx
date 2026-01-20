@@ -12,8 +12,12 @@ import {
   Bus,
   Headset,
   Building2,
-  PlaneTakeoff
+  PlaneTakeoff,
+  Ticket,
+  Map,
+  ExternalLink
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
 import MakkahIcon from "./icons/MakkahIcon";
@@ -25,6 +29,12 @@ interface Service {
   title: string;
   description: string;
   order_index: number;
+}
+
+interface ParentCompanySettings {
+  button_text: string;
+  button_link: string;
+  is_enabled: boolean;
 }
 
 // Extended icon map with more travel/pilgrimage relevant icons
@@ -42,6 +52,10 @@ const iconMap: Record<string, LucideIcon> = {
   Headphones: Headset,
   HeartHandshake,
   Bus,
+  Ticket,
+  Map,
+  Globe: Map,
+  Compass: Map,
 };
 
 // Custom icon names for Makkah and Madinah
@@ -69,10 +83,33 @@ const CustomServiceIcon = ({ icon: Icon }: { icon: React.FC<{ size?: number; cla
 const ServicesOverview = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [parentCompany, setParentCompany] = useState<ParentCompanySettings>({
+    button_text: "Visit Parent Company",
+    button_link: "",
+    is_enabled: false
+  });
 
   useEffect(() => {
     fetchServices();
+    fetchParentCompanySettings();
   }, []);
+
+  const fetchParentCompanySettings = async () => {
+    const { data } = await supabase
+      .from("site_settings")
+      .select("*")
+      .eq("setting_key", "parent_company")
+      .single();
+    
+    if (data?.setting_value) {
+      const settings = data.setting_value as unknown as ParentCompanySettings;
+      setParentCompany({
+        button_text: settings.button_text || "Visit Parent Company",
+        button_link: settings.button_link || "",
+        is_enabled: settings.is_enabled ?? false
+      });
+    }
+  };
 
   const fetchServices = async () => {
     const { data } = await supabase
@@ -91,6 +128,8 @@ const ServicesOverview = () => {
         { id: "4", icon_name: "Users", title: "Expert Guides", description: "Experienced Islamic scholars to guide you through rituals", order_index: 3 },
         { id: "5", icon_name: "Clock", title: "24/7 Support", description: "Round-the-clock assistance throughout your spiritual journey", order_index: 4 },
         { id: "6", icon_name: "HeartHandshake", title: "Complete Care", description: "From departure to return, we handle every detail with care", order_index: 5 },
+        { id: "7", icon_name: "Ticket", title: "Air Ticket", description: "Affordable air tickets to destinations worldwide with trusted airlines", order_index: 6 },
+        { id: "8", icon_name: "Map", title: "Tour Package", description: "Exciting tour packages to explore beautiful destinations around the world", order_index: 7 },
       ]);
     }
     setLoading(false);
@@ -138,7 +177,7 @@ const ServicesOverview = () => {
           <span className="font-thuluth text-secondary/60 text-2xl md:text-3xl block mb-6">خدماتنا</span>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {services.map((service, index) => {
             const isCustom = isCustomIcon(service.icon_name);
             const CustomIcon = isCustom ? getCustomIcon(service.icon_name) : null;
@@ -182,6 +221,26 @@ const ServicesOverview = () => {
             );
           })}
         </div>
+
+        {/* Parent Company Button */}
+        {parentCompany.is_enabled && parentCompany.button_link && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex justify-center mt-12"
+          >
+            <Button
+              size="lg"
+              className="gap-2 px-8 py-6 text-base font-semibold"
+              onClick={() => window.open(parentCompany.button_link, '_blank')}
+            >
+              <ExternalLink className="w-5 h-5" />
+              {parentCompany.button_text}
+            </Button>
+          </motion.div>
+        )}
       </div>
       </section>
     </IslamicBorder>
