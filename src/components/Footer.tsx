@@ -306,7 +306,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/10 relative z-10">
-        <div className="container py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="container py-6 pb-20 lg:pb-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/70 text-sm text-center md:text-left">
             {displayCopyright}
           </p>
