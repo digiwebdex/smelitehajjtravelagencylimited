@@ -280,49 +280,50 @@ const AdminEMIReport = () => {
     try {
       setExporting(true);
       
-      // Summary section
-      let csvContent = "INSTALLMENT REPORT\n";
-      csvContent += `Generated on: ${format(new Date(), "dd MMM yyyy, hh:mm a")}\n\n`;
+      // Summary section - using \r\n for Excel compatibility
+      let csvContent = "INSTALLMENT REPORT\r\n";
+      csvContent += `"Generated on:","${format(new Date(), "dd MMM yyyy, hh:mm a")}"\r\n\r\n`;
       
-      csvContent += "SUMMARY\n";
-      csvContent += `Total Installment Plans,${summary.totalEMIPlans}\n`;
-      csvContent += `Total Expected,${summary.totalExpected}\n`;
-      csvContent += `Total Collected,${summary.totalCollected}\n`;
-      csvContent += `Pending Amount,${summary.totalPending}\n`;
-      csvContent += `Overdue Amount,${summary.totalOverdue}\n`;
-      csvContent += `Overdue Count,${summary.overdueCount}\n`;
-      csvContent += `Collection Rate,${summary.collectionRate.toFixed(1)}%\n\n`;
+      csvContent += "SUMMARY\r\n";
+      csvContent += `"Total Installment Plans","${summary.totalEMIPlans}"\r\n`;
+      csvContent += `"Total Expected","${summary.totalExpected}"\r\n`;
+      csvContent += `"Total Collected","${summary.totalCollected}"\r\n`;
+      csvContent += `"Pending Amount","${summary.totalPending}"\r\n`;
+      csvContent += `"Overdue Amount","${summary.totalOverdue}"\r\n`;
+      csvContent += `"Overdue Count","${summary.overdueCount}"\r\n`;
+      csvContent += `"Collection Rate","${summary.collectionRate.toFixed(1)}%"\r\n\r\n`;
       
       // Monthly trends
-      csvContent += "MONTHLY COLLECTION TRENDS\n";
-      csvContent += "Month,Expected,Collected\n";
+      csvContent += "MONTHLY COLLECTION TRENDS\r\n";
+      csvContent += `"Month","Expected","Collected"\r\n`;
       monthlyTrends.forEach(trend => {
-        csvContent += `${trend.month},${trend.expected},${trend.collected}\n`;
+        csvContent += `"${trend.month}","${trend.expected}","${trend.collected}"\r\n`;
       });
-      csvContent += "\n";
+      csvContent += "\r\n";
       
       // Status distribution
-      csvContent += "PAYMENT STATUS DISTRIBUTION\n";
-      csvContent += "Status,Amount\n";
+      csvContent += "PAYMENT STATUS DISTRIBUTION\r\n";
+      csvContent += `"Status","Amount"\r\n`;
       statusDistribution.forEach(item => {
-        csvContent += `${item.name},${item.value}\n`;
+        csvContent += `"${item.name}","${item.value}"\r\n`;
       });
-      csvContent += "\n";
+      csvContent += "\r\n";
       
       // Overdue installments
       if (overdueInstallments.length > 0) {
-        csvContent += "OVERDUE INSTALLMENTS\n";
-        csvContent += "Customer,Package,Installment,Amount,Due Date,Days Overdue\n";
+        csvContent += "OVERDUE INSTALLMENTS\r\n";
+        csvContent += `"Customer","Package","Installment","Amount","Due Date","Days Overdue"\r\n`;
         overdueInstallments.forEach(item => {
           const daysOverdue = Math.floor(
             (new Date().getTime() - new Date(item.due_date).getTime()) / (1000 * 60 * 60 * 24)
           );
-          csvContent += `"${item.customer_name}","${item.package_name}",Installment #${item.installment_number},${item.amount},${format(new Date(item.due_date), "dd MMM yyyy")},${daysOverdue}\n`;
+          csvContent += `"${item.customer_name.replace(/"/g, '""')}","${item.package_name.replace(/"/g, '""')}","Installment #${item.installment_number}","${item.amount}","${format(new Date(item.due_date), "dd MMM yyyy")}","${daysOverdue}"\r\n`;
         });
       }
       
-      // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      // Add BOM (Byte Order Mark) for proper Excel UTF-8 encoding
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `installment-report-${format(new Date(), "yyyy-MM-dd")}.csv`;

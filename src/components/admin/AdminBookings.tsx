@@ -374,16 +374,18 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
       ...csvData.map(row => 
         row.map(cell => {
           const cellStr = String(cell);
-          // Escape quotes and wrap in quotes if contains comma or quote
+          // Escape quotes and wrap in quotes if contains comma, quote, or newline
           if (cellStr.includes(",") || cellStr.includes('"') || cellStr.includes("\n")) {
             return `"${cellStr.replace(/"/g, '""')}"`;
           }
-          return cellStr;
+          return `"${cellStr}"`;
         }).join(",")
       )
-    ].join("\n");
+    ].join("\r\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    // Add BOM (Byte Order Mark) for proper Excel UTF-8 encoding
+    const BOM = "\uFEFF";
+    const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
