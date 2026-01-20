@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap, LayoutTemplate, Columns, AlignCenter } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap, LayoutTemplate, Columns, AlignCenter, Sun, Moon, Grid3X3, Sparkles } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +35,9 @@ interface SliderSettings {
   autoplayInterval: string;
   transitionSpeed: string;
   layoutMode: "centered" | "split-screen";
+  heroTheme: "dark" | "light";
+  showServiceTiles: boolean;
+  showFloatingPatterns: boolean;
 }
 
 const defaultSlide: Omit<HeroSlide, "id"> = {
@@ -64,6 +67,9 @@ const AdminHero = () => {
     autoplayInterval: "6",
     transitionSpeed: "normal",
     layoutMode: "split-screen",
+    heroTheme: "dark",
+    showServiceTiles: true,
+    showFloatingPatterns: true,
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const { uploadImage, uploading } = useImageUpload({
@@ -80,18 +86,24 @@ const AdminHero = () => {
     const { data } = await supabase
       .from("site_settings")
       .select("setting_key, setting_value")
-      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode"]);
+      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode", "hero_theme", "hero_show_service_tiles", "hero_show_floating_patterns"]);
 
     if (data) {
-      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen" };
+      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen", heroTheme: "dark", showServiceTiles: true, showFloatingPatterns: true };
       data.forEach((item) => {
+        const value = String(item.setting_value).replace(/"/g, "");
         if (item.setting_key === "hero_autoplay_interval") {
-          settings.autoplayInterval = String(item.setting_value).replace(/"/g, "");
+          settings.autoplayInterval = value;
         } else if (item.setting_key === "hero_transition_speed") {
-          settings.transitionSpeed = String(item.setting_value).replace(/"/g, "");
+          settings.transitionSpeed = value;
         } else if (item.setting_key === "hero_layout_mode") {
-          const mode = String(item.setting_value).replace(/"/g, "");
-          settings.layoutMode = mode === "centered" ? "centered" : "split-screen";
+          settings.layoutMode = value === "centered" ? "centered" : "split-screen";
+        } else if (item.setting_key === "hero_theme") {
+          settings.heroTheme = value === "light" ? "light" : "dark";
+        } else if (item.setting_key === "hero_show_service_tiles") {
+          settings.showServiceTiles = value !== "false";
+        } else if (item.setting_key === "hero_show_floating_patterns") {
+          settings.showFloatingPatterns = value !== "false";
         }
       });
       setSliderSettings(settings);
@@ -101,38 +113,36 @@ const AdminHero = () => {
   const handleSaveSettings = async () => {
     setSavingSettings(true);
     
-    // Update existing settings
-    await Promise.all([
-      supabase
-        .from("site_settings")
-        .update({ setting_value: JSON.stringify(sliderSettings.autoplayInterval) })
-        .eq("setting_key", "hero_autoplay_interval"),
-      supabase
-        .from("site_settings")
-        .update({ setting_value: JSON.stringify(sliderSettings.transitionSpeed) })
-        .eq("setting_key", "hero_transition_speed"),
-    ]);
+    const settingsToSave = [
+      { key: "hero_autoplay_interval", value: sliderSettings.autoplayInterval },
+      { key: "hero_transition_speed", value: sliderSettings.transitionSpeed },
+      { key: "hero_layout_mode", value: sliderSettings.layoutMode },
+      { key: "hero_theme", value: sliderSettings.heroTheme },
+      { key: "hero_show_service_tiles", value: String(sliderSettings.showServiceTiles) },
+      { key: "hero_show_floating_patterns", value: String(sliderSettings.showFloatingPatterns) },
+    ];
 
-    // Handle layout mode separately (upsert)
-    const { data: existingLayoutMode } = await supabase
-      .from("site_settings")
-      .select("id")
-      .eq("setting_key", "hero_layout_mode")
-      .single();
+    for (const setting of settingsToSave) {
+      const { data: existing } = await supabase
+        .from("site_settings")
+        .select("id")
+        .eq("setting_key", setting.key)
+        .single();
 
-    if (existingLayoutMode) {
-      await supabase
-        .from("site_settings")
-        .update({ setting_value: JSON.stringify(sliderSettings.layoutMode) })
-        .eq("setting_key", "hero_layout_mode");
-    } else {
-      await supabase
-        .from("site_settings")
-        .insert({ 
-          setting_key: "hero_layout_mode", 
-          setting_value: JSON.stringify(sliderSettings.layoutMode),
-          category: "hero"
-        });
+      if (existing) {
+        await supabase
+          .from("site_settings")
+          .update({ setting_value: JSON.stringify(setting.value) })
+          .eq("setting_key", setting.key);
+      } else {
+        await supabase
+          .from("site_settings")
+          .insert({ 
+            setting_key: setting.key, 
+            setting_value: JSON.stringify(setting.value),
+            category: "hero"
+          });
+      }
     }
     
     toast({ title: "Success", description: "Slider settings saved" });
@@ -376,6 +386,72 @@ const AdminHero = () => {
                 <span className="font-medium text-sm">Full-Width Centered</span>
                 <span className="text-xs text-muted-foreground text-center">Classic centered layout</span>
               </button>
+            </div>
+          </div>
+
+          {/* Theme Selection */}
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              {sliderSettings.heroTheme === "light" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              Hero Theme
+            </Label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setSliderSettings({ ...sliderSettings, heroTheme: "dark" })}
+                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  sliderSettings.heroTheme === "dark" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-muted hover:border-muted-foreground/30"
+                }`}
+              >
+                <Moon className="w-8 h-8" />
+                <span className="font-medium text-sm">Dark Theme</span>
+                <span className="text-xs text-muted-foreground text-center">Rich emerald with gold accents</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSliderSettings({ ...sliderSettings, heroTheme: "light" })}
+                className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                  sliderSettings.heroTheme === "light" 
+                    ? "border-primary bg-primary/5" 
+                    : "border-muted hover:border-muted-foreground/30"
+                }`}
+              >
+                <Sun className="w-8 h-8" />
+                <span className="font-medium text-sm">Light Theme</span>
+                <span className="text-xs text-muted-foreground text-center">Clean, modern graphic style</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Toggle Options */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex items-center gap-3">
+                <Grid3X3 className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">Service Tiles</p>
+                  <p className="text-xs text-muted-foreground">Quick access buttons for Hajj, Umrah, Visa</p>
+                </div>
+              </div>
+              <Switch 
+                checked={sliderSettings.showServiceTiles} 
+                onCheckedChange={(checked) => setSliderSettings({ ...sliderSettings, showServiceTiles: checked })}
+              />
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-sm">Floating Patterns</p>
+                  <p className="text-xs text-muted-foreground">Animated Islamic patterns (dark theme only)</p>
+                </div>
+              </div>
+              <Switch 
+                checked={sliderSettings.showFloatingPatterns} 
+                onCheckedChange={(checked) => setSliderSettings({ ...sliderSettings, showFloatingPatterns: checked })}
+              />
             </div>
           </div>
 
