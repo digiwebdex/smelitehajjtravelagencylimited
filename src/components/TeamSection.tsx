@@ -237,17 +237,17 @@ const TeamSection = () => {
                   <p className="text-secondary font-semibold text-sm uppercase tracking-wide mb-3">
                     {member.role}
                   </p>
-                  <div className="flex flex-wrap items-center justify-center gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-4">
                     {member.whatsapp_number && (
                       <a
                         href={`https://wa.me/${member.whatsapp_number.replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:text-[#128C7E] transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#25D366] hover:text-[#128C7E] transition-colors font-medium hover:scale-110"
                         title="WhatsApp"
                       >
-                        <WhatsAppIcon size={16} />
-                        <span className="hidden sm:inline">{member.whatsapp_number}</span>
+                        <WhatsAppIcon size={20} />
+                        <span>{member.whatsapp_number}</span>
                       </a>
                     )}
                     {member.imo_number && (
@@ -255,11 +255,11 @@ const TeamSection = () => {
                         href={`https://imo.im/${member.imo_number.replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-[#3B82F6] hover:text-[#2563EB] transition-colors font-medium"
+                        className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#2563EB] transition-colors font-medium hover:scale-110"
                         title="IMO"
                       >
-                        <IMOIcon size={16} />
-                        <span className="hidden sm:inline">{member.imo_number}</span>
+                        <IMOIcon size={20} />
+                        <span>{member.imo_number}</span>
                       </a>
                     )}
                   </div>
