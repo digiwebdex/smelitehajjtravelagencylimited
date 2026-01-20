@@ -121,6 +121,7 @@ const UmrahPackages = () => {
                 <img
                   src={settings.image_url || medinaImage}
                   alt="Masjid al-Nabawi in Medina"
+                  loading="lazy"
                   className="w-full h-[400px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />

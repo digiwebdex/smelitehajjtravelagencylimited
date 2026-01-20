@@ -126,7 +126,8 @@ const TeamSection = () => {
                   {member.avatar_url ? (
                     <img 
                       src={member.avatar_url} 
-                      alt={member.name} 
+                      alt={member.name}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
@@ -205,7 +206,8 @@ const TeamSection = () => {
                       {member.avatar_url ? (
                         <img 
                           src={member.avatar_url} 
-                          alt={member.name} 
+                          alt={member.name}
+                          loading="lazy"
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       ) : (

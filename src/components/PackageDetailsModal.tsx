@@ -167,6 +167,7 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
                           key={currentImageIndex}
                           src={hotelImages[currentImageIndex]}
                           alt={`Hotel image ${currentImageIndex + 1}`}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}

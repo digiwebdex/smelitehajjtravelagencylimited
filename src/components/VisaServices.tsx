@@ -411,6 +411,7 @@ const VisaServices = () => {
                   <img 
                     src={`https://flagcdn.com/w80/${getCountryCode(country.country_name)}.png`}
                     alt={`${country.country_name} flag`}
+                    loading="lazy"
                     className="w-12 h-8 object-cover rounded shadow-sm"
                     onError={(e) => {
                       // Fallback to emoji if flag image fails
@@ -519,6 +520,7 @@ const VisaServices = () => {
                         <img 
                           src={`https://flagcdn.com/w40/${getCountryCode(country.country_name)}.png`}
                           alt={`${country.country_name} flag`}
+                          loading="lazy"
                           className="w-8 h-6 object-cover rounded shadow-sm"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
