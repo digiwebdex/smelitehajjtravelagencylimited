@@ -280,13 +280,19 @@ const AdminFooter = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium">Phone Numbers</label>
-                <Button type="button" variant="outline" size="sm" onClick={addPhone}>
+                <Button type="button" variant="outline" size="sm" onClick={addPhone} disabled={footerContent.contact_phones.length >= 8}>
                   <Plus className="w-4 h-4 mr-1" />Add Phone
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                First 2 numbers appear in the 1st contact section, next 6 numbers in the 2nd contact section (max 8 total)
+              </p>
               <div className="space-y-2">
                 {footerContent.contact_phones.map((phone, index) => (
-                  <div key={index} className="flex gap-2">
+                  <div key={index} className="flex gap-2 items-center">
+                    <span className={`text-xs font-medium w-24 flex-shrink-0 ${index < 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {index < 2 ? `1st Section #${index + 1}` : `2nd Section #${index - 1}`}
+                    </span>
                     <Input 
                       value={phone} 
                       onChange={(e) => updatePhone(index, e.target.value)} 

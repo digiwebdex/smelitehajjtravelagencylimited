@@ -290,29 +290,40 @@ const Footer = () => {
                         <Phone className="w-5 h-5 text-secondary" />
                       </div>
                       <div className="text-primary-foreground/80 text-sm pt-2 space-y-1">
-                        {displayPhones.slice(0, 2).map((phone, index) => (
-                          <a 
-                            key={index} 
-                            href={`tel:${phone.replace(/\s/g, '')}`}
-                            className="block hover:text-secondary transition-colors"
-                          >
-                            {phone}
-                          </a>
-                        ))}
+                        {/* Group first 2 phones in pairs */}
+                        {Array.from({ length: Math.ceil(displayPhones.slice(0, 2).length / 2) }).map((_, pairIndex) => {
+                          const startIdx = pairIndex * 2;
+                          const pair = displayPhones.slice(0, 2).slice(startIdx, startIdx + 2);
+                          return (
+                            <div key={pairIndex}>
+                              {pair.map((phone, idx) => (
+                                <span key={idx}>
+                                  <a 
+                                    href={`tel:${phone.replace(/\s/g, '')}`}
+                                    className="hover:text-secondary transition-colors"
+                                  >
+                                    {phone}
+                                  </a>
+                                  {idx < pair.length - 1 && <span className="text-primary-foreground/50">, </span>}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })}
                       </div>
                     </li>
                   )}
-                  {/* Second group - remaining phones (2 per line with comma) */}
+                  {/* Second group - next 6 phones (positions 3-8) */}
                   {displayPhones.length > 2 && (
                     <li className="flex items-start gap-3">
                       <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Phone className="w-5 h-5 text-secondary" />
                       </div>
                       <div className="text-primary-foreground/80 text-sm pt-2 space-y-1">
-                        {/* Group remaining phones in pairs */}
-                        {Array.from({ length: Math.ceil(displayPhones.slice(2).length / 2) }).map((_, pairIndex) => {
+                        {/* Group phones 3-8 in pairs (up to 6 numbers) */}
+                        {Array.from({ length: Math.ceil(Math.min(displayPhones.slice(2, 8).length, 6) / 2) }).map((_, pairIndex) => {
                           const startIdx = pairIndex * 2;
-                          const pair = displayPhones.slice(2).slice(startIdx, startIdx + 2);
+                          const pair = displayPhones.slice(2, 8).slice(startIdx, startIdx + 2);
                           return (
                             <div key={pairIndex}>
                               {pair.map((phone, idx) => (
