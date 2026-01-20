@@ -14,6 +14,7 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import ImageUpload from "./ImageUpload";
 import { Plus, Edit, Trash2, User } from "lucide-react";
 import WhatsAppIcon from "../icons/WhatsAppIcon";
+import IMOIcon from "../icons/IMOIcon";
 
 interface TeamMember {
   id: string;
@@ -25,6 +26,7 @@ interface TeamMember {
   order_index: number;
   is_active: boolean;
   whatsapp_number: string;
+  imo_number: string;
 }
 
 const AdminTeam = () => {
@@ -34,7 +36,7 @@ const AdminTeam = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TeamMember | null>(null);
   const [formData, setFormData] = useState({
-    name: "", role: "", qualifications: "", avatar_url: "", board_type: "management", whatsapp_number: ""
+    name: "", role: "", qualifications: "", avatar_url: "", board_type: "management", whatsapp_number: "", imo_number: ""
   });
 
   const { uploadImage, uploading } = useImageUpload({
@@ -73,14 +75,14 @@ const AdminTeam = () => {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", role: "", qualifications: "", avatar_url: "", board_type: "management", whatsapp_number: "" });
+    setFormData({ name: "", role: "", qualifications: "", avatar_url: "", board_type: "management", whatsapp_number: "", imo_number: "" });
   };
 
   const handleEdit = (item: TeamMember) => {
     setEditingItem(item);
     setFormData({
       name: item.name, role: item.role, qualifications: item.qualifications || "",
-      avatar_url: item.avatar_url || "", board_type: item.board_type, whatsapp_number: item.whatsapp_number || ""
+      avatar_url: item.avatar_url || "", board_type: item.board_type, whatsapp_number: item.whatsapp_number || "", imo_number: item.imo_number || ""
     });
     setIsDialogOpen(true);
   };
@@ -112,6 +114,7 @@ const AdminTeam = () => {
             <TableHead>Name</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>WhatsApp</TableHead>
+            <TableHead>IMO</TableHead>
             <TableHead className="max-w-[200px]">Qualifications</TableHead>
             <TableHead>Active</TableHead>
             <TableHead>Actions</TableHead>
@@ -135,6 +138,16 @@ const AdminTeam = () => {
                   <span className="flex items-center gap-1 text-[#25D366] text-sm">
                     <WhatsAppIcon size={14} />
                     {item.whatsapp_number}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground text-sm">—</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {item.imo_number ? (
+                  <span className="flex items-center gap-1 text-[#3B82F6] text-sm">
+                    <IMOIcon size={14} />
+                    {item.imo_number}
                   </span>
                 ) : (
                   <span className="text-muted-foreground text-sm">—</span>
@@ -216,6 +229,15 @@ const AdminTeam = () => {
                   placeholder="e.g., +8801712345678"
                 />
                 <p className="text-xs text-muted-foreground mt-1">Shows on card for management board members</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium">IMO Number</label>
+                <Input 
+                  value={formData.imo_number} 
+                  onChange={(e) => setFormData({ ...formData, imo_number: e.target.value })} 
+                  placeholder="e.g., +8801712345678"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Shows on card alongside WhatsApp</p>
               </div>
               <Button type="submit" className="w-full" disabled={uploading}>
                 {editingItem ? "Update" : "Create"}
