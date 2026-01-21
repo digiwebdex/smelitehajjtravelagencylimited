@@ -268,7 +268,7 @@ const ServicesOverview = () => {
           >
             <Button
               size="lg"
-              className="gap-2 px-10 py-7 text-lg font-bold bg-gradient-to-r from-secondary via-secondary/90 to-secondary hover:from-secondary/90 hover:to-secondary text-secondary-foreground shadow-lg hover:shadow-[0_0_30px_rgba(201,162,39,0.6)] hover:scale-105 transition-all duration-300 border-2 border-secondary/20 animate-pulse hover:animate-none ring-2 ring-secondary/0 hover:ring-secondary/40"
+              className="gap-2 px-10 py-7 text-lg font-bold bg-gradient-to-r from-secondary via-secondary/90 to-secondary hover:from-secondary/90 hover:to-secondary text-secondary-foreground shadow-lg hover:shadow-[0_0_30px_rgba(201,162,39,0.6)] hover:scale-105 transition-all duration-300 border-2 border-secondary/20 ring-2 ring-secondary/0 hover:ring-secondary/40"
               onClick={() => window.open(parentCompany.button_link, '_blank')}
             >
               <ExternalLink className="w-6 h-6" />
