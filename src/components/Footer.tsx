@@ -279,7 +279,7 @@ const Footer = () => {
               <span className="w-8 h-0.5 bg-secondary" />
               Phone Numbers
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {/* First 2 sections with icons */}
               {displayPhones.slice(0, 2).map((phoneSection, sectionIndex) => {
                 const phones = phoneSection.split(',').map(p => p.trim()).filter(p => p);
@@ -290,7 +290,8 @@ const Footer = () => {
                     <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Phone className="w-5 h-5 text-secondary" />
                     </div>
-                    <div className="text-primary-foreground/80 text-sm flex flex-col md:flex-row md:gap-2">
+                    {/* On mobile: stacked; on md+: inline with comma (no extra gap) */}
+                    <div className="text-primary-foreground/80 text-sm flex flex-col md:block leading-none">
                       {phones.map((phone, idx) => (
                         <span key={idx} className="block md:inline">
                           <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-secondary transition-colors">
@@ -306,13 +307,13 @@ const Footer = () => {
               
               {/* Remaining sections without icons - grouped as paragraph */}
               {displayPhones.length > 2 && (
-                <li className="pl-[52px] text-primary-foreground/80 text-sm leading-relaxed -mt-1">
+                <li className="pl-[52px] text-primary-foreground/80 text-sm leading-none -mt-2">
                   {displayPhones.slice(2).map((phoneSection, sectionIndex) => {
                     const phones = phoneSection.split(',').map(p => p.trim()).filter(p => p);
                     if (phones.length === 0) return null;
                     
                     return (
-                      <div key={sectionIndex} className="flex flex-col md:flex-row md:gap-2">
+                      <div key={sectionIndex} className="flex flex-col md:block">
                         {phones.map((phone, idx) => (
                           <span key={idx} className="block md:inline">
                             <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-secondary transition-colors">
