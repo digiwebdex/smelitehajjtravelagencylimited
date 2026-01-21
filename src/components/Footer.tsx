@@ -290,13 +290,13 @@ const Footer = () => {
                 const showIcon = sectionIndex < 2;
                 
                 return (
-                  <li key={sectionIndex} className="flex items-start gap-3">
+                  <li key={sectionIndex} className={`flex items-start gap-3 ${!showIcon ? '-mt-2' : ''}`}>
                     {showIcon ? (
                       <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Phone className="w-5 h-5 text-secondary" />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 flex-shrink-0" />
+                      <div className="w-10 flex-shrink-0" />
                     )}
                     {/* Two columns on desktop/tablet, stacked on mobile */}
                     <div className="text-primary-foreground/80 text-sm pt-2 flex flex-col md:flex-row md:gap-2">
