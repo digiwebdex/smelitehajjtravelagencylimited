@@ -365,7 +365,7 @@ const HeroSection = () => {
         <HeroSkeleton />
       ) : layoutMode === "centered" ? (
         /* Full-Width Centered Layout */
-        <div className={`relative z-10 container text-center pt-40 md:pt-44 lg:pt-48 pb-20 ${textPrimary}`}>
+        <div className={`relative z-10 container text-center pt-[15vh] md:pt-[12vh] lg:pt-[10vh] pb-20 ${textPrimary}`}>
           <motion.div
             key={`content-centered-${currentSlide}`}
             variants={containerVariants}
@@ -458,7 +458,7 @@ const HeroSection = () => {
         </div>
       ) : (
         /* Split-Screen Layout */
-        <div className="relative z-10 w-full min-h-screen flex items-center pt-24 md:pt-28 lg:pt-32">
+        <div className="relative z-10 w-full min-h-screen flex items-center pt-[15vh] md:pt-[12vh] lg:pt-[10vh]">
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               {/* Left Side - Content */}
