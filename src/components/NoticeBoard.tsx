@@ -206,15 +206,15 @@ const NoticeBoard = () => {
         {/* Regular Notices Section */}
         {regularNotices.length > 0 && (
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Bell className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3 mb-4">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <h2 className="text-xl font-semibold">Notice Board</h2>
-              <Badge variant="secondary">{regularNotices.length} Updates</Badge>
+              <h2 className="text-lg sm:text-xl font-semibold">Notice Board</h2>
+              <Badge variant="secondary" className="text-xs">{regularNotices.length} Updates</Badge>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               <AnimatePresence>
                 {regularNotices.slice(0, 6).map((notice, index) => (
                   <motion.div
@@ -222,32 +222,32 @@ const NoticeBoard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`relative p-4 rounded-xl border ${getPriorityStyles(notice.priority)} transition-all duration-300 hover:shadow-lg cursor-pointer`}
+                    className={`relative p-3 sm:p-4 rounded-xl border ${getPriorityStyles(notice.priority)} transition-all duration-300 hover:shadow-lg cursor-pointer`}
                     onClick={() => setExpandedNotice(expandedNotice === notice.id ? null : notice.id)}
                   >
                     {notice.is_pinned && (
-                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full">
                         Pinned
                       </div>
                     )}
                     
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-background/50 rounded-lg flex-shrink-0">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="p-1.5 sm:p-2 bg-background/50 rounded-lg flex-shrink-0">
                         {getTypeIcon(notice.notice_type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-1">
                           {getPriorityBadge(notice.priority)}
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-[10px] sm:text-xs">
                             {getTypeBadge(notice.notice_type)}
                           </Badge>
                         </div>
-                        <h3 className="font-semibold line-clamp-2">{notice.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{notice.title}</h3>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                           {format(new Date(notice.created_at), "dd MMM yyyy")}
                         </p>
                       </div>
-                      <ChevronRight className={`h-5 w-5 text-muted-foreground transition-transform ${expandedNotice === notice.id ? "rotate-90" : ""}`} />
+                      <ChevronRight className={`h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-transform flex-shrink-0 ${expandedNotice === notice.id ? "rotate-90" : ""}`} />
                     </div>
 
                     <AnimatePresence>
