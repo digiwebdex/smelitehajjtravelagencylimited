@@ -175,7 +175,7 @@ const Footer = () => {
           loop
           muted
           playsInline
-          className="w-full h-full object-cover opacity-50 scale-[4]"
+          className="w-full h-full object-cover opacity-50 scale-[6]"
           style={{ filter: 'blur(0.5px)' }}
         >
           <source src="/videos/footer-bg.mp4" type="video/mp4" />
