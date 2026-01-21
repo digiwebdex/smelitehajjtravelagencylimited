@@ -146,12 +146,19 @@ const NoticeBoard = () => {
                       variant="outline"
                       size="sm"
                       className="border-red-500/30 text-red-600 hover:bg-red-500/10"
-                      asChild
+                      onClick={(e) => {
+                        const link = urgentNotices[currentSlide].external_link!;
+                        if (link.startsWith('#')) {
+                          e.preventDefault();
+                          const element = document.querySelector(link);
+                          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } else {
+                          window.open(link, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
                     >
-                      <a href={urgentNotices[currentSlide].external_link} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        {urgentNotices[currentSlide].external_link_text || "View"}
-                      </a>
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      {urgentNotices[currentSlide].external_link_text || "View"}
                     </Button>
                   )}
                   {urgentNotices[currentSlide]?.attachment_url && (
@@ -258,13 +265,20 @@ const NoticeBoard = () => {
                                   variant="outline"
                                   size="sm"
                                   className="gap-1"
-                                  asChild
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const link = notice.external_link!;
+                                    if (link.startsWith('#')) {
+                                      e.preventDefault();
+                                      const element = document.querySelector(link);
+                                      element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    } else {
+                                      window.open(link, '_blank', 'noopener,noreferrer');
+                                    }
+                                  }}
                                 >
-                                  <a href={notice.external_link} target="_blank" rel="noopener noreferrer">
-                                    <ExternalLink className="h-3 w-3" />
-                                    {notice.external_link_text || "Learn More"}
-                                  </a>
+                                  <ExternalLink className="h-3 w-3" />
+                                  {notice.external_link_text || "Learn More"}
                                 </Button>
                               )}
                               {notice.attachment_url && (
