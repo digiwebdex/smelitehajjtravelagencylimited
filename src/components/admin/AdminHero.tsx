@@ -39,7 +39,6 @@ interface SliderSettings {
   showServiceTiles: boolean;
   showFloatingPatterns: boolean;
   heroHeight: "60vh" | "70vh" | "80vh" | "100vh";
-  heroHeightTablet: "50vh" | "60vh" | "65vh" | "70vh" | "80vh" | "100vh";
   heroHeightMobile: "50vh" | "60vh" | "70vh" | "80vh" | "100vh";
 }
 
@@ -74,7 +73,6 @@ const AdminHero = () => {
     showServiceTiles: true,
     showFloatingPatterns: true,
     heroHeight: "70vh",
-    heroHeightTablet: "65vh",
     heroHeightMobile: "60vh",
   });
   const [savingSettings, setSavingSettings] = useState(false);
@@ -92,10 +90,10 @@ const AdminHero = () => {
     const { data } = await supabase
       .from("site_settings")
       .select("setting_key, setting_value")
-      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode", "hero_theme", "hero_show_service_tiles", "hero_show_floating_patterns", "hero_height", "hero_height_tablet", "hero_height_mobile"]);
+      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode", "hero_theme", "hero_show_service_tiles", "hero_show_floating_patterns", "hero_height", "hero_height_mobile"]);
 
     if (data) {
-      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen", heroTheme: "dark", showServiceTiles: true, showFloatingPatterns: true, heroHeight: "70vh", heroHeightTablet: "65vh" as const, heroHeightMobile: "60vh" };
+      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen", heroTheme: "dark", showServiceTiles: true, showFloatingPatterns: true, heroHeight: "70vh", heroHeightMobile: "60vh" };
       data.forEach((item) => {
         const value = String(item.setting_value).replace(/"/g, "");
         if (item.setting_key === "hero_autoplay_interval") {
@@ -112,8 +110,6 @@ const AdminHero = () => {
           settings.showFloatingPatterns = value !== "false";
         } else if (item.setting_key === "hero_height") {
           settings.heroHeight = (value === "60vh" || value === "70vh" || value === "80vh" || value === "100vh") ? value : "70vh";
-        } else if (item.setting_key === "hero_height_tablet") {
-          settings.heroHeightTablet = (value === "50vh" || value === "60vh" || value === "65vh" || value === "70vh" || value === "80vh" || value === "100vh") ? value : "65vh";
         } else if (item.setting_key === "hero_height_mobile") {
           settings.heroHeightMobile = (value === "50vh" || value === "60vh" || value === "70vh" || value === "80vh" || value === "100vh") ? value : "60vh";
         }
@@ -133,7 +129,6 @@ const AdminHero = () => {
       { key: "hero_show_service_tiles", value: String(sliderSettings.showServiceTiles) },
       { key: "hero_show_floating_patterns", value: String(sliderSettings.showFloatingPatterns) },
       { key: "hero_height", value: sliderSettings.heroHeight },
-      { key: "hero_height_tablet", value: sliderSettings.heroHeightTablet },
       { key: "hero_height_mobile", value: sliderSettings.heroHeightMobile },
     ];
 
@@ -470,7 +465,7 @@ const AdminHero = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Timer className="w-4 h-4" />
@@ -492,7 +487,7 @@ const AdminHero = () => {
                   <SelectItem value="10">10 seconds (Ultra Slow)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Time before auto-switching</p>
+              <p className="text-xs text-muted-foreground">Time before auto-switching to next slide</p>
             </div>
             
             <div className="space-y-2">
@@ -513,7 +508,7 @@ const AdminHero = () => {
                   <SelectItem value="slow">Slow (1.2s)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Speed of slide animation</p>
+              <p className="text-xs text-muted-foreground">Speed of slide transition animation</p>
             </div>
 
             <div className="space-y-2">
@@ -529,41 +524,15 @@ const AdminHero = () => {
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="60vh">60% (Compact)</SelectItem>
-                  <SelectItem value="70vh">70% (Default)</SelectItem>
-                  <SelectItem value="80vh">80% (Large)</SelectItem>
+                  <SelectItem value="60vh">60% Screen (Compact)</SelectItem>
+                  <SelectItem value="70vh">70% Screen (Default)</SelectItem>
+                  <SelectItem value="80vh">80% Screen (Large)</SelectItem>
                   <SelectItem value="100vh">Full Screen</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Height on desktop (1024px+)</p>
+              <p className="text-xs text-muted-foreground">Height on desktop screens</p>
             </div>
 
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Maximize className="w-4 h-4" />
-                Tablet Height
-              </Label>
-              <Select
-                value={sliderSettings.heroHeightTablet}
-                onValueChange={(value: "50vh" | "60vh" | "65vh" | "70vh" | "80vh" | "100vh") => setSliderSettings({ ...sliderSettings, heroHeightTablet: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select height" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="50vh">50% (Compact)</SelectItem>
-                  <SelectItem value="60vh">60% (Small)</SelectItem>
-                  <SelectItem value="65vh">65% (Default)</SelectItem>
-                  <SelectItem value="70vh">70% (Medium)</SelectItem>
-                  <SelectItem value="80vh">80% (Large)</SelectItem>
-                  <SelectItem value="100vh">Full Screen</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">Height on tablet (768-1024px)</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Maximize className="w-4 h-4" />
@@ -577,22 +546,22 @@ const AdminHero = () => {
                   <SelectValue placeholder="Select height" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="50vh">50% (Compact)</SelectItem>
-                  <SelectItem value="60vh">60% (Default)</SelectItem>
-                  <SelectItem value="70vh">70% (Medium)</SelectItem>
-                  <SelectItem value="80vh">80% (Large)</SelectItem>
+                  <SelectItem value="50vh">50% Screen (Compact)</SelectItem>
+                  <SelectItem value="60vh">60% Screen (Default)</SelectItem>
+                  <SelectItem value="70vh">70% Screen (Medium)</SelectItem>
+                  <SelectItem value="80vh">80% Screen (Large)</SelectItem>
                   <SelectItem value="100vh">Full Screen</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Height on mobile (&lt;768px)</p>
+              <p className="text-xs text-muted-foreground">Height on mobile screens</p>
             </div>
+          </div>
 
-            <div className="col-span-1 lg:col-span-3 flex items-end justify-end">
-              <Button onClick={handleSaveSettings} disabled={savingSettings} className="gap-2">
-                <Save className="w-4 h-4" />
-                {savingSettings ? "Saving..." : "Save Settings"}
-              </Button>
-            </div>
+          <div className="flex justify-end pt-2">
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="gap-2">
+              <Save className="w-4 h-4" />
+              {savingSettings ? "Saving..." : "Save Settings"}
+            </Button>
           </div>
         </CardContent>
       </Card>
