@@ -175,8 +175,7 @@ const Footer = () => {
           loop
           muted
           playsInline
-          className="w-full h-full object-cover opacity-50 scale-50"
-          style={{ filter: 'blur(0.5px)' }}
+          className="w-full h-full object-cover opacity-40"
         >
           <source src="/videos/footer-kaaba.mp4" type="video/mp4" />
         </video>
