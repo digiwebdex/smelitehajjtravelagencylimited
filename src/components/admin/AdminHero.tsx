@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap, LayoutTemplate, Columns, AlignCenter, Sun, Moon, Grid3X3, Sparkles } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, Image as ImageIcon, Settings, Timer, Zap, LayoutTemplate, Columns, AlignCenter, Sun, Moon, Grid3X3, Sparkles, Maximize } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -38,6 +38,7 @@ interface SliderSettings {
   heroTheme: "dark" | "light";
   showServiceTiles: boolean;
   showFloatingPatterns: boolean;
+  heroHeight: "60vh" | "70vh" | "80vh" | "100vh";
 }
 
 const defaultSlide: Omit<HeroSlide, "id"> = {
@@ -70,6 +71,7 @@ const AdminHero = () => {
     heroTheme: "dark",
     showServiceTiles: true,
     showFloatingPatterns: true,
+    heroHeight: "70vh",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const { uploadImage, uploading } = useImageUpload({
@@ -86,10 +88,10 @@ const AdminHero = () => {
     const { data } = await supabase
       .from("site_settings")
       .select("setting_key, setting_value")
-      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode", "hero_theme", "hero_show_service_tiles", "hero_show_floating_patterns"]);
+      .in("setting_key", ["hero_autoplay_interval", "hero_transition_speed", "hero_layout_mode", "hero_theme", "hero_show_service_tiles", "hero_show_floating_patterns", "hero_height"]);
 
     if (data) {
-      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen", heroTheme: "dark", showServiceTiles: true, showFloatingPatterns: true };
+      const settings: SliderSettings = { autoplayInterval: "6", transitionSpeed: "normal", layoutMode: "split-screen", heroTheme: "dark", showServiceTiles: true, showFloatingPatterns: true, heroHeight: "70vh" };
       data.forEach((item) => {
         const value = String(item.setting_value).replace(/"/g, "");
         if (item.setting_key === "hero_autoplay_interval") {
@@ -104,6 +106,8 @@ const AdminHero = () => {
           settings.showServiceTiles = value !== "false";
         } else if (item.setting_key === "hero_show_floating_patterns") {
           settings.showFloatingPatterns = value !== "false";
+        } else if (item.setting_key === "hero_height") {
+          settings.heroHeight = (value === "60vh" || value === "70vh" || value === "80vh" || value === "100vh") ? value : "70vh";
         }
       });
       setSliderSettings(settings);
@@ -120,6 +124,7 @@ const AdminHero = () => {
       { key: "hero_theme", value: sliderSettings.heroTheme },
       { key: "hero_show_service_tiles", value: String(sliderSettings.showServiceTiles) },
       { key: "hero_show_floating_patterns", value: String(sliderSettings.showFloatingPatterns) },
+      { key: "hero_height", value: sliderSettings.heroHeight },
     ];
 
     for (const setting of settingsToSave) {
@@ -455,7 +460,7 @@ const AdminHero = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Timer className="w-4 h-4" />
@@ -499,6 +504,28 @@ const AdminHero = () => {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">Speed of slide transition animation</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Maximize className="w-4 h-4" />
+                Hero Height
+              </Label>
+              <Select
+                value={sliderSettings.heroHeight}
+                onValueChange={(value: "60vh" | "70vh" | "80vh" | "100vh") => setSliderSettings({ ...sliderSettings, heroHeight: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select height" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="60vh">60% Screen (Compact)</SelectItem>
+                  <SelectItem value="70vh">70% Screen (Default)</SelectItem>
+                  <SelectItem value="80vh">80% Screen (Large)</SelectItem>
+                  <SelectItem value="100vh">Full Screen</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Height of hero banner section</p>
             </div>
 
             <div className="flex items-end">
