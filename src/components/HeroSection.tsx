@@ -259,55 +259,23 @@ const HeroSection = () => {
   const backgroundImage = content.background_image_url || heroImage;
   const isLight = heroTheme === "light";
 
-  // Simplified animation variants - GPU-accelerated, minimal properties
-  const containerVariants = useMemo(() => ({
+  // Simple fade animation for content - no complex exits
+  const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.08 },
     },
-    exit: {
-      opacity: 0,
-      transition: { duration: transitionDuration * 0.5 },
-    },
-  }), [transitionDuration]);
+  };
 
-  const itemVariants = useMemo(() => ({
-    hidden: { opacity: 0, y: -30 },
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { 
-        duration: transitionDuration, 
-        ease: "easeOut" as const,
-      },
+      transition: { duration: 0.4, ease: "easeOut" as const },
     },
-    exit: {
-      opacity: 0,
-      transition: { duration: transitionDuration * 0.4 },
-    },
-  }), [transitionDuration]);
-
-  // Simplified image animation - only transform for GPU acceleration
-  const imageVariants = useMemo(() => ({
-    initial: { opacity: 0, x: 60 },
-    animate: { 
-      opacity: 1,
-      x: 0,
-      transition: { 
-        duration: transitionDuration * 1.2, 
-        ease: "easeOut" as const,
-      }
-    },
-    exit: { 
-      opacity: 0,
-      x: -60,
-      transition: { 
-        duration: transitionDuration * 0.6, 
-        ease: "easeOut" as const,
-      }
-    },
-  }), [transitionDuration]);
+  };
 
   // Light theme text colors
   const textPrimary = isLight ? "text-foreground" : "text-primary-foreground";
@@ -362,31 +330,29 @@ const HeroSection = () => {
           </div>
         </div>
       ) : (
-        /* Dark Theme Background */
-        <div className="absolute inset-0 bg-primary">
+        /* Dark Theme Background - Simple CSS transition for slide */
+        <div className="absolute inset-0 bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
           
-          {/* Background image with GPU-accelerated animation */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`bg-${currentSlide}`}
-              variants={imageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="absolute inset-0 z-[2]"
-              style={{ willChange: 'transform, opacity' }}
+          {/* Background images - stacked with CSS transitions */}
+          {slides.map((slide, index) => (
+            <div
+              key={slide.id}
+              className="absolute inset-0 z-[2] transition-transform duration-700 ease-out"
+              style={{
+                transform: `translateX(${(index - currentSlide) * 100}%)`,
+              }}
             >
               <img
-                src={backgroundImage}
+                src={slide.background_image_url || heroImage}
                 alt="Hero background"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: imageFocalPoint }}
                 draggable={false}
-                loading="eager"
+                loading={index === 0 ? "eager" : "lazy"}
               />
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          ))}
 
           {/* Overlay gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/50 to-transparent z-[3]" />
@@ -400,14 +366,12 @@ const HeroSection = () => {
       ) : layoutMode === "centered" ? (
         /* Full-Width Centered Layout */
         <div className={`relative z-10 container text-center pt-40 md:pt-44 lg:pt-48 pb-20 ${textPrimary}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`content-centered-${currentSlide}`}
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="max-w-4xl mx-auto"
+          <motion.div
+            key={`content-centered-${currentSlide}`}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="max-w-4xl mx-auto"
             >
               {/* Badge */}
               {content.badge_text && (
@@ -491,7 +455,6 @@ const HeroSection = () => {
                 </motion.div>
               )}
             </motion.div>
-          </AnimatePresence>
         </div>
       ) : (
         /* Split-Screen Layout */
@@ -499,15 +462,13 @@ const HeroSection = () => {
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
               {/* Left Side - Content */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`content-${currentSlide}`}
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className={`text-left order-2 lg:order-1 ${textPrimary}`}
-                >
+              <motion.div
+                key={`content-${currentSlide}`}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className={`text-left order-2 lg:order-1 ${textPrimary}`}
+              >
                   {/* Badge */}
                   {content.badge_text && (
                     <motion.div variants={itemVariants} className="mb-6">
@@ -589,44 +550,37 @@ const HeroSection = () => {
                       ))}
                     </motion.div>
                   )}
-                </motion.div>
-              </AnimatePresence>
+              </motion.div>
 
-              {/* Right Side - Image with simplified animation */}
-              <div className="relative order-1 lg:order-2 hidden lg:block">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`frame-${currentSlide}`}
-                    variants={imageVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    className="relative"
-                    style={{ willChange: 'transform, opacity' }}
-                  >
-                    {/* Simplified Hero Image Frame - inline for better performance */}
-                    <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isLight ? "shadow-slate-300/50" : "shadow-black/30"}`}>
-                      <div className={`absolute inset-0 border-2 rounded-2xl z-10 ${isLight ? "border-slate-200" : "border-secondary/20"}`} />
-                      <img
-                        src={backgroundImage}
-                        alt="Hero feature"
-                        className="w-full h-auto max-h-[500px] object-cover"
-                        style={{ objectPosition: imageFocalPoint }}
-                        loading="eager"
-                        draggable={false}
-                      />
-                      {/* Simple badge overlay */}
-                      <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium z-20
-                        ${isLight 
-                          ? "bg-white/90 text-emerald-700 border border-emerald-200" 
-                          : "bg-secondary/90 text-primary-foreground"
-                        }`}>
-                        <Star className="w-3 h-3 inline mr-1 fill-current" />
-                        Premium Experience
+              {/* Right Side - Image with CSS slide transition */}
+              <div className="relative order-1 lg:order-2 hidden lg:block overflow-hidden rounded-2xl">
+                <div className="relative flex transition-transform duration-700 ease-out"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {slides.map((slide, index) => (
+                    <div key={slide.id} className="flex-shrink-0 w-full">
+                      <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isLight ? "shadow-slate-300/50" : "shadow-black/30"}`}>
+                        <div className={`absolute inset-0 border-2 rounded-2xl z-10 ${isLight ? "border-slate-200" : "border-secondary/20"}`} />
+                        <img
+                          src={slide.background_image_url || heroImage}
+                          alt="Hero feature"
+                          className="w-full h-auto max-h-[500px] object-cover"
+                          style={{ objectPosition: imageFocalPoint }}
+                          loading={index === 0 ? "eager" : "lazy"}
+                          draggable={false}
+                        />
+                        <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium z-20
+                          ${isLight 
+                            ? "bg-white/90 text-emerald-700 border border-emerald-200" 
+                            : "bg-secondary/90 text-primary-foreground"
+                          }`}>
+                          <Star className="w-3 h-3 inline mr-1 fill-current" />
+                          Premium Experience
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                </AnimatePresence>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
