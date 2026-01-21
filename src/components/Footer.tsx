@@ -279,7 +279,7 @@ const Footer = () => {
               <span className="w-8 h-0.5 bg-secondary" />
               Phone Numbers
             </h4>
-            <ul className="space-y-4">
+            <ul className="space-y-3">
               {/* Display each phone section */}
               {displayPhones.map((phoneSection, sectionIndex) => {
                 // Split the comma-separated phones
@@ -290,7 +290,7 @@ const Footer = () => {
                 const showIcon = sectionIndex < 2;
                 
                 return (
-                  <li key={sectionIndex} className={`flex items-start gap-3 ${!showIcon ? '-mt-2' : ''}`}>
+                  <li key={sectionIndex} className={`flex items-start gap-3 ${!showIcon ? '-mt-1' : ''}`}>
                     {showIcon ? (
                       <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Phone className="w-5 h-5 text-secondary" />
