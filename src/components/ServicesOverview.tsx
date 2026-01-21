@@ -262,10 +262,10 @@ const ServicesOverview = () => {
           >
             <Button
               size="lg"
-              className="gap-2 px-8 py-6 text-base font-semibold"
+              className="gap-2 px-10 py-7 text-lg font-bold bg-gradient-to-r from-secondary via-secondary/90 to-secondary hover:from-secondary/90 hover:to-secondary text-secondary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-secondary/20 animate-pulse hover:animate-none"
               onClick={() => window.open(parentCompany.button_link, '_blank')}
             >
-              <ExternalLink className="w-5 h-5" />
+              <ExternalLink className="w-6 h-6" />
               {parentCompany.button_text}
             </Button>
           </motion.div>
