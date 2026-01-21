@@ -161,7 +161,7 @@ const TeamSection = () => {
                     
                     {/* Content */}
                     <div className="p-5 sm:p-6 lg:p-8 flex flex-col justify-center flex-1">
-                      <h3 className="font-pilgrimage font-bold text-xl sm:text-2xl lg:text-3xl text-secondary mb-2">
+                      <h3 className="font-pilgrimage font-bold text-2xl sm:text-3xl lg:text-4xl text-secondary mb-2">
                         {member.name}
                       </h3>
                       <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide">
@@ -231,7 +231,7 @@ const TeamSection = () => {
                 
                 {/* Content */}
                 <div className="p-6">
-                  <h3 className="font-pilgrimage font-bold text-2xl text-secondary mb-2">
+                  <h3 className="font-pilgrimage font-bold text-3xl text-secondary mb-2">
                     {member.name}
                   </h3>
                   <p className="text-foreground font-semibold text-sm capitalize tracking-wide mb-3">
