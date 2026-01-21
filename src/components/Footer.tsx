@@ -279,43 +279,53 @@ const Footer = () => {
               <span className="w-8 h-0.5 bg-secondary" />
               Phone Numbers
             </h4>
-            <ul className="space-y-0.5">
-              {/* Display each phone section */}
-              {displayPhones.map((phoneSection, sectionIndex) => {
-                // Split the comma-separated phones
+            <ul className="space-y-3">
+              {/* First 2 sections with icons */}
+              {displayPhones.slice(0, 2).map((phoneSection, sectionIndex) => {
                 const phones = phoneSection.split(',').map(p => p.trim()).filter(p => p);
                 if (phones.length === 0) return null;
                 
-                // Only show phone icon for first 2 sections
-                const showIcon = sectionIndex < 2;
-                
                 return (
                   <li key={sectionIndex} className="flex items-center gap-3">
-                    {showIcon && (
-                      <div className="w-9 h-9 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-5 h-5 text-secondary" />
-                      </div>
-                    )}
-                    {/* Two columns on desktop/tablet, stacked on mobile */}
-                    <div className={`text-primary-foreground/80 text-sm leading-none flex flex-col md:flex-row md:gap-2 ${showIcon ? '' : 'pl-[48px]'}`}>
+                    <div className="w-10 h-10 bg-primary-foreground/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div className="text-primary-foreground/80 text-sm flex flex-col md:flex-row md:gap-2">
                       {phones.map((phone, idx) => (
                         <span key={idx} className="block md:inline">
-                          <a 
-                            href={`tel:${phone.replace(/\s/g, '')}`}
-                            className="hover:text-secondary transition-colors"
-                          >
+                          <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-secondary transition-colors">
                             {phone}
                           </a>
-                          {/* Show comma separator only on desktop between phones */}
-                          {idx < phones.length - 1 && (
-                            <span className="hidden md:inline text-primary-foreground/50">, </span>
-                          )}
+                          {idx < phones.length - 1 && <span className="hidden md:inline text-primary-foreground/50">, </span>}
                         </span>
                       ))}
                     </div>
                   </li>
                 );
               })}
+              
+              {/* Remaining sections without icons - grouped as paragraph */}
+              {displayPhones.length > 2 && (
+                <li className="pl-[52px] text-primary-foreground/80 text-sm leading-relaxed">
+                  {displayPhones.slice(2).map((phoneSection, sectionIndex) => {
+                    const phones = phoneSection.split(',').map(p => p.trim()).filter(p => p);
+                    if (phones.length === 0) return null;
+                    
+                    return (
+                      <div key={sectionIndex} className="flex flex-col md:flex-row md:gap-2">
+                        {phones.map((phone, idx) => (
+                          <span key={idx} className="block md:inline">
+                            <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-secondary transition-colors">
+                              {phone}
+                            </a>
+                            {idx < phones.length - 1 && <span className="hidden md:inline text-primary-foreground/50">, </span>}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </li>
+              )}
             </ul>
           </div>
         </div>
