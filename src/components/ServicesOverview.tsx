@@ -266,14 +266,35 @@ const ServicesOverview = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex justify-center mt-12"
           >
-            <Button
-              size="lg"
-              className="gap-2 px-10 py-7 text-lg font-bold bg-gradient-to-r from-secondary via-secondary/90 to-secondary hover:from-secondary/90 hover:to-secondary text-secondary-foreground shadow-lg hover:shadow-[0_0_30px_rgba(201,162,39,0.6)] hover:scale-105 transition-all duration-300 border-2 border-secondary/20 ring-2 ring-secondary/0 hover:ring-secondary/40"
+            <button
               onClick={() => window.open(parentCompany.button_link, '_blank')}
+              className="group relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold overflow-hidden rounded-xl transition-all duration-500"
             >
-              <ExternalLink className="w-6 h-6" />
-              {parentCompany.button_text}
-            </Button>
+              {/* Animated gradient background */}
+              <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-secondary transition-all duration-500 group-hover:scale-105" />
+              
+              {/* Shine effect */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              
+              {/* Border glow */}
+              <span className="absolute inset-0 rounded-xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300" />
+              
+              {/* Outer glow on hover */}
+              <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-primary/50 to-secondary/50 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-500 -z-10" />
+              
+              {/* Icon */}
+              <ExternalLink className="relative z-10 w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
+              
+              {/* Text */}
+              <span className="relative z-10 text-white tracking-wide">
+                {parentCompany.button_text}
+              </span>
+              
+              {/* Arrow indicator */}
+              <span className="relative z-10 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white">
+                →
+              </span>
+            </button>
           </motion.div>
         )}
       </div>
