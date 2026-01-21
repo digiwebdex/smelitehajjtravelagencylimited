@@ -178,7 +178,7 @@ const Footer = () => {
           className="w-full h-full object-cover opacity-50 scale-50"
           style={{ filter: 'blur(0.5px)' }}
         >
-          <source src="/videos/footer-kaaba.mp4" type="video/mp4" />
+          <source src="/videos/footer-bg.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-primary/30" />
       </div>
