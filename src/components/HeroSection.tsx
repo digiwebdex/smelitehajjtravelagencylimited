@@ -390,11 +390,11 @@ const HeroSection = () => {
               {/* Title */}
               <motion.h1
                 variants={itemVariants}
-                className={`font-arabic text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-normal tracking-wide overflow-visible ${textPrimary}`}
+                className={`font-arabic text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
               >
                 <span className="inline-block">{content.title}</span>
                 {content.subtitle && (
-                  <span className={`block mt-2 font-kufi pb-2 ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
+                  <span className={`block mt-2 font-kufi pb-2 text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
                     {content.subtitle}
                   </span>
                 )}
@@ -403,7 +403,7 @@ const HeroSection = () => {
               {/* Description */}
               <motion.p
                 variants={itemVariants}
-                className={`text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed ${textSecondary}`}
+                className={`text-sm xs:text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 sm:mb-12 leading-relaxed px-2 sm:px-0 ${textSecondary}`}
               >
                 {content.description}
               </motion.p>
@@ -486,11 +486,11 @@ const HeroSection = () => {
                   {/* Title */}
                   <motion.h1
                     variants={itemVariants}
-                    className={`font-arabic text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-normal tracking-wide overflow-visible ${textPrimary}`}
+                    className={`font-arabic text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
                   >
                     <span className="inline-block">{content.title}</span>
                     {content.subtitle && (
-                      <span className={`block mt-1 font-kufi pb-1 text-3xl md:text-4xl lg:text-5xl xl:text-6xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
+                      <span className={`block mt-1 font-kufi pb-1 text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
                         {content.subtitle}
                       </span>
                     )}
@@ -499,7 +499,7 @@ const HeroSection = () => {
                   {/* Description */}
                   <motion.p
                     variants={itemVariants}
-                    className={`text-base md:text-lg max-w-lg mb-8 leading-relaxed ${textSecondary}`}
+                    className={`text-sm xs:text-base md:text-lg max-w-lg mb-6 sm:mb-8 leading-relaxed ${textSecondary}`}
                   >
                     {content.description}
                   </motion.p>
