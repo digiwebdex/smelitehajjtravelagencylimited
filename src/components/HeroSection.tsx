@@ -390,11 +390,11 @@ const HeroSection = () => {
               {/* Title */}
               <motion.h1
                 variants={itemVariants}
-                className={`font-arabic text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
+                className={`font-arabic text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
               >
                 <span className="inline-block">{content.title}</span>
                 {content.subtitle && (
-                  <span className={`block mt-2 font-kufi pb-2 text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
+                  <span className={`block mt-2 font-kufi pb-2 text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
                     {content.subtitle}
                   </span>
                 )}
@@ -486,11 +486,11 @@ const HeroSection = () => {
                   {/* Title */}
                   <motion.h1
                     variants={itemVariants}
-                    className={`font-arabic text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
+                    className={`font-arabic text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
                   >
                     <span className="inline-block">{content.title}</span>
                     {content.subtitle && (
-                      <span className={`block mt-1 font-kufi pb-1 text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
+                      <span className={`block mt-1 font-kufi pb-1 text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl ${isLight ? "text-emerald-600" : "text-gradient-gold"}`}>
                         {content.subtitle}
                       </span>
                     )}
