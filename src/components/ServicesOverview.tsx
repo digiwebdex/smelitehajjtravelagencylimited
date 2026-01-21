@@ -220,7 +220,6 @@ const ServicesOverview = () => {
                 whileHover={{ 
                   scale: 1.02, 
                   y: -4,
-                  boxShadow: "0 12px 32px -8px rgba(0, 0, 0, 0.15)"
                 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ 
@@ -229,16 +228,23 @@ const ServicesOverview = () => {
                   ease: [0.25, 0.46, 0.45, 0.94],
                   scale: { duration: 0.2 },
                   y: { duration: 0.2 },
-                  boxShadow: { duration: 0.2 }
                 }}
-                className="group flex items-start gap-4 p-6 rounded-xl hover:bg-muted/50 transition-colors duration-300 cursor-pointer"
+                className={`group relative flex items-start gap-4 p-6 rounded-xl transition-all duration-300 cursor-pointer overflow-hidden
+                  ${index % 2 === 0 ? 'bg-muted/30' : 'bg-card'}
+                  hover:bg-gradient-to-br hover:from-primary/5 hover:to-secondary/10
+                  before:absolute before:inset-0 before:rounded-xl before:border-2 before:border-transparent before:transition-all before:duration-300
+                  hover:before:border-primary/30 hover:before:shadow-[0_0_20px_rgba(30,58,95,0.15)]
+                `}
               >
+                {/* Gradient border overlay on hover */}
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
+                
                 {isCustom && CustomIcon ? (
                   <CustomServiceIcon icon={CustomIcon} />
                 ) : LucideIconComponent ? (
                   <ServiceIcon icon={LucideIconComponent} />
                 ) : null}
-                <div>
+                <div className="relative z-10">
                   <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
                     {service.title}
                   </h3>
