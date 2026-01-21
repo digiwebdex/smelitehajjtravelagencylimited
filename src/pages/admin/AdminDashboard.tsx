@@ -39,6 +39,7 @@ import AdminGallery from "@/components/admin/AdminGallery";
 import AdminSectionVisibility from "@/components/admin/AdminSectionVisibility";
 import AdminEMIReport from "@/components/admin/AdminEMIReport";
 import AdminNotices from "@/components/admin/AdminNotices";
+import AdminStaffManagement from "@/components/admin/AdminStaffManagement";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -175,6 +176,8 @@ const AdminDashboard = () => {
         return <AdminEMIReport />;
       case "payments":
         return <AdminPaymentMethods />;
+      case "staff":
+        return <AdminStaffManagement />;
       case "notifications":
         return <AdminNotifications />;
       case "sections":

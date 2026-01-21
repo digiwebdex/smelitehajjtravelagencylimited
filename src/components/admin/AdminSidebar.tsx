@@ -20,6 +20,7 @@ import {
   Images,
   Calculator,
   Megaphone,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ const menuItems = [
   { value: "revenue", label: "Revenue", icon: Wallet },
   { value: "emi-report", label: "Installment Report", icon: Calculator },
   { value: "payments", label: "Payments", icon: Wallet },
+  { value: "staff", label: "Staff Management", icon: UserCog },
   { value: "notifications", label: "Notifications", icon: Bell },
   { value: "notices", label: "Notice Board", icon: Megaphone },
   { value: "sections", label: "Section Visibility", icon: Layers },

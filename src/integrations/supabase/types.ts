@@ -1119,6 +1119,101 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_activity_log: {
+        Row: {
+          action_description: string
+          action_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          staff_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          staff_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          staff_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_activity_log_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_members: {
+        Row: {
+          address: string | null
+          created_at: string
+          department: string | null
+          employee_id: string | null
+          hire_date: string | null
+          id: string
+          is_active: boolean
+          permissions: Json | null
+          phone: string | null
+          role: Database["public"]["Enums"]["staff_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          department?: string | null
+          employee_id?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          permissions?: Json | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["staff_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          department?: string | null
+          employee_id?: string | null
+          hire_date?: string | null
+          id?: string
+          is_active?: boolean
+          permissions?: Json | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["staff_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           avatar_url: string | null
@@ -1349,11 +1444,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_staff_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["staff_role"]
+      }
+      has_staff_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["staff_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
       package_type: "hajj" | "umrah"
+      staff_role: "admin" | "manager" | "agent" | "support"
       tracking_status:
         | "order_submitted"
         | "documents_received"
@@ -1491,6 +1599,7 @@ export const Constants = {
     Enums: {
       booking_status: ["pending", "confirmed", "cancelled", "completed"],
       package_type: ["hajj", "umrah"],
+      staff_role: ["admin", "manager", "agent", "support"],
       tracking_status: [
         "order_submitted",
         "documents_received",
