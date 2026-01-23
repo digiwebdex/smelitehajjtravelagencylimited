@@ -97,6 +97,7 @@ interface FooterContent {
   video_enabled: boolean;
   video_speed: number;
   video_blur: number;
+  video_overlay_color: string;
   video_scale: number;
 }
 
@@ -128,6 +129,7 @@ const AdminFooter = () => {
     video_enabled: true,
     video_speed: 1.0,
     video_blur: 0.5,
+    video_overlay_color: 'rgba(0, 0, 0, 0.5)',
     video_scale: 100,
   });
   const [videoUploading, setVideoUploading] = useState(false);
@@ -172,6 +174,7 @@ const AdminFooter = () => {
         video_enabled: (dataRecord.video_enabled as boolean) ?? true,
         video_speed: (dataRecord.video_speed as number) ?? 1.0,
         video_blur: (dataRecord.video_blur as number) ?? 0.5,
+        video_overlay_color: (dataRecord.video_overlay_color as string) ?? 'rgba(0, 0, 0, 0.5)',
         video_scale: (dataRecord.video_scale as number) ?? 100,
       });
     }
@@ -201,6 +204,7 @@ const AdminFooter = () => {
       video_enabled: footerContent.video_enabled,
       video_speed: footerContent.video_speed,
       video_blur: footerContent.video_blur,
+      video_overlay_color: footerContent.video_overlay_color,
       video_scale: footerContent.video_scale,
     };
 
@@ -423,6 +427,60 @@ const AdminFooter = () => {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">Zoom in on the video (100% - 800%)</p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Video Overlay Color</label>
+            <div className="flex gap-3 items-center">
+              <input
+                type="color"
+                value={footerContent.video_overlay_color.startsWith('rgba') 
+                  ? '#000000' 
+                  : footerContent.video_overlay_color.slice(0, 7)}
+                onChange={(e) => {
+                  const hex = e.target.value;
+                  const r = parseInt(hex.slice(1, 3), 16);
+                  const g = parseInt(hex.slice(3, 5), 16);
+                  const b = parseInt(hex.slice(5, 7), 16);
+                  const currentOpacity = footerContent.video_overlay_color.match(/[\d.]+\)$/)?.[0]?.replace(')', '') || '0.5';
+                  setFooterContent({ 
+                    ...footerContent, 
+                    video_overlay_color: `rgba(${r}, ${g}, ${b}, ${currentOpacity})` 
+                  });
+                }}
+                className="w-12 h-10 rounded border cursor-pointer"
+              />
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs text-muted-foreground">Overlay Opacity</span>
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round(parseFloat(footerContent.video_overlay_color.match(/[\d.]+\)$/)?.[0]?.replace(')', '') || '0.5') * 100)}%
+                  </span>
+                </div>
+                <Slider
+                  value={[parseFloat(footerContent.video_overlay_color.match(/[\d.]+\)$/)?.[0]?.replace(')', '') || '0.5') * 100]}
+                  onValueChange={(value) => {
+                    const match = footerContent.video_overlay_color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    const r = match?.[1] || '0';
+                    const g = match?.[2] || '0';
+                    const b = match?.[3] || '0';
+                    setFooterContent({ 
+                      ...footerContent, 
+                      video_overlay_color: `rgba(${r}, ${g}, ${b}, ${value[0] / 100})` 
+                    });
+                  }}
+                  min={0}
+                  max={100}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            <div 
+              className="h-8 rounded border mt-2" 
+              style={{ backgroundColor: footerContent.video_overlay_color }}
+            />
+            <p className="text-xs text-muted-foreground">Pick a color and opacity for the video overlay tint</p>
           </div>
         </div>
 

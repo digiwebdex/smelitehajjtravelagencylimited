@@ -46,6 +46,7 @@ interface FooterContent {
   video_speed?: number;
   video_blur?: number;
   video_scale?: number;
+  video_overlay_color?: string;
 }
 
 const Footer = () => {
@@ -83,6 +84,7 @@ const Footer = () => {
     video_enabled: true,
     video_speed: 1.0,
     video_blur: 0.5,
+    video_overlay_color: 'rgba(0, 0, 0, 0.5)',
     video_scale: 100,
   });
 
@@ -128,6 +130,7 @@ const Footer = () => {
         video_enabled: (dataRecord.video_enabled as boolean) ?? true,
         video_speed: (dataRecord.video_speed as number) ?? 1.0,
         video_blur: (dataRecord.video_blur as number) ?? 0.5,
+        video_overlay_color: (dataRecord.video_overlay_color as string) ?? 'rgba(0, 0, 0, 0.5)',
         video_scale: (dataRecord.video_scale as number) ?? 100,
       });
     }
@@ -148,6 +151,7 @@ const Footer = () => {
   const videoSpeed = content.video_speed ?? 1.0;
   const videoBlur = content.video_blur ?? 0.5;
   const videoScale = content.video_scale ?? 100;
+  const videoOverlayColor = content.video_overlay_color ?? 'rgba(0, 0, 0, 0.5)';
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -212,7 +216,7 @@ const Footer = () => {
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-primary/30" />
+          <div className="absolute inset-0" style={{ backgroundColor: videoOverlayColor }} />
         </div>
       )}
       
