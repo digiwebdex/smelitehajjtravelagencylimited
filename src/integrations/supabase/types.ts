@@ -419,6 +419,9 @@ export type Database = {
           services_links: Json | null
           social_links: Json | null
           updated_at: string
+          video_enabled: boolean | null
+          video_opacity: number | null
+          video_url: string | null
         }
         Insert: {
           address_label_1?: string | null
@@ -435,6 +438,9 @@ export type Database = {
           services_links?: Json | null
           social_links?: Json | null
           updated_at?: string
+          video_enabled?: boolean | null
+          video_opacity?: number | null
+          video_url?: string | null
         }
         Update: {
           address_label_1?: string | null
@@ -451,6 +457,9 @@ export type Database = {
           services_links?: Json | null
           social_links?: Json | null
           updated_at?: string
+          video_enabled?: boolean | null
+          video_opacity?: number | null
+          video_url?: string | null
         }
         Relationships: []
       }

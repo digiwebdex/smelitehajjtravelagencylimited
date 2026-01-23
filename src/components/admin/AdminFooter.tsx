@@ -5,10 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Plus, Trash2, GripVertical } from "lucide-react";
+import { Save, Plus, Trash2, GripVertical, Video, Upload } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface PhoneSection {
   id: string;
@@ -89,6 +92,9 @@ interface FooterContent {
   address_label_2: string;
   contact_phones: string[]; // Now stores sections, each section is "phone1, phone2"
   contact_email: string;
+  video_url: string;
+  video_opacity: number;
+  video_enabled: boolean;
 }
 
 const AdminFooter = () => {
@@ -114,7 +120,11 @@ const AdminFooter = () => {
     address_label_2: "Branch Office",
     contact_phones: [], // Stores sections as strings
     contact_email: "",
+    video_url: "",
+    video_opacity: 60,
+    video_enabled: true,
   });
+  const [videoUploading, setVideoUploading] = useState(false);
 
   // Generate unique IDs for phone sections (for drag-and-drop)
   const [phoneSections, setPhoneSections] = useState<PhoneSection[]>([]);
@@ -137,6 +147,7 @@ const AdminFooter = () => {
     const { data, error } = await supabase.from("footer_content").select("*").limit(1).maybeSingle();
     
     if (!error && data) {
+      const dataRecord = data as Record<string, unknown>;
       setFooterContent({
         id: data.id,
         company_description: data.company_description || "",
@@ -144,12 +155,15 @@ const AdminFooter = () => {
         services_links: Array.isArray(data.services_links) ? (data.services_links as unknown as FooterLink[]) : [],
         social_links: Array.isArray(data.social_links) ? (data.social_links as unknown as SocialLink[]) : [],
         copyright_text: data.copyright_text || "",
-        contact_address: (data as any).contact_address || "",
-        contact_address_2: (data as any).contact_address_2 || "",
-        address_label_1: (data as any).address_label_1 || "Head Office",
-        address_label_2: (data as any).address_label_2 || "Branch Office",
-        contact_phones: Array.isArray((data as any).contact_phones) ? (data as any).contact_phones : [""],
-        contact_email: (data as any).contact_email || "",
+        contact_address: dataRecord.contact_address as string || "",
+        contact_address_2: dataRecord.contact_address_2 as string || "",
+        address_label_1: dataRecord.address_label_1 as string || "Head Office",
+        address_label_2: dataRecord.address_label_2 as string || "Branch Office",
+        contact_phones: Array.isArray(dataRecord.contact_phones) ? dataRecord.contact_phones as string[] : [""],
+        contact_email: dataRecord.contact_email as string || "",
+        video_url: dataRecord.video_url as string || "",
+        video_opacity: (dataRecord.video_opacity as number) ?? 60,
+        video_enabled: (dataRecord.video_enabled as boolean) ?? true,
       });
     }
     setLoading(false);
@@ -173,6 +187,9 @@ const AdminFooter = () => {
       address_label_2: footerContent.address_label_2,
       contact_phones: phonesArray,
       contact_email: footerContent.contact_email,
+      video_url: footerContent.video_url,
+      video_opacity: footerContent.video_opacity,
+      video_enabled: footerContent.video_enabled,
     };
 
     let error;
@@ -190,6 +207,40 @@ const AdminFooter = () => {
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else toast({ title: "Success", description: "Footer updated" });
     setSaving(false);
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast({ title: "Error", description: "Please upload a video file", variant: "destructive" });
+      return;
+    }
+
+    setVideoUploading(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `footer-video-${Date.now()}.${fileExt}`;
+    const filePath = `footer/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('site-assets')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast({ title: "Upload Error", description: uploadError.message, variant: "destructive" });
+      setVideoUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('site-assets')
+      .getPublicUrl(filePath);
+
+    setFooterContent(prev => ({ ...prev, video_url: urlData.publicUrl }));
+    toast({ title: "Success", description: "Video uploaded successfully" });
+    setVideoUploading(false);
   };
 
   const addQuickLink = () => setFooterContent({ ...footerContent, quick_links: [...footerContent.quick_links, { label: "", href: "" }] });
@@ -244,6 +295,77 @@ const AdminFooter = () => {
         <CardDescription>Manage footer content, links, and social media</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Background Video Settings */}
+        <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+          <div className="flex items-center gap-2">
+            <Video className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">Background Video</h3>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <Label htmlFor="video-enabled" className="text-sm font-medium">Enable Video Background</Label>
+            <Switch
+              id="video-enabled"
+              checked={footerContent.video_enabled}
+              onCheckedChange={(checked) => setFooterContent({ ...footerContent, video_enabled: checked })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Video File</label>
+            <div className="flex gap-2">
+              <Input
+                value={footerContent.video_url}
+                onChange={(e) => setFooterContent({ ...footerContent, video_url: e.target.value })}
+                placeholder="Video URL or upload a file"
+                className="flex-1"
+              />
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                />
+                <Button type="button" variant="outline" disabled={videoUploading} asChild>
+                  <span>
+                    <Upload className="w-4 h-4 mr-2" />
+                    {videoUploading ? "Uploading..." : "Upload"}
+                  </span>
+                </Button>
+              </label>
+            </div>
+            {footerContent.video_url && (
+              <div className="mt-2 rounded-lg overflow-hidden border">
+                <video 
+                  src={footerContent.video_url} 
+                  className="w-full h-32 object-cover"
+                  muted
+                  loop
+                  autoPlay
+                  playsInline
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-medium">Video Opacity</label>
+              <span className="text-sm text-muted-foreground">{footerContent.video_opacity}%</span>
+            </div>
+            <Slider
+              value={[footerContent.video_opacity]}
+              onValueChange={(value) => setFooterContent({ ...footerContent, video_opacity: value[0] })}
+              min={10}
+              max={100}
+              step={5}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">Lower values make the video more subtle</p>
+          </div>
+        </div>
+
         <div>
           <label className="text-sm font-medium">Company Description</label>
           <Textarea
