@@ -40,6 +40,9 @@ interface FooterContent {
   address_label_2?: string;
   contact_phones?: string[];
   contact_email?: string;
+  video_url?: string;
+  video_opacity?: number;
+  video_enabled?: boolean;
 }
 
 const Footer = () => {
@@ -72,6 +75,9 @@ const Footer = () => {
     address_label_2: "Branch Office",
     contact_phones: [],
     contact_email: "",
+    video_url: "/videos/footer-bg.mp4",
+    video_opacity: 60,
+    video_enabled: true,
   });
 
   useEffect(() => {
@@ -111,6 +117,9 @@ const Footer = () => {
         address_label_2: dataRecord.address_label_2 as string || "Branch Office",
         contact_phones: Array.isArray(dataRecord.contact_phones) ? dataRecord.contact_phones as string[] : [],
         contact_email: dataRecord.contact_email as string || "",
+        video_url: dataRecord.video_url as string || "/videos/footer-bg.mp4",
+        video_opacity: (dataRecord.video_opacity as number) ?? 60,
+        video_enabled: (dataRecord.video_enabled as boolean) ?? true,
       });
     }
   };
@@ -124,6 +133,9 @@ const Footer = () => {
   const displayAddressLabel2 = content.address_label_2 || "Branch Office";
   const displayPhones = content.contact_phones?.length ? content.contact_phones : [contactDetails.phone];
   const displayEmail = content.contact_email || contactDetails.email;
+  const videoUrl = content.video_url || "/videos/footer-bg.mp4";
+  const videoOpacity = content.video_opacity ?? 60;
+  const videoEnabled = content.video_enabled ?? true;
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -169,19 +181,24 @@ const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
       {/* Background Video Animation */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover opacity-60"
-          style={{ filter: 'blur(0.5px)' }}
-        >
-          <source src="/videos/footer-bg.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-primary/30" />
-      </div>
+      {videoEnabled && videoUrl && (
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ 
+              filter: 'blur(0.5px)',
+              opacity: videoOpacity / 100 
+            }}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-primary/30" />
+        </div>
+      )}
       
       {/* Floating Islamic Pattern Animation */}
       <FloatingIslamicPattern />
