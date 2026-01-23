@@ -240,15 +240,6 @@ const Footer = () => {
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0 geometric-pattern" />
       </div>
-      {/* Scroll to top button */}
-      <motion.button
-        onClick={scrollToTop}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 bg-secondary text-secondary-foreground rounded-full shadow-gold flex items-center justify-center hover:bg-secondary/90 transition-colors"
-      >
-        <ArrowUp className="w-6 h-6" />
-      </motion.button>
 
       <div className="container py-20 relative z-10">
         <div className="grid md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12">
