@@ -232,7 +232,7 @@ const TeamSection = () => {
                 
                 {/* Content */}
                 <div className="p-5">
-                  <h3 className="font-heading font-bold text-xl text-foreground mb-1">
+                  <h3 className="font-pilgrimage font-bold text-2xl text-secondary mb-1">
                     {member.name}
                   </h3>
                   <p className="text-secondary font-semibold text-xs uppercase tracking-widest mb-3">
