@@ -234,11 +234,11 @@ const AdminOfficeLocations = () => {
               <Input
                 value={office.map_query || ""}
                 onChange={(e) => updateOffice(office.id, "map_query", e.target.value)}
-                placeholder="e.g., House+37+Block+C+Banani+Dhaka"
+                placeholder="e.g., https://maps.app.goo.gl/... or House+37+Block+C+Banani+Dhaka"
                 className="mt-1"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Use + instead of spaces. This is used for the Google Maps link.
+                Paste a full Google Maps URL (https://maps.app.goo.gl/...) or use a search query with + instead of spaces.
               </p>
             </div>
 

@@ -272,7 +272,7 @@ const ContactSection = () => {
                     </div>
                     <div className="space-y-1 sm:space-y-2">
                       <a 
-                        href={`https://maps.google.com/?q=${office.map_query || encodeURIComponent(office.address)}`}
+                        href={office.map_query?.startsWith('http') ? office.map_query : `https://maps.google.com/?q=${office.map_query || encodeURIComponent(office.address)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-start gap-1.5 sm:gap-2 text-muted-foreground hover:text-primary transition-colors group/link"
