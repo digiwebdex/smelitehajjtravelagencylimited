@@ -235,8 +235,8 @@ const TeamSection = () => {
                   <h3 className="font-pilgrimage font-bold text-2xl text-secondary mb-1">
                     {member.name}
                   </h3>
-                  <p className="text-secondary font-semibold text-xs uppercase tracking-widest mb-3">
-                    {member.role}
+                  <p className="text-foreground font-semibold text-xs uppercase tracking-widest mb-3">
+                    {member.role.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-4">
                     {member.whatsapp_number && (
