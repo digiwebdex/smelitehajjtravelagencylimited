@@ -48,24 +48,6 @@ const IslamicBorder = ({ children, className = "", variant = "both" }: IslamicBo
                 transition={{ duration: 1.5, delay: 0.3 }}
               />
               
-              {/* Center ornament */}
-              <motion.g
-                initial={{ scale: 0, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                {/* Central 8-pointed star */}
-                <polygon 
-                  points="600,10 608,22 620,22 612,30 620,38 608,38 600,50 592,38 580,38 588,30 580,22 592,22" 
-                  className="fill-secondary/50"
-                />
-                {/* Inner diamond */}
-                <polygon 
-                  points="600,20 608,30 600,40 592,30" 
-                  className="fill-primary/30"
-                />
-              </motion.g>
               
               {/* Right geometric pattern line */}
               <motion.path
@@ -136,22 +118,6 @@ const IslamicBorder = ({ children, className = "", variant = "both" }: IslamicBo
                 transition={{ duration: 1.5, delay: 0.5 }}
               />
               
-              {/* Center ornament */}
-              <motion.g
-                initial={{ scale: 0, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-              >
-                <polygon 
-                  points="600,10 608,22 620,22 612,30 620,38 608,38 600,50 592,38 580,38 588,30 580,22 592,22" 
-                  className="fill-secondary/40"
-                />
-                <polygon 
-                  points="600,20 608,30 600,40 592,30" 
-                  className="fill-primary/20"
-                />
-              </motion.g>
               
               {/* Right geometric wave pattern */}
               <motion.path
