@@ -541,6 +541,11 @@ export type Database = {
           title: string
           title_color: string | null
           updated_at: string
+          video_blur: number | null
+          video_enabled: boolean | null
+          video_opacity: number | null
+          video_speed: number | null
+          video_url: string | null
         }
         Insert: {
           autoplay_carousel?: boolean | null
@@ -565,6 +570,11 @@ export type Database = {
           title?: string
           title_color?: string | null
           updated_at?: string
+          video_blur?: number | null
+          video_enabled?: boolean | null
+          video_opacity?: number | null
+          video_speed?: number | null
+          video_url?: string | null
         }
         Update: {
           autoplay_carousel?: boolean | null
@@ -589,6 +599,11 @@ export type Database = {
           title?: string
           title_color?: string | null
           updated_at?: string
+          video_blur?: number | null
+          video_enabled?: boolean | null
+          video_opacity?: number | null
+          video_speed?: number | null
+          video_url?: string | null
         }
         Relationships: []
       }

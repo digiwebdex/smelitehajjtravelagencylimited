@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2, Edit2, ChevronUp, ChevronDown, Image as ImageIcon, Settings, Palette } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit2, ChevronUp, ChevronDown, Image as ImageIcon, Settings, Palette, Video, Upload } from "lucide-react";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 interface GalleryImage {
@@ -27,6 +28,11 @@ interface GallerySettings {
   subtitle: string | null;
   background_color: string | null;
   is_enabled: boolean;
+  video_url: string | null;
+  video_enabled: boolean | null;
+  video_opacity: number | null;
+  video_blur: number | null;
+  video_speed: number | null;
 }
 
 interface SectionHeader {
@@ -55,6 +61,7 @@ const AdminGallery = () => {
   const [caption, setCaption] = useState("");
   
   const { uploadImage, uploading } = useImageUpload({ bucket: "admin-uploads", folder: "gallery" });
+  const [videoUploading, setVideoUploading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -145,6 +152,11 @@ const AdminGallery = () => {
           subtitle: settings.subtitle,
           background_color: settings.background_color,
           is_enabled: settings.is_enabled,
+          video_url: settings.video_url,
+          video_enabled: settings.video_enabled,
+          video_opacity: settings.video_opacity,
+          video_blur: settings.video_blur,
+          video_speed: settings.video_speed,
         })
         .eq("id", settings.id);
 
@@ -155,6 +167,38 @@ const AdminGallery = () => {
       toast.error("Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleVideoUpload = async (file: File) => {
+    if (!file.type.startsWith('video/')) {
+      toast.error("Please select a video file");
+      return;
+    }
+    
+    setVideoUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `gallery-video-${Date.now()}.${fileExt}`;
+      const filePath = `gallery/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('admin-uploads')
+        .upload(filePath, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('admin-uploads')
+        .getPublicUrl(filePath);
+      
+      setSettings(prev => prev ? { ...prev, video_url: publicUrl } : null);
+      toast.success("Video uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      toast.error("Failed to upload video");
+    } finally {
+      setVideoUploading(false);
     }
   };
 
@@ -377,7 +421,107 @@ const AdminGallery = () => {
             />
           </div>
 
-          <div className="flex gap-2">
+          {/* Video Settings Section */}
+          <div className="border-t pt-6 mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Video className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">Background Video</h3>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 mb-4">
+              <div>
+                <Label className="text-base font-medium">Enable Video Background</Label>
+                <p className="text-sm text-muted-foreground">Show a video behind the gallery section</p>
+              </div>
+              <Switch
+                checked={settings?.video_enabled ?? false}
+                onCheckedChange={(checked) => setSettings(prev => prev ? { ...prev, video_enabled: checked } : null)}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Video File</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={settings?.video_url || ""}
+                    onChange={(e) => setSettings(prev => prev ? { ...prev, video_url: e.target.value } : null)}
+                    placeholder="Enter video URL or upload"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={videoUploading}
+                    onClick={() => document.getElementById("gallery-video-upload")?.click()}
+                    className="gap-2"
+                  >
+                    {videoUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    Upload
+                  </Button>
+                  <input
+                    id="gallery-video-upload"
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleVideoUpload(file);
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Video Preview */}
+              {settings?.video_url && (
+                <div className="relative rounded-lg overflow-hidden bg-black aspect-video max-w-md">
+                  <video
+                    src={settings.video_url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{
+                      opacity: settings.video_opacity ?? 0.3,
+                      filter: `blur(${settings.video_blur ?? 0}px)`,
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/60 pointer-events-none" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="text-white/80 text-sm font-medium bg-black/50 px-3 py-1 rounded">Preview with effects</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-3">
+                  <Label>Video Opacity: {Math.round((settings?.video_opacity ?? 0.3) * 100)}%</Label>
+                  <Slider
+                    value={[(settings?.video_opacity ?? 0.3) * 100]}
+                    onValueChange={(value) => setSettings(prev => prev ? { ...prev, video_opacity: value[0] / 100 } : null)}
+                    min={10}
+                    max={100}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label>Video Blur: {settings?.video_blur ?? 0}px</Label>
+                  <Slider
+                    value={[settings?.video_blur ?? 0]}
+                    onValueChange={(value) => setSettings(prev => prev ? { ...prev, video_blur: value[0] } : null)}
+                    min={0}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4 border-t">
             <Button onClick={handleSaveSettings} disabled={saving}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Save Settings

@@ -28,6 +28,11 @@ interface GallerySettings {
   subtitle: string | null;
   background_color: string | null;
   is_enabled: boolean;
+  video_url: string | null;
+  video_enabled: boolean | null;
+  video_opacity: number | null;
+  video_blur: number | null;
+  video_speed: number | null;
 }
 
 type ViewMode = "grid" | "carousel";
@@ -313,8 +318,29 @@ const GallerySection = () => {
         className="py-24 relative overflow-hidden"
         style={{ backgroundColor: settings?.background_color || undefined }}
       >
+        {/* Background Video */}
+        {settings?.video_enabled && settings?.video_url && (
+          <div className="absolute inset-0 overflow-hidden">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute w-full h-full object-cover"
+              style={{
+                opacity: settings.video_opacity ?? 0.3,
+                filter: `blur(${settings.video_blur ?? 0}px)`,
+              }}
+            >
+              <source src={settings.video_url} type="video/mp4" />
+            </video>
+            {/* Video overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
+          </div>
+        )}
+        
         {/* Enhanced Decorative background elements */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full geometric-pattern opacity-30" />
           <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary/20 to-secondary/10 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tl from-secondary/20 to-primary/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
