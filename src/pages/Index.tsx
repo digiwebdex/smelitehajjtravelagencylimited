@@ -1,24 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import NoticeBoard from "@/components/NoticeBoard";
-import ServicesOverview from "@/components/ServicesOverview";
-import HajjPackages from "@/components/HajjPackages";
-import UmrahPackages from "@/components/UmrahPackages";
-import VisaServices from "@/components/VisaServices";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import TeamSection from "@/components/TeamSection";
-import FAQSection from "@/components/FAQSection";
-import ContactSection from "@/components/ContactSection";
-import GallerySection from "@/components/GallerySection";
-import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import MobileCTABar from "@/components/MobileCTABar";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load non-critical components for faster initial page load
+const NoticeBoard = lazy(() => import("@/components/NoticeBoard"));
+const ServicesOverview = lazy(() => import("@/components/ServicesOverview"));
+const HajjPackages = lazy(() => import("@/components/HajjPackages"));
+const UmrahPackages = lazy(() => import("@/components/UmrahPackages"));
+const VisaServices = lazy(() => import("@/components/VisaServices"));
+const TestimonialsSection = lazy(() => import("@/components/TestimonialsSection"));
+const TeamSection = lazy(() => import("@/components/TeamSection"));
+const FAQSection = lazy(() => import("@/components/FAQSection"));
+const GallerySection = lazy(() => import("@/components/GallerySection"));
+const ContactSection = lazy(() => import("@/components/ContactSection"));
+const Footer = lazy(() => import("@/components/Footer"));
+const WhatsAppButton = lazy(() => import("@/components/WhatsAppButton"));
+const MobileCTABar = lazy(() => import("@/components/MobileCTABar"));
 
 interface SectionVisibility {
   [key: string]: boolean;
 }
+
+// Loading placeholder for lazy components
+const SectionSkeleton = ({ height = "h-96" }: { height?: string }) => (
+  <div className={`${height} w-full animate-pulse bg-muted/30`}>
+    <div className="container py-12">
+      <Skeleton className="h-8 w-48 mx-auto mb-4" />
+      <Skeleton className="h-4 w-64 mx-auto mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Skeleton className="h-48 rounded-lg" />
+        <Skeleton className="h-48 rounded-lg" />
+        <Skeleton className="h-48 rounded-lg" />
+      </div>
+    </div>
+  </div>
+);
 
 const Index = () => {
   const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({
@@ -77,20 +95,56 @@ const Index = () => {
       <Header />
       <main>
         {sectionVisibility.hero && <HeroSection />}
-        {sectionVisibility.notices && <NoticeBoard />}
-        {sectionVisibility.services && <ServicesOverview />}
-        {sectionVisibility.hajj_packages && <HajjPackages />}
-        {sectionVisibility.umrah_packages && <UmrahPackages />}
-        {sectionVisibility.visa_services && <VisaServices />}
-        {sectionVisibility.testimonials && <TestimonialsSection />}
-        {sectionVisibility.team && <TeamSection />}
-        {sectionVisibility.faq && <FAQSection />}
-        {sectionVisibility.gallery && <GallerySection />}
-        {sectionVisibility.contact && <ContactSection />}
+        
+        <Suspense fallback={<SectionSkeleton height="h-32" />}>
+          {sectionVisibility.notices && <NoticeBoard />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.services && <ServicesOverview />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.hajj_packages && <HajjPackages />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.umrah_packages && <UmrahPackages />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.visa_services && <VisaServices />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.testimonials && <TestimonialsSection />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.team && <TeamSection />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.faq && <FAQSection />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.gallery && <GallerySection />}
+        </Suspense>
+        
+        <Suspense fallback={<SectionSkeleton />}>
+          {sectionVisibility.contact && <ContactSection />}
+        </Suspense>
       </main>
-      <Footer />
-      <WhatsAppButton />
-      <MobileCTABar />
+      
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
+      
+      <Suspense fallback={null}>
+        <WhatsAppButton />
+        <MobileCTABar />
+      </Suspense>
     </div>
   );
 };

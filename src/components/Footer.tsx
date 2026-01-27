@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense, memo } from "react";
 import { Link } from "react-router-dom";
 import { 
-  Phone, Mail, MapPin, Facebook, Instagram, Youtube, Twitter, ArrowUp, Building2, Building,
+  Phone, Mail, Facebook, Instagram, Youtube, Twitter, Building2, Building,
   Linkedin, MessageCircle, Send, Music, Globe, ExternalLink, Camera, Video, Rss, Twitch, Github
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import companyLogo from "@/assets/company-logo.jpeg";
-import FloatingIslamicPattern from "./FloatingIslamicPattern";
+
+// Lazy load non-critical decorative component
+const FloatingIslamicPattern = lazy(() => import("./FloatingIslamicPattern"));
 
 interface FooterLink {
   label: string;
@@ -233,8 +234,10 @@ const Footer = () => {
         </div>
       )}
       
-      {/* Floating Islamic Pattern Animation */}
-      <FloatingIslamicPattern />
+      {/* Floating Islamic Pattern Animation - Lazy Loaded */}
+      <Suspense fallback={null}>
+        <FloatingIslamicPattern />
+      </Suspense>
       
       {/* Decorative Pattern */}
       <div className="absolute inset-0 opacity-5">
@@ -260,17 +263,16 @@ const Footer = () => {
                 {socialNetworks.map((network) => {
                   const Icon = getSocialIcon(network.icon_name);
                   return (
-                    <motion.a
+                    <a
                       key={network.id}
                       href={network.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      whileHover={{ scale: 1.1, y: -2 }}
-                      className="w-11 h-11 bg-primary-foreground/10 rounded-xl flex items-center justify-center hover:bg-secondary hover:text-secondary-foreground transition-all duration-300"
+                      className="w-11 h-11 bg-primary-foreground/10 rounded-xl flex items-center justify-center hover:bg-secondary hover:text-secondary-foreground transition-all duration-300 hover:scale-110 hover:-translate-y-0.5"
                       aria-label={network.platform_name}
                     >
                       <Icon className="w-5 h-5" />
-                    </motion.a>
+                    </a>
                   );
                 })}
               </div>

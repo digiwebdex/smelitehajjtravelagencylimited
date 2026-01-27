@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
 import { ChevronDown, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-kaaba.jpg";
-import { motion, AnimatePresence } from "framer-motion";
-import HeroServiceTiles from "./HeroServiceTiles";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { motion } from "framer-motion";
+
+// Lazy load non-critical components
+const HeroServiceTiles = lazy(() => import("./HeroServiceTiles"));
+const Dialog = lazy(() => import("@/components/ui/dialog").then(m => ({ default: m.Dialog })));
+const DialogContent = lazy(() => import("@/components/ui/dialog").then(m => ({ default: m.DialogContent })));
+const DialogTitle = lazy(() => import("@/components/ui/dialog").then(m => ({ default: m.DialogTitle })));
 
 interface HeroSlide {
   id: string;
@@ -411,7 +411,9 @@ const HeroSection = () => {
               {/* Service Tiles */}
               {showServiceTiles && (
                 <motion.div variants={itemVariants} className="mb-10">
-                  <HeroServiceTiles theme={heroTheme} />
+                  <Suspense fallback={<div className="h-16 animate-pulse bg-muted/20 rounded-lg" />}>
+                    <HeroServiceTiles theme={heroTheme} />
+                  </Suspense>
                 </motion.div>
               )}
 
@@ -507,7 +509,9 @@ const HeroSection = () => {
                   {/* Service Tiles - Compact for split view */}
                   {showServiceTiles && (
                     <motion.div variants={itemVariants} className="mb-8">
-                      <HeroServiceTiles theme={heroTheme} />
+                      <Suspense fallback={<div className="h-16 animate-pulse bg-muted/20 rounded-lg" />}>
+                        <HeroServiceTiles theme={heroTheme} />
+                      </Suspense>
                     </motion.div>
                   )}
 
@@ -587,24 +591,28 @@ const HeroSection = () => {
         </div>
       )}
 
-      {/* Video Modal */}
-      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-        <DialogContent className="max-w-4xl p-0 bg-black border-none">
-          <DialogTitle className="sr-only">Watch Video</DialogTitle>
-          <div className="relative aspect-video">
-            {content.video_url && isYouTubeUrl(content.video_url) ? (
-              <iframe
-                src={isVideoOpen ? getEmbedUrl(content.video_url) : ""}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : content.video_url ? (
-              <video src={content.video_url} controls autoPlay className="w-full h-full" />
-            ) : null}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Video Modal - Lazy Loaded */}
+      {isVideoOpen && (
+        <Suspense fallback={null}>
+          <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+            <DialogContent className="max-w-4xl p-0 bg-black border-none">
+              <DialogTitle className="sr-only">Watch Video</DialogTitle>
+              <div className="relative aspect-video">
+                {content.video_url && isYouTubeUrl(content.video_url) ? (
+                  <iframe
+                    src={isVideoOpen ? getEmbedUrl(content.video_url) : ""}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : content.video_url ? (
+                  <video src={content.video_url} controls autoPlay className="w-full h-full" />
+                ) : null}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </Suspense>
+      )}
     </section>
   );
 };
