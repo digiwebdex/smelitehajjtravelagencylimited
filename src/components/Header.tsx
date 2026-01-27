@@ -236,7 +236,7 @@ const Header = () => {
 
             <div className="hidden lg:flex items-center gap-2 xl:gap-3">
               <Link to="/track-order">
-                <Button variant="ghost" size="sm" className="gap-1.5 text-sm px-3">
+                <Button variant="outline" size="sm" className="gap-1.5 text-sm px-3 border-primary/30 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors">
                   <MapPin className="w-4 h-4" />
                   <span className="hidden xl:inline">Track Order</span>
                   <span className="xl:hidden">Track</span>
