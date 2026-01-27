@@ -348,8 +348,20 @@ const Header = () => {
                       Track Order
                     </Button>
                   </Link>
-                  {user && (
+                  {user ? (
                     <>
+                      <Link to="/my-bookings" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full gap-2">
+                          <ClipboardList className="w-4 h-4" />
+                          My Bookings
+                        </Button>
+                      </Link>
+                      <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="outline" className="w-full gap-2">
+                          <Settings className="w-4 h-4" />
+                          Profile Settings
+                        </Button>
+                      </Link>
                       {isAdmin && (
                         <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                           <Button variant="outline" className="w-full gap-2">
@@ -363,87 +375,13 @@ const Header = () => {
                         Sign Out
                       </Button>
                     </>
-                  )}
-                  {appearance.show_book_now_button !== false && packages.length > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button className="bg-gradient-primary w-full">
-                          Book Now
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="center" className="w-72 max-h-80 overflow-y-auto bg-card border border-border shadow-lg z-[100]">
-                        {showMyBookings && (
-                          <>
-                            <DropdownMenuItem 
-                              onClick={() => { navigate("/my-bookings"); setIsMenuOpen(false); }}
-                              className="flex items-center gap-2 cursor-pointer py-2 bg-secondary/50"
-                            >
-                              <ClipboardList className="w-4 h-4 text-primary" />
-                              <span className="font-medium text-primary">My Bookings</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
-                        <DropdownMenuLabel className="text-primary font-semibold">Hajj Packages</DropdownMenuLabel>
-                        {packages.filter(p => p.type === "hajj").map((pkg) => (
-                          <DropdownMenuItem 
-                            key={pkg.id} 
-                            onClick={() => handleBookPackage(pkg)}
-                            className="flex flex-col items-start gap-1 cursor-pointer py-2"
-                          >
-                            <span className="font-medium text-foreground">{pkg.title}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-2">
-                              <span>{pkg.duration_days} Days</span>
-                              <span>•</span>
-                              <span className="text-primary font-semibold">{formatCurrency(pkg.price)}</span>
-                            </span>
-                          </DropdownMenuItem>
-                        ))}
-                        {packages.filter(p => p.type === "umrah").length > 0 && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="text-primary font-semibold">Umrah Packages</DropdownMenuLabel>
-                            {packages.filter(p => p.type === "umrah").map((pkg) => (
-                              <DropdownMenuItem 
-                                key={pkg.id} 
-                                onClick={() => handleBookPackage(pkg)}
-                                className="flex flex-col items-start gap-1 cursor-pointer py-2"
-                              >
-                                <span className="font-medium text-foreground">{pkg.title}</span>
-                                <span className="text-xs text-muted-foreground flex items-center gap-2">
-                                  <span>{pkg.duration_days} Days</span>
-                                  <span>•</span>
-                                  <span className="text-primary font-semibold">{formatCurrency(pkg.price)}</span>
-                                </span>
-                              </DropdownMenuItem>
-                            ))}
-                          </>
-                        )}
-                        {visaCountries.length > 0 && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel className="text-primary font-semibold flex items-center gap-1.5">
-                              <Globe className="w-3.5 h-3.5" />
-                              Visa Services
-                            </DropdownMenuLabel>
-                            {visaCountries.map((country) => (
-                              <DropdownMenuItem 
-                                key={country.id} 
-                                onClick={() => handleApplyVisa(country)}
-                                className="flex flex-col items-start gap-1 cursor-pointer py-2"
-                              >
-                                <span className="font-medium text-foreground">{country.flag_emoji} {country.country_name}</span>
-                                <span className="text-xs text-muted-foreground flex items-center gap-2">
-                                  <span>{country.processing_time}</span>
-                                  <span>•</span>
-                                  <span className="text-primary font-semibold">{formatCurrency(country.price)}</span>
-                                </span>
-                              </DropdownMenuItem>
-                            ))}
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  ) : (
+                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full gap-2 bg-gradient-primary">
+                        <LogIn className="w-4 h-4" />
+                        Sign In
+                      </Button>
+                    </Link>
                   )}
                 </div>
               </div>
