@@ -179,14 +179,14 @@ const Auth = () => {
         description: "You have successfully signed up. Welcome aboard!",
       });
 
-      // Send welcome notification if phone number provided
-      if (phone && data?.user) {
+      // Send welcome notification (email and/or WhatsApp)
+      if (data?.user) {
         try {
           await supabase.functions.invoke('send-welcome-notification', {
             body: {
               userId: data.user.id,
               fullName: fullName,
-              phone: phone,
+              phone: phone || null,
               email: email,
             },
           });
