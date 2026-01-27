@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import MyBookings from "./pages/MyBookings";
+import ProfileSettings from "./pages/ProfileSettings";
 import TrackOrder from "./pages/TrackOrder";
 import TrackVisa from "./pages/TrackVisa";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/my-bookings" element={<MyBookings />} />
+                <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/track-visa" element={<TrackVisa />} />
                 <Route path="/admin" element={<AdminDashboard />} />
