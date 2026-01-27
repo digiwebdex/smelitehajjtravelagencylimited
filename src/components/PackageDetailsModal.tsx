@@ -39,42 +39,62 @@ interface PackageDetailsModalProps {
 
 // Helper component to format description text with proper sections
 const FormattedDescription = ({ text }: { text: string }) => {
-  // Split by section headers (text wrapped in **)
-  const parts = text.split(/\*\*([^*]+)\*\*/g).filter(Boolean);
-  
+  // Split by section headers (text wrapped in ** **)
+  const regex = /\*\*([^*]+)\*\*/g;
   const parsedSections: { title: string; content: { type: 'bullet' | 'text'; value: string }[] }[] = [];
+  
+  let lastIndex = 0;
+  let match;
   let currentSection: { title: string; content: { type: 'bullet' | 'text'; value: string }[] } | null = null;
   
-  parts.forEach((part, index) => {
-    const trimmed = part.trim();
-    if (!trimmed) return;
+  while ((match = regex.exec(text)) !== null) {
+    // Get content before this match (belongs to previous section)
+    const contentBefore = text.slice(lastIndex, match.index).trim();
     
-    // Odd indices after split are the section titles
-    if (index % 2 === 1) {
-      // Save previous section
-      if (currentSection) {
-        parsedSections.push(currentSection);
-      }
-      currentSection = { title: trimmed.replace(/:$/, ''), content: [] };
-    } else if (currentSection) {
-      // This is content - check if it has bullet points
-      if (trimmed.includes('•')) {
-        const items = trimmed.split('•').filter(item => item.trim());
+    if (currentSection && contentBefore) {
+      // Parse the content for the previous section
+      if (contentBefore.includes('•')) {
+        const items = contentBefore.split('•').filter(item => item.trim());
         items.forEach(item => {
           currentSection!.content.push({ type: 'bullet', value: item.trim() });
         });
       } else {
-        // Plain text paragraph - split by newlines for multiple paragraphs
-        const paragraphs = trimmed.split('\n').filter(p => p.trim());
+        const paragraphs = contentBefore.split('\n').filter(p => p.trim());
         paragraphs.forEach(p => {
           currentSection!.content.push({ type: 'text', value: p.trim() });
         });
       }
     }
-  });
+    
+    // Save previous section if exists
+    if (currentSection && currentSection.content.length > 0) {
+      parsedSections.push(currentSection);
+    }
+    
+    // Start new section with the matched title
+    const title = match[1].trim().replace(/:$/, '');
+    currentSection = { title, content: [] };
+    lastIndex = regex.lastIndex;
+  }
+  
+  // Get remaining content after last match
+  const remainingContent = text.slice(lastIndex).trim();
+  if (currentSection && remainingContent) {
+    if (remainingContent.includes('•')) {
+      const items = remainingContent.split('•').filter(item => item.trim());
+      items.forEach(item => {
+        currentSection!.content.push({ type: 'bullet', value: item.trim() });
+      });
+    } else {
+      const paragraphs = remainingContent.split('\n').filter(p => p.trim());
+      paragraphs.forEach(p => {
+        currentSection!.content.push({ type: 'text', value: p.trim() });
+      });
+    }
+  }
   
   // Add last section
-  if (currentSection) {
+  if (currentSection && currentSection.content.length > 0) {
     parsedSections.push(currentSection);
   }
 
