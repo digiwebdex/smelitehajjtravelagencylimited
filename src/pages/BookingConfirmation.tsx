@@ -26,11 +26,14 @@ import {
   ArrowRight,
   Phone,
   Mail,
-  Clock
+  Clock,
+  Upload
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { generateBookingPDF } from "@/utils/generateBookingPDF";
 import { cn } from "@/lib/utils";
+import BookingDocumentUploadInline from "@/components/BookingDocumentUploadInline";
+import { useAuth } from "@/hooks/useAuth";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
 
@@ -106,6 +109,7 @@ const getNextSteps = (paymentMethod: string | null, paymentStatus: string): stri
 const BookingConfirmation = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -366,6 +370,16 @@ const BookingConfirmation = () => {
               </ul>
             </CardContent>
           </Card>
+
+          {/* Document Upload Section */}
+          {user && bookingId && (
+            <div className="mb-6">
+              <BookingDocumentUploadInline 
+                bookingId={bookingId}
+                userId={user.id}
+              />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center print:hidden">

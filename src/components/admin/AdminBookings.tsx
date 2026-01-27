@@ -33,7 +33,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText, FolderOpen } from "lucide-react";
 import * as XLSX from "xlsx";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 import AdminTrackingStatus from "./AdminTrackingStatus";
 import AdminEMIManagement from "./AdminEMIManagement";
 import AdminBankTransferVerification from "./AdminBankTransferVerification";
+import AdminDocumentReview from "./AdminDocumentReview";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
 
@@ -117,11 +118,14 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const [trackingBooking, setTrackingBooking] = useState<Booking | null>(null);
   const [emiBooking, setEmiBooking] = useState<Booking | null>(null);
   const [verifyBankTransferBooking, setVerifyBankTransferBooking] = useState<Booking | null>(null);
+  const [documentReviewBooking, setDocumentReviewBooking] = useState<Booking | null>(null);
+  const [documentCounts, setDocumentCounts] = useState<Record<string, number>>({});
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     fetchBookings();
+    fetchDocumentCounts();
   }, []);
 
   const fetchBookings = async () => {
@@ -174,6 +178,20 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
       setBookings(bookingsWithProfiles as Booking[]);
     }
     setLoading(false);
+  };
+
+  const fetchDocumentCounts = async () => {
+    const { data, error } = await supabase
+      .from("booking_documents")
+      .select("booking_id");
+
+    if (!error && data) {
+      const counts: Record<string, number> = {};
+      data.forEach((doc) => {
+        counts[doc.booking_id] = (counts[doc.booking_id] || 0) + 1;
+      });
+      setDocumentCounts(counts);
+    }
   };
 
   // Helper to get customer display info (profile or guest)
@@ -579,6 +597,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                   <TableHead>Passengers</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Payment</TableHead>
+                  <TableHead>Documents</TableHead>
                   <TableHead>Tracking</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -663,6 +682,20 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                           </span>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                          "gap-1 h-7 text-xs",
+                          documentCounts[booking.id] > 0 && "border-green-500/50 text-green-700"
+                        )}
+                        onClick={() => setDocumentReviewBooking(booking)}
+                      >
+                        <FolderOpen className="w-3 h-3" />
+                        {documentCounts[booking.id] || 0} Files
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <Button
@@ -872,6 +905,17 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           onUpdate();
         }}
       />
+
+      {/* Document Review Modal */}
+      {documentReviewBooking && (
+        <AdminDocumentReview
+          isOpen={!!documentReviewBooking}
+          onClose={() => setDocumentReviewBooking(null)}
+          bookingId={documentReviewBooking.id}
+          customerName={getCustomerInfo(documentReviewBooking).name}
+          packageTitle={documentReviewBooking.packages.title}
+        />
+      )}
     </>
   );
 };
