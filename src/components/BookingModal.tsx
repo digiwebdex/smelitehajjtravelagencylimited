@@ -343,6 +343,20 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
       body: { bookingId: bookingId }
     }).catch(err => console.error("Notification error:", err));
 
+    // Auto-create user account with phone number and send credentials via SMS/Email
+    supabase.functions.invoke("create-guest-account", {
+      body: {
+        bookingId: bookingId,
+        guestName: formData.guestName.trim(),
+        guestPhone: formData.guestPhone.trim(),
+        guestEmail: formData.guestEmail.trim() || undefined,
+      }
+    }).then(response => {
+      if (response.data?.isNew) {
+        console.log("Guest account created, credentials sent via SMS/Email");
+      }
+    }).catch(err => console.error("Account creation error:", err));
+
     // For installment bookings, redirect to confirmation page
     if (isInstallment) {
       onClose();

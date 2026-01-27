@@ -9,6 +9,12 @@ verify_jwt = false
 [functions.send-visa-notification]
 verify_jwt = false
 
+[functions.send-welcome-notification]
+verify_jwt = false
+
+[functions.create-guest-account]
+verify_jwt = false
+
 [functions.payment-sslcommerz]
 verify_jwt = false
 
