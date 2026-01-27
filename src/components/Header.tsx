@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin, MessageCircle, Package, ClipboardList } from "lucide-react";
+import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin, MessageCircle, Package, ClipboardList, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -17,6 +17,7 @@ import { formatCurrency } from "@/lib/currency";
 import { hasGuestBookings } from "@/utils/guestBookingStorage";
 import companyLogo from "@/assets/company-logo.jpeg";
 import BookingModal from "./BookingModal";
+import VisaApplicationModal from "./VisaApplicationModal";
 
 interface MenuItem {
   id: string;
@@ -31,6 +32,14 @@ interface PackageItem {
   price: number;
   type: "hajj" | "umrah";
   duration_days: number;
+}
+
+interface VisaCountry {
+  id: string;
+  country_name: string;
+  flag_emoji: string;
+  processing_time: string;
+  price: number;
 }
 
 const ANNOUNCEMENT_DISMISSED_KEY = "smEliteHajj_announcementDismissed";
@@ -49,8 +58,11 @@ const Header = () => {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [packages, setPackages] = useState<PackageItem[]>([]);
+  const [visaCountries, setVisaCountries] = useState<VisaCountry[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageItem | null>(null);
+  const [selectedVisaCountry, setSelectedVisaCountry] = useState<VisaCountry | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isVisaModalOpen, setIsVisaModalOpen] = useState(false);
   const [showMyBookings, setShowMyBookings] = useState(false);
 
   // Check if user has bookings (logged in or guest)
@@ -70,6 +82,7 @@ const Header = () => {
   useEffect(() => {
     fetchMenuItems();
     fetchPackages();
+    fetchVisaCountries();
   }, []);
 
   const fetchMenuItems = async () => {
@@ -109,6 +122,18 @@ const Header = () => {
     }
   };
 
+  const fetchVisaCountries = async () => {
+    const { data } = await supabase
+      .from("visa_countries")
+      .select("id, country_name, flag_emoji, processing_time, price")
+      .eq("is_active", true)
+      .order("order_index");
+    
+    if (data) {
+      setVisaCountries(data);
+    }
+  };
+
   const handleBookPackage = (pkg: PackageItem) => {
     setSelectedPackage(pkg);
     setIsBookingModalOpen(true);
@@ -121,6 +146,17 @@ const Header = () => {
     setSelectedPackage(null);
     // Check again for guest bookings
     setShowMyBookings(!!user || hasGuestBookings());
+  };
+
+  const handleApplyVisa = (country: VisaCountry) => {
+    setSelectedVisaCountry(country);
+    setIsVisaModalOpen(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleVisaModalClose = () => {
+    setIsVisaModalOpen(false);
+    setSelectedVisaCountry(null);
   };
 
   const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -320,6 +356,29 @@ const Header = () => {
                         ))}
                       </>
                     )}
+                    {visaCountries.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel className="text-primary font-semibold flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5" />
+                          Visa Services
+                        </DropdownMenuLabel>
+                        {visaCountries.map((country) => (
+                          <DropdownMenuItem 
+                            key={country.id} 
+                            onClick={() => handleApplyVisa(country)}
+                            className="flex flex-col items-start gap-1 cursor-pointer py-2"
+                          >
+                            <span className="font-medium text-foreground">{country.flag_emoji} {country.country_name}</span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-2">
+                              <span>{country.processing_time}</span>
+                              <span>•</span>
+                              <span className="text-primary font-semibold">{formatCurrency(country.price)}</span>
+                            </span>
+                          </DropdownMenuItem>
+                        ))}
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -426,6 +485,29 @@ const Header = () => {
                             ))}
                           </>
                         )}
+                        {visaCountries.length > 0 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-primary font-semibold flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5" />
+                              Visa Services
+                            </DropdownMenuLabel>
+                            {visaCountries.map((country) => (
+                              <DropdownMenuItem 
+                                key={country.id} 
+                                onClick={() => handleApplyVisa(country)}
+                                className="flex flex-col items-start gap-1 cursor-pointer py-2"
+                              >
+                                <span className="font-medium text-foreground">{country.flag_emoji} {country.country_name}</span>
+                                <span className="text-xs text-muted-foreground flex items-center gap-2">
+                                  <span>{country.processing_time}</span>
+                                  <span>•</span>
+                                  <span className="text-primary font-semibold">{formatCurrency(country.price)}</span>
+                                </span>
+                              </DropdownMenuItem>
+                            ))}
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
@@ -450,6 +532,13 @@ const Header = () => {
           }}
         />
       )}
+
+      {/* Visa Application Modal */}
+      <VisaApplicationModal
+        isOpen={isVisaModalOpen}
+        onClose={handleVisaModalClose}
+        country={selectedVisaCountry}
+      />
     </>
   );
 };
