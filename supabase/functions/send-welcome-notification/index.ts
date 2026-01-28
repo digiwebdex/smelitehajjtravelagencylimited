@@ -1,10 +1,92 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// Simple SMTP helper for sending emails
+const sendSMTPEmail = async (
+  config: { host: string; port: number; user: string; password: string; fromEmail: string; fromName: string },
+  to: string,
+  subject: string,
+  htmlContent: string
+): Promise<void> => {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  const conn = await Deno.connect({ hostname: config.host, port: config.port });
+  
+  const readResponse = async (): Promise<string> => {
+    const buffer = new Uint8Array(1024);
+    const n = await conn.read(buffer);
+    return n ? decoder.decode(buffer.subarray(0, n)) : "";
+  };
+
+  const writeCommand = async (cmd: string): Promise<string> => {
+    await conn.write(encoder.encode(cmd + "\r\n"));
+    return await readResponse();
+  };
+
+  try {
+    await readResponse();
+    await writeCommand(`EHLO localhost`);
+    
+    const starttlsResp = await writeCommand("STARTTLS");
+    if (starttlsResp.startsWith("220")) {
+      const tlsConn = await Deno.startTls(conn, { hostname: config.host });
+      
+      const tlsReadResponse = async (): Promise<string> => {
+        const buffer = new Uint8Array(2048);
+        const n = await tlsConn.read(buffer);
+        return n ? decoder.decode(buffer.subarray(0, n)) : "";
+      };
+
+      const tlsWriteCommand = async (cmd: string): Promise<string> => {
+        await tlsConn.write(encoder.encode(cmd + "\r\n"));
+        return await tlsReadResponse();
+      };
+
+      await tlsWriteCommand(`EHLO localhost`);
+      await tlsWriteCommand("AUTH LOGIN");
+      await tlsWriteCommand(btoa(config.user));
+      const authResp = await tlsWriteCommand(btoa(config.password));
+      
+      if (!authResp.startsWith("235")) {
+        throw new Error("SMTP authentication failed: " + authResp);
+      }
+      
+      await tlsWriteCommand(`MAIL FROM:<${config.fromEmail}>`);
+      await tlsWriteCommand(`RCPT TO:<${to}>`);
+      await tlsWriteCommand("DATA");
+      
+      const emailContent = [
+        `From: ${config.fromName} <${config.fromEmail}>`,
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        htmlContent,
+        `.`
+      ].join("\r\n");
+      
+      const dataResp = await tlsWriteCommand(emailContent);
+      
+      if (!dataResp.startsWith("250")) {
+        throw new Error("Failed to send email: " + dataResp);
+      }
+      
+      await tlsWriteCommand("QUIT");
+      tlsConn.close();
+    } else {
+      throw new Error("STARTTLS not supported: " + starttlsResp);
+    }
+  } catch (error) {
+    conn.close();
+    throw error;
+  }
 };
 
 interface WelcomeRequest {
@@ -33,17 +115,11 @@ interface EmailConfig {
   from_name: string;
 }
 
-// Helper to format phone number for WhatsApp
 const formatWhatsAppNumber = (phone: string): string => {
-  // Remove all non-digit characters
   let cleaned = phone.replace(/\D/g, '');
-  
-  // If starts with 0, assume Bangladesh and replace with 880
   if (cleaned.startsWith('0')) {
     cleaned = '880' + cleaned.substring(1);
   }
-  
-  // Add whatsapp: prefix if not present
   return `whatsapp:+${cleaned}`;
 };
 
@@ -51,10 +127,7 @@ const getWelcomeEmailHtml = (fullName: string): string => {
   return `
     <!DOCTYPE html>
     <html>
-    <head>
-      <meta charset="utf-8">
-      <title>Welcome to SM Elite Hajj</title>
-    </head>
+    <head><meta charset="utf-8"><title>Welcome to SM Elite Hajj</title></head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4;">
       <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #d4a853, #c4963e); color: white; padding: 40px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -63,9 +136,7 @@ const getWelcomeEmailHtml = (fullName: string): string => {
         </div>
         <div style="background: white; padding: 40px; border-radius: 0 0 10px 10px;">
           <p style="font-size: 18px; margin-top: 0;">Assalamu Alaikum <strong>${fullName}</strong>,</p>
-          
           <p>We are honored and delighted to welcome you to the SM Elite Hajj family! May Allah bless your journey with us.</p>
-          
           <div style="background: linear-gradient(135deg, #f8f4e8, #fff); padding: 25px; border-radius: 10px; margin: 25px 0; border-left: 4px solid #d4a853;">
             <h3 style="margin-top: 0; color: #d4a853;">🌟 What We Offer:</h3>
             <ul style="margin: 0; padding-left: 20px; color: #555;">
@@ -75,14 +146,11 @@ const getWelcomeEmailHtml = (fullName: string): string => {
               <li style="margin: 10px 0;"><strong>24/7 Support</strong> - We're always here to assist you</li>
             </ul>
           </div>
-          
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
             <p style="margin: 0; color: #666;">Ready to begin your spiritual journey?</p>
             <a href="https://smelitehajjtravelagencylimited.lovable.app" style="display: inline-block; margin-top: 15px; background: linear-gradient(135deg, #d4a853, #c4963e); color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold;">Browse Our Packages</a>
           </div>
-          
-          <p>If you have any questions or need assistance, our team is always ready to help. Feel free to reach out to us anytime.</p>
-          
+          <p>If you have any questions or need assistance, our team is always ready to help.</p>
           <p style="margin-bottom: 0;">
             May Allah accept your intentions and grant you the opportunity to perform Hajj and Umrah.<br><br>
             <strong>JazakAllah Khair,</strong><br>
@@ -119,52 +187,34 @@ const handler = async (req: Request): Promise<Response> => {
       email: { sent: false, error: null as string | null },
     };
 
-    // Fetch all notification settings
-    const { data: settings, error: settingsError } = await supabase
-      .from("notification_settings")
-      .select("*");
-
-    if (settingsError) {
-      console.error("Error fetching notification settings:", settingsError);
-      throw new Error("Could not fetch notification settings");
-    }
+    const { data: settings } = await supabase.from("notification_settings").select("*");
 
     const whatsappSettings = settings?.find(s => s.setting_type === "whatsapp");
     const emailSettings = settings?.find(s => s.setting_type === "email");
 
-    // Send Welcome Email if enabled and email exists
+    // Send Welcome Email if enabled
     if (emailSettings?.is_enabled && email) {
       try {
         const emailConfig = emailSettings.config as unknown as EmailConfig;
         console.log("Sending welcome email to:", email);
 
-        const client = new SMTPClient({
-          connection: {
-            hostname: emailConfig.smtp_host,
+        await sendSMTPEmail(
+          {
+            host: emailConfig.smtp_host,
             port: emailConfig.smtp_port,
-            tls: emailConfig.smtp_port === 465,
-            auth: {
-              username: emailConfig.smtp_user,
-              password: emailConfig.smtp_password,
-            },
+            user: emailConfig.smtp_user,
+            password: emailConfig.smtp_password,
+            fromEmail: emailConfig.from_email,
+            fromName: emailConfig.from_name,
           },
-        });
+          email,
+          "🕋 Welcome to SM Elite Hajj - Your Spiritual Journey Begins!",
+          getWelcomeEmailHtml(fullName || "Valued Customer")
+        );
 
-        const emailHtml = getWelcomeEmailHtml(fullName || "Valued Customer");
-
-        await client.send({
-          from: `${emailConfig.from_name} <${emailConfig.from_email}>`,
-          to: email,
-          subject: "🕋 Welcome to SM Elite Hajj - Your Spiritual Journey Begins!",
-          content: `Welcome to SM Elite Hajj, ${fullName}! We're honored to have you join our family.`,
-          html: emailHtml,
-        });
-
-        await client.close();
         results.email.sent = true;
         console.log("Welcome email sent successfully");
 
-        // Log successful email
         await supabase.from("notification_logs").insert({
           booking_id: null,
           notification_type: "email_welcome",
@@ -175,7 +225,6 @@ const handler = async (req: Request): Promise<Response> => {
         console.error("Welcome email sending error:", emailError);
         results.email.error = emailError.message;
 
-        // Log failed email
         await supabase.from("notification_logs").insert({
           booking_id: null,
           notification_type: "email_welcome",
@@ -186,7 +235,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Send WhatsApp Welcome if enabled and phone exists
+    // Send WhatsApp Welcome if enabled
     if (whatsappSettings?.is_enabled && phone) {
       const whatsappConfig = whatsappSettings.config as unknown as WhatsAppConfig;
 
@@ -194,15 +243,12 @@ const handler = async (req: Request): Promise<Response> => {
         try {
           console.log("Sending WhatsApp welcome to:", phone);
 
-          // Format the welcome message from template
           const defaultTemplate = "🌟 Assalamu Alaikum {{name}}! Welcome to SM Elite Hajj. We're honored to have you join our family. May your journey with us be blessed. Contact us anytime for Hajj, Umrah, or Visa services. JazakAllah Khair! 🕋";
           
           let message = whatsappConfig.welcome_message_template || defaultTemplate;
           message = message.replace(/\{\{name\}\}/g, fullName || 'Valued Customer');
 
           const toNumber = formatWhatsAppNumber(phone);
-          
-          // Use Twilio API to send WhatsApp message
           const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${whatsappConfig.account_sid}/Messages.json`;
           
           const formData = new URLSearchParams();
@@ -226,12 +272,8 @@ const handler = async (req: Request): Promise<Response> => {
             throw new Error(`WhatsApp API error: ${errorData.message || JSON.stringify(errorData)}`);
           }
 
-          const responseData = await whatsappResponse.json();
-          console.log("WhatsApp welcome message sent, SID:", responseData.sid);
-
           results.whatsapp.sent = true;
 
-          // Log the notification
           await supabase.from("notification_logs").insert({
             booking_id: null,
             notification_type: "whatsapp_welcome",

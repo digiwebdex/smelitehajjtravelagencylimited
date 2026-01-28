@@ -1,6 +1,89 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
+// Simple SMTP helper for sending emails
+const sendSMTPEmail = async (
+  config: { host: string; port: number; user: string; password: string; fromEmail: string; fromName: string },
+  to: string,
+  subject: string,
+  htmlContent: string
+): Promise<void> => {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  const conn = await Deno.connect({ hostname: config.host, port: config.port });
+  
+  const readResponse = async (): Promise<string> => {
+    const buffer = new Uint8Array(1024);
+    const n = await conn.read(buffer);
+    return n ? decoder.decode(buffer.subarray(0, n)) : "";
+  };
+
+  const writeCommand = async (cmd: string): Promise<string> => {
+    await conn.write(encoder.encode(cmd + "\r\n"));
+    return await readResponse();
+  };
+
+  try {
+    await readResponse();
+    await writeCommand(`EHLO localhost`);
+    
+    const starttlsResp = await writeCommand("STARTTLS");
+    if (starttlsResp.startsWith("220")) {
+      const tlsConn = await Deno.startTls(conn, { hostname: config.host });
+      
+      const tlsReadResponse = async (): Promise<string> => {
+        const buffer = new Uint8Array(2048);
+        const n = await tlsConn.read(buffer);
+        return n ? decoder.decode(buffer.subarray(0, n)) : "";
+      };
+
+      const tlsWriteCommand = async (cmd: string): Promise<string> => {
+        await tlsConn.write(encoder.encode(cmd + "\r\n"));
+        return await tlsReadResponse();
+      };
+
+      await tlsWriteCommand(`EHLO localhost`);
+      await tlsWriteCommand("AUTH LOGIN");
+      await tlsWriteCommand(btoa(config.user));
+      const authResp = await tlsWriteCommand(btoa(config.password));
+      
+      if (!authResp.startsWith("235")) {
+        throw new Error("SMTP authentication failed: " + authResp);
+      }
+      
+      await tlsWriteCommand(`MAIL FROM:<${config.fromEmail}>`);
+      await tlsWriteCommand(`RCPT TO:<${to}>`);
+      await tlsWriteCommand("DATA");
+      
+      const emailContent = [
+        `From: ${config.fromName} <${config.fromEmail}>`,
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        htmlContent,
+        `.`
+      ].join("\r\n");
+      
+      const dataResp = await tlsWriteCommand(emailContent);
+      
+      if (!dataResp.startsWith("250")) {
+        throw new Error("Failed to send email: " + dataResp);
+      }
+      
+      await tlsWriteCommand("QUIT");
+      tlsConn.close();
+    } else {
+      throw new Error("STARTTLS not supported: " + starttlsResp);
+    }
+  } catch (error) {
+    conn.close();
+    throw error;
+  }
+};
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -250,85 +333,60 @@ const handler = async (req: Request): Promise<Response> => {
     // Send via Email if enabled and email exists
     if (emailSettings?.is_enabled && guestEmail) {
       try {
-        const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
         const emailConfig = emailSettings.config as unknown as EmailConfig;
-        
         console.log("Sending email to:", guestEmail);
 
-        const client = new SMTPClient({
-          connection: {
-            hostname: emailConfig.smtp_host,
-            port: emailConfig.smtp_port,
-            tls: emailConfig.smtp_port === 465,
-            auth: {
-              username: emailConfig.smtp_user,
-              password: emailConfig.smtp_password,
-            },
-          },
-        });
-
-        await client.send({
-          from: `${emailConfig.from_name} <${emailConfig.from_email}>`,
-          to: guestEmail,
-          subject: "Your SM Elite Hajj Account Credentials",
-          content: credentialsMessage,
-          html: `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <title>Account Created</title>
-              <style>
-                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #d4a853, #c4963e); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-                .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-                .credentials { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d4a853; }
-                .credential-item { padding: 10px 0; }
-                .label { font-weight: bold; color: #666; }
-                .value { font-size: 18px; font-family: monospace; background: #f0f0f0; padding: 5px 10px; border-radius: 4px; }
-                .warning { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0; }
-                .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="header">
-                  <h1>🎉 Account Created!</h1>
-                  <p>Welcome to SM Elite Hajj</p>
-                </div>
-                <div class="content">
-                  <p>Dear ${guestName},</p>
-                  <p>Your account has been created automatically after your booking. Here are your login credentials:</p>
-                  
-                  <div class="credentials">
-                    <div class="credential-item">
-                      <p class="label">📧 Login Email:</p>
-                      <p class="value">${email}</p>
-                    </div>
-                    <div class="credential-item">
-                      <p class="label">🔐 Password:</p>
-                      <p class="value">${password}</p>
-                    </div>
-                  </div>
-                  
-                  <div class="warning">
-                    <strong>⚠️ Important:</strong> Please save these credentials securely and change your password after your first login.
-                  </div>
-                  
-                  <p>You can now log in to view your bookings, track your order, and manage your account.</p>
-                  <p>Thank you for choosing SM Elite Hajj for your spiritual journey! 🕋</p>
-                </div>
-                <div class="footer">
-                  <p>This is an automated email. Please do not reply directly to this email.</p>
-                </div>
+        const emailHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><title>Account Created</title></head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background: linear-gradient(135deg, #d4a853, #c4963e); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0;">🎉 Account Created!</h1>
+                <p style="margin: 10px 0 0 0;">Welcome to SM Elite Hajj</p>
               </div>
-            </body>
-            </html>
-          `,
-        });
+              <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+                <p>Dear ${guestName},</p>
+                <p>Your account has been created automatically after your booking. Here are your login credentials:</p>
+                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #d4a853;">
+                  <div style="padding: 10px 0;">
+                    <p style="font-weight: bold; color: #666; margin: 0;">📧 Login Email:</p>
+                    <p style="font-size: 18px; font-family: monospace; background: #f0f0f0; padding: 5px 10px; border-radius: 4px; margin: 5px 0;">${email}</p>
+                  </div>
+                  <div style="padding: 10px 0;">
+                    <p style="font-weight: bold; color: #666; margin: 0;">🔐 Password:</p>
+                    <p style="font-size: 18px; font-family: monospace; background: #f0f0f0; padding: 5px 10px; border-radius: 4px; margin: 5px 0;">${password}</p>
+                  </div>
+                </div>
+                <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                  <strong>⚠️ Important:</strong> Please save these credentials securely and change your password after your first login.
+                </div>
+                <p>You can now log in to view your bookings, track your order, and manage your account.</p>
+                <p>Thank you for choosing SM Elite Hajj for your spiritual journey! 🕋</p>
+              </div>
+              <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
+                <p>This is an automated email. Please do not reply directly to this email.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
 
-        await client.close();
+        await sendSMTPEmail(
+          {
+            host: emailConfig.smtp_host,
+            port: emailConfig.smtp_port,
+            user: emailConfig.smtp_user,
+            password: emailConfig.smtp_password,
+            fromEmail: emailConfig.from_email,
+            fromName: emailConfig.from_name,
+          },
+          guestEmail,
+          "Your SM Elite Hajj Account Credentials",
+          emailHtml
+        );
+
         notificationResults.email.sent = true;
         console.log("Email sent successfully");
       } catch (err: any) {

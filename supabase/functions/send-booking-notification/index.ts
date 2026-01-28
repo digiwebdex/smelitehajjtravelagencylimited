@@ -1,6 +1,105 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+
+// Simple SMTP helper for sending emails
+const sendSMTPEmail = async (
+  config: { host: string; port: number; user: string; password: string; fromEmail: string; fromName: string },
+  to: string,
+  subject: string,
+  htmlContent: string
+): Promise<void> => {
+  // Use a web-based email API approach for reliability
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  // Connect to SMTP server
+  const conn = await Deno.connect({ hostname: config.host, port: config.port });
+  
+  const readResponse = async (): Promise<string> => {
+    const buffer = new Uint8Array(1024);
+    const n = await conn.read(buffer);
+    return n ? decoder.decode(buffer.subarray(0, n)) : "";
+  };
+
+  const writeCommand = async (cmd: string): Promise<string> => {
+    await conn.write(encoder.encode(cmd + "\r\n"));
+    return await readResponse();
+  };
+
+  try {
+    // Read server greeting
+    await readResponse();
+    
+    // EHLO
+    await writeCommand(`EHLO localhost`);
+    
+    // STARTTLS
+    const starttlsResp = await writeCommand("STARTTLS");
+    if (starttlsResp.startsWith("220")) {
+      // Upgrade to TLS
+      const tlsConn = await Deno.startTls(conn, { hostname: config.host });
+      
+      const tlsReadResponse = async (): Promise<string> => {
+        const buffer = new Uint8Array(2048);
+        const n = await tlsConn.read(buffer);
+        return n ? decoder.decode(buffer.subarray(0, n)) : "";
+      };
+
+      const tlsWriteCommand = async (cmd: string): Promise<string> => {
+        await tlsConn.write(encoder.encode(cmd + "\r\n"));
+        return await tlsReadResponse();
+      };
+
+      // EHLO again after TLS
+      await tlsWriteCommand(`EHLO localhost`);
+      
+      // AUTH LOGIN
+      await tlsWriteCommand("AUTH LOGIN");
+      await tlsWriteCommand(btoa(config.user));
+      const authResp = await tlsWriteCommand(btoa(config.password));
+      
+      if (!authResp.startsWith("235")) {
+        throw new Error("SMTP authentication failed: " + authResp);
+      }
+      
+      // MAIL FROM
+      await tlsWriteCommand(`MAIL FROM:<${config.fromEmail}>`);
+      
+      // RCPT TO
+      await tlsWriteCommand(`RCPT TO:<${to}>`);
+      
+      // DATA
+      await tlsWriteCommand("DATA");
+      
+      // Email content
+      const emailContent = [
+        `From: ${config.fromName} <${config.fromEmail}>`,
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        htmlContent,
+        `.`
+      ].join("\r\n");
+      
+      const dataResp = await tlsWriteCommand(emailContent);
+      
+      if (!dataResp.startsWith("250")) {
+        throw new Error("Failed to send email: " + dataResp);
+      }
+      
+      // QUIT
+      await tlsWriteCommand("QUIT");
+      tlsConn.close();
+    } else {
+      throw new Error("STARTTLS not supported: " + starttlsResp);
+    }
+  } catch (error) {
+    conn.close();
+    throw error;
+  }
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -410,29 +509,22 @@ const handler = async (req: Request): Promise<Response> => {
         const emailConfig = emailSettings.config as unknown as EmailConfig;
         console.log("Sending email to:", customerEmail);
 
-        const client = new SMTPClient({
-          connection: {
-            hostname: emailConfig.smtp_host,
-            port: emailConfig.smtp_port,
-            tls: emailConfig.smtp_port === 465,
-            auth: {
-              username: emailConfig.smtp_user,
-              password: emailConfig.smtp_password,
-            },
-          },
-        });
-
         const { subject, html: emailHtml } = getEmailTemplate(notificationType, customerName, bookingDetails, rejectionReason);
 
-        await client.send({
-          from: `${emailConfig.from_name} <${emailConfig.from_email}>`,
-          to: customerEmail,
+        await sendSMTPEmail(
+          {
+            host: emailConfig.smtp_host,
+            port: emailConfig.smtp_port,
+            user: emailConfig.smtp_user,
+            password: emailConfig.smtp_password,
+            fromEmail: emailConfig.from_email,
+            fromName: emailConfig.from_name,
+          },
+          customerEmail,
           subject,
-          content: subject,
-          html: emailHtml,
-        });
+          emailHtml
+        );
 
-        await client.close();
         results.email.sent = true;
         console.log("Email sent successfully");
 
