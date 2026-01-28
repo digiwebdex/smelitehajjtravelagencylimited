@@ -311,6 +311,9 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
           variant: "destructive",
         });
       } else {
+        // Small delay to ensure emi_payments record is fully committed before RLS check on installments
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Create individual installments using the pre-generated ID
         const installmentsToCreate = [];
         const today = new Date();
