@@ -50,6 +50,12 @@ const InstallmentPaymentModal = ({
   };
 
   const handlePayment = async () => {
+    // Prevent double submission
+    if (processing) {
+      console.log("Blocking duplicate payment submission");
+      return;
+    }
+
     if (!selectedMethod) {
       toast({
         title: "Select Payment Method",

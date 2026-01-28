@@ -186,6 +186,12 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent double submission
+    if (loading || paymentProcessing) {
+      console.log("Blocking duplicate submission");
+      return;
+    }
+    
     // For installment payments, payment method is not required
     const dataToValidate = paymentType === "installment" 
       ? { ...formData, paymentMethod: "installment" }

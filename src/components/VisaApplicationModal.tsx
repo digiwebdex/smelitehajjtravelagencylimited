@@ -210,6 +210,12 @@ const VisaApplicationModal = ({ isOpen, onClose, country }: VisaApplicationModal
   };
 
   const handlePaymentSubmit = async () => {
+    // Prevent double submission
+    if (loading || paymentProcessing) {
+      console.log("Blocking duplicate visa payment submission");
+      return;
+    }
+
     if (!paymentMethod) {
       toast({
         title: "Select Payment Method",
