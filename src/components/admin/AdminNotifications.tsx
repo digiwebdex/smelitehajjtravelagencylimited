@@ -10,9 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, MessageSquare, Settings, History, Loader2, Eye, EyeOff, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Mail, MessageSquare, Settings, History, Loader2, Eye, EyeOff, CheckCircle, XCircle, Clock, Bell } from "lucide-react";
 import { format } from "date-fns";
 import WhatsAppIcon from "@/components/icons/WhatsAppNotificationIcon";
+import AdminInstallmentReminders from "./AdminInstallmentReminders";
 
 interface SMSConfig {
   provider: string;
@@ -288,7 +289,7 @@ const AdminNotifications = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="sms" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="sms" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             SMS Settings
@@ -301,9 +302,13 @@ const AdminNotifications = () => {
             <Mail className="h-4 w-4" />
             Email Settings
           </TabsTrigger>
+          <TabsTrigger value="reminders" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Reminders
+          </TabsTrigger>
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <History className="h-4 w-4" />
-            Notification Logs
+            Logs
           </TabsTrigger>
         </TabsList>
 
@@ -630,6 +635,11 @@ const AdminNotifications = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Installment Reminders Tab */}
+        <TabsContent value="reminders">
+          <AdminInstallmentReminders />
         </TabsContent>
 
         {/* Notification Logs Tab */}
