@@ -234,32 +234,33 @@
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted-foreground) / 0.4) hsl(var(--muted) / 0.3);
+  scrollbar-width: auto;
+  scrollbar-color: hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.4);
   position: relative;
 }
 
 .admin-table-scroll::-webkit-scrollbar {
-  height: 10px;
-  background: hsl(var(--muted) / 0.3);
-  border-radius: 5px;
+  height: 14px;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 7px;
+  display: block !important;
 }
 
 .admin-table-scroll::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.4);
-  border-radius: 5px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: hsl(var(--primary) / 0.4);
+  border-radius: 7px;
+  border: 3px solid hsl(var(--muted) / 0.4);
+  min-width: 80px;
 }
 
 .admin-table-scroll::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.6);
-  background-clip: padding-box;
+  background: hsl(var(--primary) / 0.6);
 }
 
 .admin-table-scroll::-webkit-scrollbar-track {
-  background: hsl(var(--muted) / 0.2);
-  border-radius: 5px;
+  background: hsl(var(--muted) / 0.4);
+  border-radius: 7px;
+  margin: 0 8px;
 }
 
 /* Sticky column shadows for visual depth */
