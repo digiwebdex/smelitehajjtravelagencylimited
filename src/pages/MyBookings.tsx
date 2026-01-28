@@ -52,6 +52,7 @@ interface Booking {
   guest_email?: string | null;
   guest_phone?: string | null;
   payment_status?: string;
+  user_id?: string | null;
   packages: {
     title: string;
     type: string;
@@ -173,6 +174,7 @@ const MyBookings = () => {
         guest_email,
         guest_phone,
         payment_status,
+        user_id,
         packages (
           title,
           type,
@@ -205,6 +207,7 @@ const MyBookings = () => {
         guest_email,
         guest_phone,
         payment_status,
+        user_id,
         packages (
           title,
           type,
@@ -697,12 +700,12 @@ const MyBookings = () => {
       />
 
       {/* Document Upload Modal */}
-      {documentUploadBooking && user && (
+      {documentUploadBooking && (user || documentUploadBooking.user_id) && (
         <BookingDocumentUpload
           isOpen={!!documentUploadBooking}
           onClose={() => setDocumentUploadBooking(null)}
           bookingId={documentUploadBooking.id}
-          userId={user.id}
+          userId={user?.id || documentUploadBooking.user_id || ''}
           packageTitle={documentUploadBooking.packages.title}
         />
       )}

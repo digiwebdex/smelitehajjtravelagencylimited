@@ -49,6 +49,7 @@ interface BookingDetails {
   payment_status: string;
   payment_method: string | null;
   tracking_status: TrackingStatus;
+  user_id: string | null;
   packages: {
     title: string;
     type: string;
@@ -136,6 +137,7 @@ const BookingConfirmation = () => {
           payment_status,
           payment_method,
           tracking_status,
+          user_id,
           packages (
             title,
             type,
@@ -372,11 +374,11 @@ const BookingConfirmation = () => {
           </Card>
 
           {/* Document Upload Section */}
-          {user && bookingId && (
+          {bookingId && (user || booking.user_id) && (
             <div className="mb-6">
               <BookingDocumentUploadInline 
                 bookingId={bookingId}
-                userId={user.id}
+                userId={user?.id || booking.user_id || ''}
               />
             </div>
           )}
