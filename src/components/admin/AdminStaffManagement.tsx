@@ -78,6 +78,12 @@ interface StaffMember {
   };
 }
 
+interface RegisteredUser {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+}
+
 interface ActivityLog {
   id: string;
   staff_id: string | null;
@@ -116,6 +122,7 @@ const AdminStaffManagement = () => {
   const { toast } = useToast();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
@@ -124,7 +131,7 @@ const AdminStaffManagement = () => {
   const [activityFilter, setActivityFilter] = useState<string>("all");
 
   const [formData, setFormData] = useState({
-    user_email: "",
+    user_id: "",
     staff_name: "",
     mobile_number: "",
     role: "agent" as 'admin' | 'manager' | 'agent' | 'support',
@@ -139,6 +146,7 @@ const AdminStaffManagement = () => {
   useEffect(() => {
     fetchStaff();
     fetchActivityLogs();
+    fetchRegisteredUsers();
   }, []);
 
   const fetchStaff = async () => {
@@ -180,6 +188,26 @@ const AdminStaffManagement = () => {
     }
   };
 
+  const fetchRegisteredUsers = async () => {
+    try {
+      // Fetch all profiles and filter out those already staff
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .order("full_name", { ascending: true });
+
+      if (error) throw error;
+      setRegisteredUsers(profiles || []);
+    } catch (error) {
+      console.error("Error fetching registered users:", error);
+    }
+  };
+
+  // Get available users (not already staff)
+  const availableUsers = registeredUsers.filter(
+    (user) => !staff.some((s) => s.user_id === user.id)
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -205,28 +233,25 @@ const AdminStaffManagement = () => {
 
         toast({ title: "Success", description: "Staff member updated successfully" });
       } else {
-        // First, find the user by email
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("id, email, full_name")
-          .eq("email", formData.user_email)
-          .single();
-
-        if (profileError || !profileData) {
+        // Validate user selection
+        if (!formData.user_id) {
           toast({
             title: "Error",
-            description: "User not found. Make sure the user has registered first.",
+            description: "Please select a registered user.",
             variant: "destructive",
           });
           return;
         }
 
+        // Get the selected user's info
+        const selectedUser = registeredUsers.find(u => u.id === formData.user_id);
+
         // Create new staff member
         const { error } = await supabase
           .from("staff_members")
           .insert({
-            user_id: profileData.id,
-            staff_name: formData.staff_name || profileData.full_name || null,
+            user_id: formData.user_id,
+            staff_name: formData.staff_name || selectedUser?.full_name || null,
             mobile_number: formData.mobile_number || null,
             role: formData.role,
             employee_id: formData.employee_id || null,
@@ -250,6 +275,7 @@ const AdminStaffManagement = () => {
         }
 
         toast({ title: "Success", description: "Staff member added successfully" });
+        fetchRegisteredUsers(); // Refresh to update available users
       }
 
       setIsDialogOpen(false);
@@ -312,7 +338,7 @@ const AdminStaffManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      user_email: "",
+      user_id: "",
       staff_name: "",
       mobile_number: "",
       role: "agent",
@@ -329,7 +355,7 @@ const AdminStaffManagement = () => {
   const openEditDialog = (staffMember: StaffMember) => {
     setEditingStaff(staffMember);
     setFormData({
-      user_email: staffMember.profile?.email || "",
+      user_id: staffMember.user_id,
       staff_name: staffMember.staff_name || staffMember.profile?.full_name || "",
       mobile_number: staffMember.mobile_number || "",
       role: staffMember.role,
@@ -416,19 +442,35 @@ const AdminStaffManagement = () => {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     {!editingStaff && (
                       <div className="space-y-2">
-                        <Label htmlFor="user_email">User Email *</Label>
-                        <Input
-                          id="user_email"
-                          type="email"
-                          value={formData.user_email}
-                          onChange={(e) =>
-                            setFormData({ ...formData, user_email: e.target.value })
-                          }
-                          placeholder="Enter registered user email"
-                          required
-                        />
+                        <Label htmlFor="user_id">Select Registered User *</Label>
+                        <Select
+                          value={formData.user_id}
+                          onValueChange={(value) => {
+                            const selectedUser = registeredUsers.find(u => u.id === value);
+                            setFormData({ 
+                              ...formData, 
+                              user_id: value,
+                              staff_name: selectedUser?.full_name || ""
+                            });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a registered user" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableUsers.length === 0 ? (
+                              <SelectItem value="none" disabled>No available users</SelectItem>
+                            ) : (
+                              availableUsers.map((user) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {user.full_name || "No Name"} ({user.email})
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
                         <p className="text-xs text-muted-foreground">
-                          The user must be registered first
+                          Only registered users not already staff are shown ({availableUsers.length} available)
                         </p>
                       </div>
                     )}
