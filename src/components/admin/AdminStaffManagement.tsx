@@ -151,16 +151,32 @@ const AdminStaffManagement = () => {
 
   const fetchStaff = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch staff members
+      const { data: staffData, error: staffError } = await supabase
         .from("staff_members")
-        .select(`
-          *,
-          profile:profiles!staff_members_user_id_fkey(full_name, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setStaff((data as unknown as StaffMember[]) || []);
+      if (staffError) throw staffError;
+
+      // Then fetch profiles for each staff member
+      if (staffData && staffData.length > 0) {
+        const userIds = staffData.map(s => s.user_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+
+        // Map profiles to staff members
+        const staffWithProfiles = staffData.map(staff => ({
+          ...staff,
+          profile: profilesData?.find(p => p.id === staff.user_id) || null
+        }));
+
+        setStaff(staffWithProfiles as unknown as StaffMember[]);
+      } else {
+        setStaff([]);
+      }
     } catch (error) {
       console.error("Error fetching staff:", error);
     } finally {
