@@ -130,11 +130,14 @@ const AdminStaffManagement = () => {
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [activityFilter, setActivityFilter] = useState<string>("all");
 
+  const [createNewUser, setCreateNewUser] = useState(true);
   const [formData, setFormData] = useState({
     user_id: "",
+    email: "",
+    password: "",
     staff_name: "",
     mobile_number: "",
-    role: "agent" as 'admin' | 'manager' | 'agent' | 'support',
+    role: "support" as 'admin' | 'manager' | 'agent' | 'support',
     employee_id: "",
     department: "",
     phone: "",
@@ -249,25 +252,74 @@ const AdminStaffManagement = () => {
 
         toast({ title: "Success", description: "Staff member updated successfully" });
       } else {
-        // Validate user selection
-        if (!formData.user_id) {
-          toast({
-            title: "Error",
-            description: "Please select a registered user.",
-            variant: "destructive",
-          });
-          return;
+        let userId = formData.user_id;
+        let staffName = formData.staff_name;
+
+        if (createNewUser) {
+          // Validate new user fields
+          if (!formData.email || !formData.password || !formData.staff_name) {
+            toast({
+              title: "Error",
+              description: "Email, password, and name are required for new staff.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          if (formData.password.length < 6) {
+            toast({
+              title: "Error",
+              description: "Password must be at least 6 characters.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          // Create user account via edge function
+          const { data: createResult, error: createError } = await supabase.functions.invoke(
+            "create-staff-user",
+            {
+              body: {
+                email: formData.email,
+                password: formData.password,
+                full_name: formData.staff_name,
+                phone: formData.mobile_number || undefined,
+              },
+            }
+          );
+
+          if (createError || !createResult?.user_id) {
+            toast({
+              title: "Error",
+              description: createResult?.error || createError?.message || "Failed to create user account",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          userId = createResult.user_id;
+          staffName = formData.staff_name;
+        } else {
+          // Validate existing user selection
+          if (!formData.user_id) {
+            toast({
+              title: "Error",
+              description: "Please select a registered user.",
+              variant: "destructive",
+            });
+            return;
+          }
+
+          const selectedUser = registeredUsers.find(u => u.id === formData.user_id);
+          staffName = formData.staff_name || selectedUser?.full_name || null;
         }
 
-        // Get the selected user's info
-        const selectedUser = registeredUsers.find(u => u.id === formData.user_id);
-
-        // Create new staff member
+        // Create staff member record
         const { error } = await supabase
           .from("staff_members")
           .insert({
-            user_id: formData.user_id,
-            staff_name: formData.staff_name || selectedUser?.full_name || null,
+            user_id: userId,
+            staff_name: staffName,
             mobile_number: formData.mobile_number || null,
             role: formData.role,
             employee_id: formData.employee_id || null,
@@ -290,8 +342,13 @@ const AdminStaffManagement = () => {
           throw error;
         }
 
-        toast({ title: "Success", description: "Staff member added successfully" });
-        fetchRegisteredUsers(); // Refresh to update available users
+        toast({ 
+          title: "Success", 
+          description: createNewUser 
+            ? `Staff member created. Login: ${formData.email}` 
+            : "Staff member added successfully" 
+        });
+        fetchRegisteredUsers();
       }
 
       setIsDialogOpen(false);
@@ -355,9 +412,11 @@ const AdminStaffManagement = () => {
   const resetForm = () => {
     setFormData({
       user_id: "",
+      email: "",
+      password: "",
       staff_name: "",
       mobile_number: "",
-      role: "agent",
+      role: "support",
       employee_id: "",
       department: "",
       phone: "",
@@ -366,12 +425,16 @@ const AdminStaffManagement = () => {
       permissions: { ...DEFAULT_PERMISSIONS },
     });
     setEditingStaff(null);
+    setCreateNewUser(true);
   };
 
   const openEditDialog = (staffMember: StaffMember) => {
     setEditingStaff(staffMember);
+    setCreateNewUser(false);
     setFormData({
       user_id: staffMember.user_id,
+      email: staffMember.profile?.email || "",
+      password: "",
       staff_name: staffMember.staff_name || staffMember.profile?.full_name || "",
       mobile_number: staffMember.mobile_number || "",
       role: staffMember.role,
@@ -457,38 +520,97 @@ const AdminStaffManagement = () => {
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     {!editingStaff && (
-                      <div className="space-y-2">
-                        <Label htmlFor="user_id">Select Registered User *</Label>
-                        <Select
-                          value={formData.user_id}
-                          onValueChange={(value) => {
-                            const selectedUser = registeredUsers.find(u => u.id === value);
-                            setFormData({ 
-                              ...formData, 
-                              user_id: value,
-                              staff_name: selectedUser?.full_name || ""
-                            });
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a registered user" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableUsers.length === 0 ? (
-                              <SelectItem value="none" disabled>No available users</SelectItem>
-                            ) : (
-                              availableUsers.map((user) => (
-                                <SelectItem key={user.id} value={user.id}>
-                                  {user.full_name || "No Name"} ({user.email})
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-muted-foreground">
-                          Only registered users not already staff are shown ({availableUsers.length} available)
-                        </p>
-                      </div>
+                      <>
+                        {/* Toggle between create new user or select existing */}
+                        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                          <div>
+                            <Label className="text-sm font-medium">Create New User Account</Label>
+                            <p className="text-xs text-muted-foreground">
+                              {createNewUser 
+                                ? "Create a new login account for this staff member" 
+                                : "Select from existing registered users"}
+                            </p>
+                          </div>
+                          <Switch
+                            checked={createNewUser}
+                            onCheckedChange={(checked) => {
+                              setCreateNewUser(checked);
+                              setFormData({ ...formData, user_id: "", email: "", password: "" });
+                            }}
+                          />
+                        </div>
+
+                        {createNewUser ? (
+                          <>
+                            {/* New user fields */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="email">Email Address *</Label>
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  value={formData.email}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, email: e.target.value })
+                                  }
+                                  placeholder="staff@example.com"
+                                  required
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="password">Password *</Label>
+                                <Input
+                                  id="password"
+                                  type="password"
+                                  value={formData.password}
+                                  onChange={(e) =>
+                                    setFormData({ ...formData, password: e.target.value })
+                                  }
+                                  placeholder="Min 6 characters"
+                                  minLength={6}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Staff will use these credentials to login at /auth
+                            </p>
+                          </>
+                        ) : (
+                          <div className="space-y-2">
+                            <Label htmlFor="user_id">Select Registered User *</Label>
+                            <Select
+                              value={formData.user_id}
+                              onValueChange={(value) => {
+                                const selectedUser = registeredUsers.find(u => u.id === value);
+                                setFormData({ 
+                                  ...formData, 
+                                  user_id: value,
+                                  staff_name: selectedUser?.full_name || ""
+                                });
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a registered user" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableUsers.length === 0 ? (
+                                  <SelectItem value="none" disabled>No available users</SelectItem>
+                                ) : (
+                                  availableUsers.map((user) => (
+                                    <SelectItem key={user.id} value={user.id}>
+                                      {user.full_name || "No Name"} ({user.email})
+                                    </SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                              Only registered users not already staff are shown ({availableUsers.length} available)
+                            </p>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     <div className="grid grid-cols-2 gap-4">
