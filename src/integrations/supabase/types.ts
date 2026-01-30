@@ -1706,6 +1706,63 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_logs: {
+        Row: {
+          action: string
+          booking_id: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          gateway: string
+          id: string
+          request_data: Json | null
+          response_data: Json | null
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          action: string
+          booking_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          gateway: string
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          action?: string
+          booking_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          gateway?: string
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_logs_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           created_at: string
@@ -2392,6 +2449,87 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string
+          currency: string
+          emi_installment_id: string | null
+          error_message: string | null
+          gateway_name: string
+          gateway_transaction_id: string | null
+          id: string
+          ip_address: string | null
+          is_live_mode: boolean
+          payment_method: string
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_agent: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          emi_installment_id?: string | null
+          error_message?: string | null
+          gateway_name: string
+          gateway_transaction_id?: string | null
+          id?: string
+          ip_address?: string | null
+          is_live_mode?: boolean
+          payment_method: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string
+          currency?: string
+          emi_installment_id?: string | null
+          error_message?: string | null
+          gateway_name?: string
+          gateway_transaction_id?: string | null
+          id?: string
+          ip_address?: string | null
+          is_live_mode?: boolean
+          payment_method?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_emi_installment_id_fkey"
+            columns: ["emi_installment_id"]
+            isOneToOne: false
+            referencedRelation: "emi_installments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       translations: {
         Row: {

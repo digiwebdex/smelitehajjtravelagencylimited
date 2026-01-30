@@ -59,6 +59,7 @@ import AdminFinancialAnalytics from "@/components/admin/AdminFinancialAnalytics"
 import AdminRetargetingSegments from "@/components/admin/AdminRetargetingSegments";
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminTranslations from "@/components/admin/AdminTranslations";
+import AdminTransactionLogs from "@/components/admin/AdminTransactionLogs";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -221,6 +222,8 @@ const AdminDashboard = () => {
         return <AdminEMIReport />;
       case "payments":
         return <AdminPaymentMethods />;
+      case "transaction-logs":
+        return <AdminTransactionLogs />;
       case "staff":
         return <AdminStaffManagement />;
       case "audit-log":

@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   UserPlus,
   TrendingUp,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ const menuGroups = [
       { value: "reconciliation", label: "Payment Reconciliation", icon: AlertTriangle },
       { value: "emi-report", label: "Installment Report", icon: Calculator },
       { value: "payments", label: "Payment Methods", icon: Wallet },
+      { value: "transaction-logs", label: "Transaction Logs", icon: Receipt },
     ]
   },
   {

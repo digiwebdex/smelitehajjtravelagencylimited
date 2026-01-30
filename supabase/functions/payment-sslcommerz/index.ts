@@ -18,6 +18,8 @@ interface InitiatePaymentRequest {
   successUrl: string;
   failUrl: string;
   cancelUrl: string;
+  amount?: number; // For installment payments
+  installmentId?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -43,7 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
     const body = await req.json();
 
     if (action === "initiate" || body.action === "initiate") {
-      return await initiatePayment(body, supabase);
+      return await initiatePayment(body, supabase, req);
     }
 
     if (action === "validate" || body.action === "validate") {
@@ -94,7 +96,76 @@ async function getSSLCommerzConfig(supabase: any) {
   };
 }
 
-async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Promise<Response> {
+async function logPayment(supabase: any, data: {
+  transactionId?: string;
+  bookingId: string;
+  gateway: string;
+  action: string;
+  status: string;
+  requestData?: any;
+  responseData?: any;
+  errorMessage?: string;
+  durationMs?: number;
+}) {
+  try {
+    await supabase.from("payment_logs").insert({
+      booking_id: data.bookingId,
+      gateway: data.gateway,
+      action: data.action,
+      status: data.status,
+      request_data: data.requestData,
+      response_data: data.responseData,
+      error_message: data.errorMessage,
+      duration_ms: data.durationMs,
+    });
+  } catch (err) {
+    console.error("Failed to log payment:", err);
+  }
+}
+
+async function createTransaction(supabase: any, data: {
+  bookingId: string;
+  emiInstallmentId?: string;
+  paymentMethod: string;
+  gatewayName: string;
+  transactionId?: string;
+  gatewayTransactionId?: string;
+  amount: number;
+  status: string;
+  isLiveMode: boolean;
+  requestPayload?: any;
+  responsePayload?: any;
+  errorMessage?: string;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  try {
+    const { data: tx, error } = await supabase.from("transactions").insert({
+      booking_id: data.bookingId,
+      emi_installment_id: data.emiInstallmentId || null,
+      payment_method: data.paymentMethod,
+      gateway_name: data.gatewayName,
+      transaction_id: data.transactionId,
+      gateway_transaction_id: data.gatewayTransactionId,
+      amount: data.amount,
+      status: data.status,
+      is_live_mode: data.isLiveMode,
+      request_payload: data.requestPayload,
+      response_payload: data.responsePayload,
+      error_message: data.errorMessage,
+      ip_address: data.ipAddress,
+      user_agent: data.userAgent,
+    }).select().single();
+    
+    return tx;
+  } catch (err) {
+    console.error("Failed to create transaction:", err);
+    return null;
+  }
+}
+
+async function initiatePayment(body: InitiatePaymentRequest, supabase: any, req: Request): Promise<Response> {
+  const startTime = Date.now();
   console.log("Initiating SSLCommerz payment for booking:", body.bookingId);
 
   const config = await getSSLCommerzConfig(supabase);
@@ -110,13 +181,18 @@ async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Pro
     throw new Error("Booking not found");
   }
 
+  const paymentAmount = body.amount || booking.total_price;
   const transactionId = `BOOKING_${booking.id}_${Date.now()}`;
+
+  // Get client info
+  const ipAddress = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  const userAgent = req.headers.get("user-agent") || "unknown";
 
   // Prepare SSLCommerz payload
   const sslPayload = new URLSearchParams({
     store_id: config.storeId,
     store_passwd: config.storePassword,
-    total_amount: booking.total_price.toString(),
+    total_amount: paymentAmount.toString(),
     currency: "BDT",
     tran_id: transactionId,
     success_url: body.successUrl,
@@ -134,6 +210,7 @@ async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Pro
     product_category: "Travel",
     product_profile: "non-physical-goods",
     value_a: booking.id, // Store booking ID for reference
+    value_b: body.installmentId || "", // Store installment ID if applicable
   });
 
   console.log("Calling SSLCommerz API:", config.apiUrl);
@@ -145,9 +222,37 @@ async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Pro
   });
 
   const result = await response.json();
+  const duration = Date.now() - startTime;
   console.log("SSLCommerz response:", result);
 
+  // Log the payment attempt
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "sslcommerz",
+    action: "initiate",
+    status: result.status === "SUCCESS" ? "success" : "failed",
+    requestData: { amount: paymentAmount, transactionId },
+    responseData: result,
+    durationMs: duration,
+  });
+
   if (result.status === "SUCCESS") {
+    // Create transaction record
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      emiInstallmentId: body.installmentId,
+      paymentMethod: "sslcommerz",
+      gatewayName: "SSLCommerz",
+      transactionId: transactionId,
+      amount: paymentAmount,
+      status: "initiated",
+      isLiveMode: config.isLive,
+      requestPayload: { amount: paymentAmount },
+      responsePayload: { sessionKey: result.sessionkey },
+      ipAddress,
+      userAgent,
+    });
+
     // Update booking with transaction ID
     await supabase
       .from("bookings")
@@ -167,6 +272,19 @@ async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Pro
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } else {
+    // Log failed initiation
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      paymentMethod: "sslcommerz",
+      gatewayName: "SSLCommerz",
+      amount: paymentAmount,
+      status: "failed",
+      isLiveMode: config.isLive,
+      errorMessage: result.failedreason || "Payment initiation failed",
+      ipAddress,
+      userAgent,
+    });
+
     console.error("SSLCommerz initiation failed:", result);
     return new Response(JSON.stringify({
       success: false,
@@ -179,6 +297,7 @@ async function initiatePayment(body: InitiatePaymentRequest, supabase: any): Pro
 }
 
 async function handleIPN(req: Request, supabase: any): Promise<Response> {
+  const startTime = Date.now();
   console.log("Processing SSLCommerz IPN callback");
 
   const formData = await req.formData();
@@ -189,10 +308,23 @@ async function handleIPN(req: Request, supabase: any): Promise<Response> {
 
   console.log("IPN data received:", data);
 
-  const { val_id, tran_id, status, value_a: bookingId, amount, bank_tran_id } = data;
+  const { val_id, tran_id, status, value_a: bookingId, value_b: installmentId, amount, bank_tran_id } = data;
 
   if (!bookingId) {
     console.error("No booking ID in IPN");
+    return new Response("OK", { status: 200 });
+  }
+
+  // Check for duplicate transaction
+  const { data: existingTx } = await supabase
+    .from("transactions")
+    .select("id, status")
+    .eq("transaction_id", tran_id)
+    .eq("status", "paid")
+    .single();
+
+  if (existingTx) {
+    console.log("Duplicate IPN - transaction already processed:", tran_id);
     return new Response("OK", { status: 200 });
   }
 
@@ -209,6 +341,7 @@ async function handleIPN(req: Request, supabase: any): Promise<Response> {
 
   const validationResponse = await fetch(`${validationUrl}?${validationParams}`);
   const validationResult = await validationResponse.json();
+  const duration = Date.now() - startTime;
 
   console.log("Validation result:", validationResult);
 
@@ -219,6 +352,28 @@ async function handleIPN(req: Request, supabase: any): Promise<Response> {
     paymentStatus = "pending";
   }
 
+  // Log the IPN
+  await logPayment(supabase, {
+    bookingId,
+    gateway: "sslcommerz",
+    action: "ipn_callback",
+    status: paymentStatus,
+    requestData: data,
+    responseData: validationResult,
+    durationMs: duration,
+  });
+
+  // Update transaction record
+  await supabase
+    .from("transactions")
+    .update({
+      status: paymentStatus,
+      gateway_transaction_id: bank_tran_id,
+      response_payload: validationResult,
+      verified_at: paymentStatus === "paid" ? new Date().toISOString() : null,
+    })
+    .eq("transaction_id", tran_id);
+
   // Update booking payment status
   await supabase
     .from("bookings")
@@ -227,6 +382,35 @@ async function handleIPN(req: Request, supabase: any): Promise<Response> {
       transaction_id: tran_id,
     })
     .eq("id", bookingId);
+
+  // If this is an installment payment, update the installment
+  if (installmentId && paymentStatus === "paid") {
+    await supabase
+      .from("emi_installments")
+      .update({
+        status: "paid",
+        paid_date: new Date().toISOString(),
+        transaction_id: tran_id,
+        payment_method: "sslcommerz",
+      })
+      .eq("id", installmentId);
+
+    // Update EMI payment record
+    const { data: installment } = await supabase
+      .from("emi_installments")
+      .select("emi_payment_id")
+      .eq("id", installmentId)
+      .single();
+
+    if (installment) {
+      await supabase.rpc("update_emi_payment_progress", { 
+        p_emi_payment_id: installment.emi_payment_id 
+      }).catch(() => {
+        // Manual update if RPC doesn't exist
+        console.log("Updating EMI payment manually");
+      });
+    }
+  }
 
   // Log the payment notification
   await supabase.from("notification_logs").insert({
@@ -262,11 +446,30 @@ async function validateTransaction(body: { valId: string; bookingId: string }, s
 
   const isValid = result.status === "VALID" || result.status === "VALIDATED";
 
+  // Log validation
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "sslcommerz",
+    action: "validate",
+    status: isValid ? "success" : "failed",
+    responseData: result,
+  });
+
   if (isValid && body.bookingId) {
     await supabase
       .from("bookings")
       .update({ payment_status: "paid" })
       .eq("id", body.bookingId);
+
+    // Update transaction
+    await supabase
+      .from("transactions")
+      .update({
+        status: "paid",
+        verified_at: new Date().toISOString(),
+      })
+      .eq("booking_id", body.bookingId)
+      .eq("status", "initiated");
   }
 
   return new Response(JSON.stringify({

@@ -17,12 +17,6 @@ interface BkashCredentials {
   test_password?: string;
 }
 
-interface BkashToken {
-  id_token: string;
-  token_type: string;
-  expires_in: number;
-}
-
 const handler = async (req: Request): Promise<Response> => {
   console.log("payment-bkash function called");
 
@@ -40,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     switch (action) {
       case "initiate":
-        return await initiatePayment(body, supabase);
+        return await initiatePayment(body, supabase, req);
       case "execute":
         return await executePayment(body, supabase);
       case "query":
@@ -97,6 +91,73 @@ async function getBkashConfig(supabase: any) {
   };
 }
 
+async function logPayment(supabase: any, data: {
+  bookingId: string;
+  gateway: string;
+  action: string;
+  status: string;
+  requestData?: any;
+  responseData?: any;
+  errorMessage?: string;
+  durationMs?: number;
+}) {
+  try {
+    await supabase.from("payment_logs").insert({
+      booking_id: data.bookingId,
+      gateway: data.gateway,
+      action: data.action,
+      status: data.status,
+      request_data: data.requestData,
+      response_data: data.responseData,
+      error_message: data.errorMessage,
+      duration_ms: data.durationMs,
+    });
+  } catch (err) {
+    console.error("Failed to log payment:", err);
+  }
+}
+
+async function createTransaction(supabase: any, data: {
+  bookingId: string;
+  emiInstallmentId?: string;
+  paymentMethod: string;
+  gatewayName: string;
+  transactionId?: string;
+  gatewayTransactionId?: string;
+  amount: number;
+  status: string;
+  isLiveMode: boolean;
+  requestPayload?: any;
+  responsePayload?: any;
+  errorMessage?: string;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  try {
+    const { data: tx } = await supabase.from("transactions").insert({
+      booking_id: data.bookingId,
+      emi_installment_id: data.emiInstallmentId || null,
+      payment_method: data.paymentMethod,
+      gateway_name: data.gatewayName,
+      transaction_id: data.transactionId,
+      gateway_transaction_id: data.gatewayTransactionId,
+      amount: data.amount,
+      status: data.status,
+      is_live_mode: data.isLiveMode,
+      request_payload: data.requestPayload,
+      response_payload: data.responsePayload,
+      error_message: data.errorMessage,
+      ip_address: data.ipAddress,
+      user_agent: data.userAgent,
+    }).select().single();
+    
+    return tx;
+  } catch (err) {
+    console.error("Failed to create transaction:", err);
+    return null;
+  }
+}
+
 async function getGrantToken(config: any): Promise<string> {
   console.log("Getting bKash grant token");
 
@@ -124,7 +185,8 @@ async function getGrantToken(config: any): Promise<string> {
   return result.id_token;
 }
 
-async function initiatePayment(body: any, supabase: any): Promise<Response> {
+async function initiatePayment(body: any, supabase: any, req: Request): Promise<Response> {
+  const startTime = Date.now();
   console.log("Initiating bKash payment for booking:", body.bookingId);
 
   const config = await getBkashConfig(supabase);
@@ -141,13 +203,16 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
     throw new Error("Booking not found");
   }
 
+  const paymentAmount = body.amount || booking.total_price;
   const invoiceNumber = `INV_${booking.id.slice(0, 8)}_${Date.now()}`;
+  const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+  const userAgent = req.headers.get("user-agent") || "unknown";
 
   const payload = {
     mode: "0011",
     payerReference: booking.guest_phone || "01700000000",
     callbackURL: body.callbackUrl,
-    amount: booking.total_price.toString(),
+    amount: paymentAmount.toString(),
     currency: "BDT",
     intent: "sale",
     merchantInvoiceNumber: invoiceNumber,
@@ -167,9 +232,37 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
   });
 
   const result = await response.json();
+  const duration = Date.now() - startTime;
   console.log("bKash create response:", result);
 
+  // Log payment attempt
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "bkash",
+    action: "initiate",
+    status: result.statusCode === "0000" ? "success" : "failed",
+    requestData: payload,
+    responseData: result,
+    durationMs: duration,
+  });
+
   if (result.statusCode === "0000") {
+    // Create transaction record
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      emiInstallmentId: body.installmentId,
+      paymentMethod: "bkash",
+      gatewayName: "bKash",
+      transactionId: result.paymentID,
+      amount: paymentAmount,
+      status: "initiated",
+      isLiveMode: config.isLive,
+      requestPayload: payload,
+      responsePayload: result,
+      ipAddress,
+      userAgent,
+    });
+
     // Update booking with payment ID
     await supabase
       .from("bookings")
@@ -189,6 +282,19 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } else {
+    // Log failed transaction
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      paymentMethod: "bkash",
+      gatewayName: "bKash",
+      amount: paymentAmount,
+      status: "failed",
+      isLiveMode: config.isLive,
+      errorMessage: result.statusMessage,
+      ipAddress,
+      userAgent,
+    });
+
     console.error("bKash initiation failed:", result);
     return new Response(JSON.stringify({
       success: false,
@@ -201,7 +307,27 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
 }
 
 async function executePayment(body: any, supabase: any): Promise<Response> {
+  const startTime = Date.now();
   console.log("Executing bKash payment:", body.paymentId);
+
+  // Check for duplicate execution
+  const { data: existingTx } = await supabase
+    .from("transactions")
+    .select("id, status")
+    .eq("transaction_id", body.paymentId)
+    .eq("status", "paid")
+    .single();
+
+  if (existingTx) {
+    console.log("Duplicate execution - payment already completed:", body.paymentId);
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Payment already processed",
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 
   const config = await getBkashConfig(supabase);
   const idToken = await getGrantToken(config);
@@ -218,9 +344,32 @@ async function executePayment(body: any, supabase: any): Promise<Response> {
   });
 
   const result = await response.json();
+  const duration = Date.now() - startTime;
   console.log("bKash execute response:", result);
 
+  // Log execution
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "bkash",
+    action: "execute",
+    status: result.statusCode === "0000" ? "success" : "failed",
+    requestData: { paymentId: body.paymentId },
+    responseData: result,
+    durationMs: duration,
+  });
+
   if (result.statusCode === "0000" && result.transactionStatus === "Completed") {
+    // Update transaction record
+    await supabase
+      .from("transactions")
+      .update({
+        status: "paid",
+        gateway_transaction_id: result.trxID,
+        response_payload: result,
+        verified_at: new Date().toISOString(),
+      })
+      .eq("transaction_id", body.paymentId);
+
     // Update booking payment status
     if (body.bookingId) {
       await supabase
@@ -230,6 +379,19 @@ async function executePayment(body: any, supabase: any): Promise<Response> {
           transaction_id: result.trxID,
         })
         .eq("id", body.bookingId);
+
+      // Update installment if applicable
+      if (body.installmentId) {
+        await supabase
+          .from("emi_installments")
+          .update({
+            status: "paid",
+            paid_date: new Date().toISOString(),
+            transaction_id: result.trxID,
+            payment_method: "bkash",
+          })
+          .eq("id", body.installmentId);
+      }
 
       // Log successful payment
       await supabase.from("notification_logs").insert({
@@ -250,6 +412,16 @@ async function executePayment(body: any, supabase: any): Promise<Response> {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } else {
+    // Update transaction as failed
+    await supabase
+      .from("transactions")
+      .update({
+        status: "failed",
+        error_message: result.statusMessage,
+        response_payload: result,
+      })
+      .eq("transaction_id", body.paymentId);
+
     // Log failed payment
     if (body.bookingId) {
       await supabase
@@ -310,13 +482,26 @@ async function queryPayment(body: any, supabase: any): Promise<Response> {
 async function handleCallback(body: any, supabase: any): Promise<Response> {
   console.log("Handling bKash callback:", body);
 
-  const { paymentID, status, bookingId } = body;
+  const { paymentID, status, bookingId, installmentId } = body;
 
   if (status === "success" && paymentID) {
     // Execute the payment
-    const executeResult = await executePayment({ paymentId: paymentID, bookingId }, supabase);
+    const executeResult = await executePayment({ 
+      paymentId: paymentID, 
+      bookingId,
+      installmentId 
+    }, supabase);
     return executeResult;
   } else if (status === "cancel" || status === "failure") {
+    // Update transaction as cancelled/failed
+    await supabase
+      .from("transactions")
+      .update({
+        status: status === "cancel" ? "cancelled" : "failed",
+        error_message: status === "cancel" ? "Cancelled by user" : "Payment failed",
+      })
+      .eq("transaction_id", paymentID);
+
     // Update booking as failed/cancelled
     if (bookingId) {
       await supabase

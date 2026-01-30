@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     switch (action) {
       case "initiate":
-        return await initiatePayment(body, supabase);
+        return await initiatePayment(body, supabase, req);
       case "complete":
         return await completePayment(body, supabase);
       case "verify":
@@ -91,6 +91,73 @@ async function getNagadConfig(supabase: any) {
   };
 }
 
+async function logPayment(supabase: any, data: {
+  bookingId: string;
+  gateway: string;
+  action: string;
+  status: string;
+  requestData?: any;
+  responseData?: any;
+  errorMessage?: string;
+  durationMs?: number;
+}) {
+  try {
+    await supabase.from("payment_logs").insert({
+      booking_id: data.bookingId,
+      gateway: data.gateway,
+      action: data.action,
+      status: data.status,
+      request_data: data.requestData,
+      response_data: data.responseData,
+      error_message: data.errorMessage,
+      duration_ms: data.durationMs,
+    });
+  } catch (err) {
+    console.error("Failed to log payment:", err);
+  }
+}
+
+async function createTransaction(supabase: any, data: {
+  bookingId: string;
+  emiInstallmentId?: string;
+  paymentMethod: string;
+  gatewayName: string;
+  transactionId?: string;
+  gatewayTransactionId?: string;
+  amount: number;
+  status: string;
+  isLiveMode: boolean;
+  requestPayload?: any;
+  responsePayload?: any;
+  errorMessage?: string;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  try {
+    const { data: tx } = await supabase.from("transactions").insert({
+      booking_id: data.bookingId,
+      emi_installment_id: data.emiInstallmentId || null,
+      payment_method: data.paymentMethod,
+      gateway_name: data.gatewayName,
+      transaction_id: data.transactionId,
+      gateway_transaction_id: data.gatewayTransactionId,
+      amount: data.amount,
+      status: data.status,
+      is_live_mode: data.isLiveMode,
+      request_payload: data.requestPayload,
+      response_payload: data.responsePayload,
+      error_message: data.errorMessage,
+      ip_address: data.ipAddress,
+      user_agent: data.userAgent,
+    }).select().single();
+    
+    return tx;
+  } catch (err) {
+    console.error("Failed to create transaction:", err);
+    return null;
+  }
+}
+
 function generateRandomString(length: number): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -113,19 +180,16 @@ function formatDateTime(): string {
 
 // Simple encryption for Nagad (in production, use proper RSA encryption)
 function encryptData(data: string, _publicKey: string): string {
-  // For demo purposes, we're using base64 encoding
-  // In production, implement proper RSA encryption with the Nagad public key
   return btoa(data);
 }
 
 // Simple signature generation (in production, use proper RSA signing)
 function generateSignature(data: string, _privateKey: string): string {
-  // For demo purposes, we're using base64 encoding
-  // In production, implement proper RSA signing with the merchant private key
   return btoa(data);
 }
 
-async function initiatePayment(body: any, supabase: any): Promise<Response> {
+async function initiatePayment(body: any, supabase: any, req: Request): Promise<Response> {
+  const startTime = Date.now();
   console.log("Initiating Nagad payment for booking:", body.bookingId);
 
   const config = await getNagadConfig(supabase);
@@ -141,9 +205,12 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
     throw new Error("Booking not found");
   }
 
+  const paymentAmount = body.amount || booking.total_price;
   const orderId = `ORD_${booking.id.slice(0, 8)}_${Date.now()}`;
   const dateTime = formatDateTime();
   const challenge = generateRandomString(40);
+  const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
+  const userAgent = req.headers.get("user-agent") || "unknown";
 
   // Prepare sensitive data
   const sensitiveData = {
@@ -185,9 +252,36 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
   });
 
   const initResult = await initResponse.json();
+  const duration = Date.now() - startTime;
   console.log("Nagad initialize response:", initResult);
 
+  // Log payment attempt
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "nagad",
+    action: "initiate",
+    status: initResult.sensitiveData ? "success" : "failed",
+    requestData: { orderId, amount: paymentAmount },
+    responseData: initResult,
+    durationMs: duration,
+  });
+
   if (initResult.sensitiveData && initResult.signature) {
+    // Create transaction record
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      emiInstallmentId: body.installmentId,
+      paymentMethod: "nagad",
+      gatewayName: "Nagad",
+      transactionId: orderId,
+      amount: paymentAmount,
+      status: "initiated",
+      isLiveMode: config.isLive,
+      requestPayload: { orderId },
+      ipAddress,
+      userAgent,
+    });
+
     // Store payment reference
     await supabase
       .from("bookings")
@@ -203,7 +297,9 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
       initResult,
       booking,
       orderId,
-      body.callbackUrl
+      body.callbackUrl,
+      body.installmentId,
+      supabase
     );
 
     return new Response(JSON.stringify(completeResult), {
@@ -211,6 +307,19 @@ async function initiatePayment(body: any, supabase: any): Promise<Response> {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } else {
+    // Log failed transaction
+    await createTransaction(supabase, {
+      bookingId: body.bookingId,
+      paymentMethod: "nagad",
+      gatewayName: "Nagad",
+      amount: paymentAmount,
+      status: "failed",
+      isLiveMode: config.isLive,
+      errorMessage: initResult.message || "Initialization failed",
+      ipAddress,
+      userAgent,
+    });
+
     console.error("Nagad initialization failed:", initResult);
     return new Response(JSON.stringify({
       success: false,
@@ -227,7 +336,9 @@ async function completePaymentInit(
   initResult: any,
   booking: any,
   orderId: string,
-  callbackUrl: string
+  callbackUrl: string,
+  installmentId: string | undefined,
+  supabase: any
 ): Promise<any> {
   const dateTime = formatDateTime();
   const challenge = generateRandomString(40);
@@ -270,12 +381,22 @@ async function completePaymentInit(
       additionalMerchantInfo: JSON.stringify({
         bookingId: booking.id,
         packageTitle: booking.package?.title,
+        installmentId: installmentId || null,
       }),
     }),
   });
 
   const completeResult = await completeResponse.json();
   console.log("Nagad complete response:", completeResult);
+
+  // Log complete step
+  await logPayment(supabase, {
+    bookingId: booking.id,
+    gateway: "nagad",
+    action: "complete_init",
+    status: completeResult.callBackUrl ? "success" : "failed",
+    responseData: completeResult,
+  });
 
   if (completeResult.callBackUrl) {
     return {
@@ -293,9 +414,28 @@ async function completePaymentInit(
 }
 
 async function completePayment(body: any, supabase: any): Promise<Response> {
+  const startTime = Date.now();
   console.log("Completing Nagad payment:", body);
   
-  // This is called after the user completes payment on Nagad
+  // Check for duplicate
+  const { data: existingTx } = await supabase
+    .from("transactions")
+    .select("id, status")
+    .eq("gateway_transaction_id", body.paymentRefId)
+    .eq("status", "paid")
+    .single();
+
+  if (existingTx) {
+    console.log("Duplicate completion - already paid:", body.paymentRefId);
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Payment already processed",
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   const config = await getNagadConfig(supabase);
 
   const verifyUrl = `${config.baseUrl}/api/dfs/verify/payment/${body.paymentRefId}`;
@@ -311,9 +451,31 @@ async function completePayment(body: any, supabase: any): Promise<Response> {
   });
 
   const result = await verifyResponse.json();
+  const duration = Date.now() - startTime;
   console.log("Nagad verify response:", result);
 
+  // Log verification
+  await logPayment(supabase, {
+    bookingId: body.bookingId,
+    gateway: "nagad",
+    action: "verify",
+    status: result.status === "Success" ? "success" : "failed",
+    responseData: result,
+    durationMs: duration,
+  });
+
   if (result.status === "Success") {
+    // Update transaction
+    await supabase
+      .from("transactions")
+      .update({
+        status: "paid",
+        gateway_transaction_id: result.issuerPaymentRefNo || body.paymentRefId,
+        response_payload: result,
+        verified_at: new Date().toISOString(),
+      })
+      .eq("transaction_id", result.orderId);
+
     // Update booking
     if (body.bookingId) {
       await supabase
@@ -323,6 +485,19 @@ async function completePayment(body: any, supabase: any): Promise<Response> {
           transaction_id: result.orderId,
         })
         .eq("id", body.bookingId);
+
+      // Update installment if applicable
+      if (body.installmentId) {
+        await supabase
+          .from("emi_installments")
+          .update({
+            status: "paid",
+            paid_date: new Date().toISOString(),
+            transaction_id: result.orderId,
+            payment_method: "nagad",
+          })
+          .eq("id", body.installmentId);
+      }
 
       await supabase.from("notification_logs").insert({
         booking_id: body.bookingId,
@@ -341,6 +516,16 @@ async function completePayment(body: any, supabase: any): Promise<Response> {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } else {
+    // Update as failed
+    await supabase
+      .from("transactions")
+      .update({
+        status: "failed",
+        error_message: result.message,
+        response_payload: result,
+      })
+      .eq("transaction_id", result.orderId);
+
     if (body.bookingId) {
       await supabase
         .from("bookings")
@@ -406,8 +591,16 @@ async function handleCallback(req: Request, supabase: any): Promise<Response> {
   
   console.log("Callback params:", params);
 
+  // Log callback
+  await logPayment(supabase, {
+    bookingId: params.bookingId || "unknown",
+    gateway: "nagad",
+    action: "callback",
+    status: "received",
+    requestData: params,
+  });
+
   // The callback URL will contain payment details
-  // Extract and verify the payment
   if (params.payment_ref_id) {
     const verifyResult = await verifyPayment(
       { paymentRefId: params.payment_ref_id },
