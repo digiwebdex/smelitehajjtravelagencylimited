@@ -1,4 +1,7 @@
 import React from "react";
+import sslcommerzLogo from "@/assets/payment/sslcommerz-logo.png";
+import bkashLogo from "@/assets/payment/bkash-logo.svg";
+import nagadLogo from "@/assets/payment/nagad-logo.svg";
 
 interface LogoProps {
   className?: string;
@@ -6,106 +9,33 @@ interface LogoProps {
 }
 
 export const SSLCommerzLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => (
-  <svg
-    width={size}
+  <img 
+    src={sslcommerzLogo} 
+    alt="SSLCommerz" 
+    width={size * 2.5} 
     height={size}
-    viewBox="0 0 100 100"
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="100" height="100" rx="12" fill="#1A1A2E" />
-    <text
-      x="50"
-      y="38"
-      textAnchor="middle"
-      fill="#00D4AA"
-      fontSize="14"
-      fontWeight="bold"
-      fontFamily="system-ui, sans-serif"
-    >
-      SSL
-    </text>
-    <text
-      x="50"
-      y="58"
-      textAnchor="middle"
-      fill="#FFFFFF"
-      fontSize="10"
-      fontWeight="600"
-      fontFamily="system-ui, sans-serif"
-    >
-      COMMERZ
-    </text>
-    <rect x="20" y="68" width="60" height="4" rx="2" fill="#00D4AA" />
-  </svg>
+    className={`object-contain ${className}`}
+  />
 );
 
 export const BkashLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => (
-  <svg
-    width={size}
+  <img 
+    src={bkashLogo} 
+    alt="bKash" 
+    width={size} 
     height={size}
-    viewBox="0 0 100 100"
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="100" height="100" rx="12" fill="#E2136E" />
-    <text
-      x="50"
-      y="42"
-      textAnchor="middle"
-      fill="#FFFFFF"
-      fontSize="18"
-      fontWeight="bold"
-      fontFamily="system-ui, sans-serif"
-    >
-      bKash
-    </text>
-    <text
-      x="50"
-      y="62"
-      textAnchor="middle"
-      fill="#FFFFFF"
-      fontSize="10"
-      fontFamily="system-ui, sans-serif"
-      opacity="0.9"
-    >
-      Mobile Banking
-    </text>
-  </svg>
+    className={`object-contain ${className}`}
+  />
 );
 
 export const NagadLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => (
-  <svg
-    width={size}
+  <img 
+    src={nagadLogo} 
+    alt="Nagad" 
+    width={size} 
     height={size}
-    viewBox="0 0 100 100"
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="100" height="100" rx="12" fill="#F6921E" />
-    <text
-      x="50"
-      y="42"
-      textAnchor="middle"
-      fill="#FFFFFF"
-      fontSize="18"
-      fontWeight="bold"
-      fontFamily="system-ui, sans-serif"
-    >
-      নগদ
-    </text>
-    <text
-      x="50"
-      y="62"
-      textAnchor="middle"
-      fill="#FFFFFF"
-      fontSize="12"
-      fontWeight="600"
-      fontFamily="system-ui, sans-serif"
-    >
-      Nagad
-    </text>
-  </svg>
+    className={`object-contain ${className}`}
+  />
 );
 
 export const CashLogo: React.FC<LogoProps> = ({ className = "", size = 40 }) => (
