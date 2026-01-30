@@ -708,7 +708,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                     : 0;
                   
                   return (
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-3 text-sm">
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total Amount:</span>
                         <span className="font-medium">{formatCurrency(totalAmount)}</span>
@@ -718,19 +718,21 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                         <span className="font-medium text-green-600">{formatCurrency(advanceAmount)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Remaining:</span>
+                        <span className="text-muted-foreground">Remaining Amount:</span>
                         <span className="font-medium">{formatCurrency(remaining)}</span>
                       </div>
                       <Separator />
-                      <div className="flex justify-between items-center text-base">
-                        <span className="font-semibold">Due Installment:</span>
-                        <span className="font-bold text-primary text-lg">
-                          {formatCurrency(perInstallment)}
-                        </span>
+                      <div className="bg-primary/10 rounded-lg p-3 border border-primary/20">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-semibold text-foreground">Per Installment:</span>
+                          <span className="font-bold text-primary text-xl">
+                            {formatCurrency(perInstallment)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          {formatCurrency(perInstallment)} × {numberOfInstallments} installment(s) = {formatCurrency(remaining)}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground text-center">
-                        × {numberOfInstallments} installment(s) = {formatCurrency(remaining)}
-                      </p>
                     </div>
                   );
                 })()}
