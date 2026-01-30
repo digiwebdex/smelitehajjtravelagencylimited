@@ -643,9 +643,9 @@ const AdminStaffManagement = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="role">Role *</Label>
-                        <Select
+                      <Select
                           value={formData.role}
-                          onValueChange={(value: 'admin' | 'manager' | 'support') =>
+                          onValueChange={(value: 'admin' | 'manager' | 'agent' | 'support') =>
                             setFormData({ ...formData, role: value })
                           }
                         >
@@ -655,6 +655,7 @@ const AdminStaffManagement = () => {
                           <SelectContent>
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="manager">Manager</SelectItem>
+                            <SelectItem value="agent">Agent</SelectItem>
                             <SelectItem value="support">Support</SelectItem>
                           </SelectContent>
                         </Select>
