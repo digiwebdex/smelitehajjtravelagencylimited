@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -111,15 +112,33 @@ const BookingConfirmation = () => {
   const { bookingId } = useParams<{ bookingId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { trackPurchase } = useFacebookPixel();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasTrackedPurchase, setHasTrackedPurchase] = useState(false);
 
   useEffect(() => {
     if (bookingId) {
       fetchBookingDetails();
     }
   }, [bookingId]);
+
+  // Track Purchase event when booking is loaded
+  useEffect(() => {
+    if (booking && !hasTrackedPurchase) {
+      trackPurchase({
+        contentId: booking.id,
+        contentName: booking.packages.title,
+        value: booking.total_price,
+        userData: {
+          email: booking.guest_email || undefined,
+          phone: booking.guest_phone || undefined,
+        },
+      });
+      setHasTrackedPurchase(true);
+    }
+  }, [booking, hasTrackedPurchase, trackPurchase]);
 
   const fetchBookingDetails = async () => {
     try {

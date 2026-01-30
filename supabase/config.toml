@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.backup-restore]
 verify_jwt = false
+
+[functions.fb-event]
+verify_jwt = false

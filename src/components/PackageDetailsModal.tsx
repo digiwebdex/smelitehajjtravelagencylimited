@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Check, X, Star, Calendar, Hotel, Plane, Bus, FileText, MapPin, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 
 interface PackageDetails {
   id: string;
@@ -128,6 +129,7 @@ const FormattedDescription = ({ text }: { text: string }) => {
 
 const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: PackageDetailsModalProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { trackViewContent } = useFacebookPixel();
 
   // Get all hotel images
   const hotelImages = package_info ? [
@@ -141,11 +143,22 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       setCurrentImageIndex(0); // Reset image index when modal opens
+      
+      // Track ViewContent event when modal opens
+      if (package_info) {
+        trackViewContent({
+          contentId: package_info.id,
+          contentName: package_info.title,
+          contentType: package_info.type,
+          value: package_info.price,
+        });
+      }
+      
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isOpen]);
+  }, [isOpen, package_info, trackViewContent]);
 
   if (!package_info) return null;
 

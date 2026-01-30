@@ -37,8 +37,10 @@ import {
   Eye,
   ExternalLink,
   Smartphone,
-  BarChart3
+  BarChart3,
+  AlertCircle
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { CURRENCY } from "@/lib/currency";
 import ImageUpload from "./ImageUpload";
 import { useImageUpload } from "@/hooks/useImageUpload";
@@ -76,6 +78,13 @@ interface Appearance {
 
 interface AnalyticsSettings {
   measurement_id: string;
+  is_enabled: boolean;
+}
+
+interface FacebookPixelSettings {
+  pixel_id: string;
+  access_token: string;
+  test_event_code: string;
   is_enabled: boolean;
 }
 
@@ -166,7 +175,15 @@ const AdminSettings = () => {
     is_enabled: false,
   });
 
+  const [facebookPixel, setFacebookPixel] = useState<FacebookPixelSettings>({
+    pixel_id: "",
+    access_token: "",
+    test_event_code: "",
+    is_enabled: false,
+  });
+
   const [savingAnalytics, setSavingAnalytics] = useState(false);
+  const [savingFacebookPixel, setSavingFacebookPixel] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -198,6 +215,9 @@ const AdminSettings = () => {
               break;
             case "analytics":
               setAnalytics(value as unknown as AnalyticsSettings);
+              break;
+            case "facebook_pixel":
+              setFacebookPixel(value as unknown as FacebookPixelSettings);
               break;
           }
         });
@@ -277,6 +297,29 @@ const AdminSettings = () => {
       toast.error("Failed to save analytics settings");
     } finally {
       setSavingAnalytics(false);
+    }
+  };
+
+  const handleSaveFacebookPixel = async () => {
+    setSavingFacebookPixel(true);
+    try {
+      // Validate pixel ID format if enabled (numeric string)
+      if (facebookPixel.is_enabled && facebookPixel.pixel_id) {
+        const trimmedId = facebookPixel.pixel_id.trim();
+        if (!/^\d+$/.test(trimmedId)) {
+          toast.error("Invalid Pixel ID format. It should be a numeric ID.");
+          setSavingFacebookPixel(false);
+          return;
+        }
+      }
+      
+      await saveSetting("facebook_pixel", facebookPixel as unknown as Record<string, unknown>, "integrations");
+      toast.success("Facebook Pixel settings saved successfully!");
+    } catch (error) {
+      console.error("Error saving Facebook Pixel:", error);
+      toast.error("Failed to save Facebook Pixel settings");
+    } finally {
+      setSavingFacebookPixel(false);
     }
   };
 
@@ -836,6 +879,157 @@ const AdminSettings = () => {
               <Button onClick={handleSaveAnalytics} disabled={savingAnalytics} className="gap-2">
                 {savingAnalytics ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Analytics Settings
+              </Button>
+            </div>
+
+            {/* Facebook Pixel Section */}
+            <Separator className="my-8" />
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <Card className="border-dashed">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Facebook className="w-5 h-5 text-primary" />
+                      <div>
+                        <Label className="text-base">Facebook Pixel & Conversions API</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Track conversions and optimize ad campaigns
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={facebookPixel.is_enabled}
+                      onCheckedChange={(checked) => setFacebookPixel({ ...facebookPixel, is_enabled: checked })}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {facebookPixel.is_enabled && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pixelId" className="flex items-center gap-2">
+                      <Facebook className="w-4 h-4" />
+                      Pixel ID
+                    </Label>
+                    <Input
+                      id="pixelId"
+                      value={facebookPixel.pixel_id}
+                      onChange={(e) => setFacebookPixel({ ...facebookPixel, pixel_id: e.target.value.replace(/\D/g, '') })}
+                      placeholder="1234567890123456"
+                      className={facebookPixel.pixel_id && !/^\d+$/.test(facebookPixel.pixel_id.trim()) ? "border-destructive" : ""}
+                    />
+                    {facebookPixel.pixel_id && !/^\d+$/.test(facebookPixel.pixel_id.trim()) && (
+                      <p className="text-xs text-destructive">
+                        Invalid format. Pixel ID should be numeric.
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      Find this in Facebook Events Manager → Your Pixel → Settings
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="accessToken" className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Access Token (Conversions API)
+                    </Label>
+                    <Input
+                      id="accessToken"
+                      type="password"
+                      value={facebookPixel.access_token}
+                      onChange={(e) => setFacebookPixel({ ...facebookPixel, access_token: e.target.value })}
+                      placeholder="Enter your Conversions API access token"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Generate via Events Manager → Settings → Conversions API → Generate access token
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="testEventCode" className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Test Event Code (Optional)
+                    </Label>
+                    <Input
+                      id="testEventCode"
+                      value={facebookPixel.test_event_code}
+                      onChange={(e) => setFacebookPixel({ ...facebookPixel, test_event_code: e.target.value.toUpperCase() })}
+                      placeholder="TEST12345"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use this to test events without affecting production data. Find it in Events Manager → Test Events
+                    </p>
+                  </div>
+
+                  {facebookPixel.test_event_code && (
+                    <Card className="bg-amber-500/10 border-amber-500/20">
+                      <CardContent className="pt-4">
+                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-500">
+                          <AlertCircle className="w-4 h-4" />
+                          <span className="font-medium text-sm">Test Mode Active</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Events will be sent with the test code. Remove it when ready for production.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <Card className="bg-muted/50">
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm">How to get your credentials:</h4>
+                        <ol className="text-sm text-muted-foreground space-y-2 list-decimal list-inside">
+                          <li>Go to <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Facebook Events Manager</a></li>
+                          <li>Select your Pixel or create a new one</li>
+                          <li>Copy the Pixel ID (numeric ID in the header)</li>
+                          <li>Go to Settings → Conversions API</li>
+                          <li>Generate an access token</li>
+                          <li>For testing, go to Test Events tab to get your test code</li>
+                        </ol>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open('https://business.facebook.com/events_manager', '_blank')}
+                          className="flex items-center gap-2 mt-2"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Open Facebook Events Manager
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-primary/5 border-primary/20">
+                    <CardContent className="pt-4">
+                      <h4 className="font-medium text-sm mb-2">Events being tracked:</h4>
+                      <ul className="text-sm text-muted-foreground space-y-1">
+                        <li>✓ PageView - on every page visit</li>
+                        <li>✓ ViewContent - when viewing package details</li>
+                        <li>✓ InitiateCheckout - when opening booking modal</li>
+                        <li>✓ Purchase - when booking is confirmed</li>
+                        <li>✓ Lead - on contact form submissions</li>
+                      </ul>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        Both browser (Pixel) and server (Conversions API) tracking with automatic deduplication.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </motion.div>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveFacebookPixel} disabled={savingFacebookPixel} className="gap-2">
+                {savingFacebookPixel ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Facebook Pixel Settings
               </Button>
             </div>
           </TabsContent>

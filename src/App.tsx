@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SiteSettingsProvider } from "@/hooks/useSiteSettings";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import FacebookPixel from "@/components/FacebookPixel";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -32,6 +33,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <AnalyticsTracker />
+              <FacebookPixel />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

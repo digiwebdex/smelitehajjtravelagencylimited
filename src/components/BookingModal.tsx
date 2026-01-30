@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePaymentProcessing } from "@/hooks/usePaymentProcessing";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 import {
   Dialog,
   DialogContent,
@@ -77,6 +78,7 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { initiatePayment, processing: paymentProcessing } = usePaymentProcessing();
+  const { trackInitiateCheckout } = useFacebookPixel();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -131,11 +133,21 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
     if (isOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      
+      // Track InitiateCheckout event when modal opens
+      if (package_info) {
+        trackInitiateCheckout({
+          contentId: package_info.id,
+          contentName: package_info.title,
+          value: package_info.price,
+        });
+      }
+      
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isOpen]);
+  }, [isOpen, package_info, trackInitiateCheckout]);
 
   const validateField = (field: keyof FormErrors, value: string | number) => {
     try {
