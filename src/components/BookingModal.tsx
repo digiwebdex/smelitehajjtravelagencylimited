@@ -700,30 +700,40 @@ const BookingModal = ({ isOpen, onClose, package_info }: BookingModalProps) => {
                 
                 <Separator />
                 
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Amount:</span>
-                    <span className="font-medium">{formatCurrency(package_info.price * formData.passengerCount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Advance Payment:</span>
-                    <span className="font-medium text-green-600">{formatCurrency(advanceAmount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Remaining:</span>
-                    <span className="font-medium">{formatCurrency((package_info.price * formData.passengerCount) - advanceAmount)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between text-base">
-                    <span className="font-semibold">Due Installment:</span>
-                    <span className="font-bold text-primary">
-                      {formatCurrency(Math.ceil(((package_info.price * formData.passengerCount) - advanceAmount) / numberOfInstallments))}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    × {numberOfInstallments} installment(s)
-                  </p>
-                </div>
+                {(() => {
+                  const totalAmount = package_info.price * formData.passengerCount;
+                  const remaining = totalAmount - advanceAmount;
+                  const perInstallment = numberOfInstallments > 0 
+                    ? Math.ceil(remaining / numberOfInstallments) 
+                    : 0;
+                  
+                  return (
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Total Amount:</span>
+                        <span className="font-medium">{formatCurrency(totalAmount)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Advance Payment:</span>
+                        <span className="font-medium text-green-600">{formatCurrency(advanceAmount)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Remaining:</span>
+                        <span className="font-medium">{formatCurrency(remaining)}</span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between items-center text-base">
+                        <span className="font-semibold">Due Installment:</span>
+                        <span className="font-bold text-primary text-lg">
+                          {formatCurrency(perInstallment)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground text-center">
+                        × {numberOfInstallments} installment(s) = {formatCurrency(remaining)}
+                      </p>
+                    </div>
+                  );
+                })()}
 
                 <Separator />
 
