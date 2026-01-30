@@ -745,6 +745,95 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          budget_range: string | null
+          created_at: string
+          device_type: string | null
+          email: string | null
+          fbclid: string | null
+          group_size: number | null
+          id: string
+          ip_address: string | null
+          lead_score: number | null
+          lead_status: string | null
+          message: string | null
+          name: string
+          original_event_id: string | null
+          package_id: string | null
+          passport_ready: boolean | null
+          payment_value: number | null
+          phone: string
+          travel_month: string | null
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          budget_range?: string | null
+          created_at?: string
+          device_type?: string | null
+          email?: string | null
+          fbclid?: string | null
+          group_size?: number | null
+          id?: string
+          ip_address?: string | null
+          lead_score?: number | null
+          lead_status?: string | null
+          message?: string | null
+          name: string
+          original_event_id?: string | null
+          package_id?: string | null
+          passport_ready?: boolean | null
+          payment_value?: number | null
+          phone: string
+          travel_month?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          budget_range?: string | null
+          created_at?: string
+          device_type?: string | null
+          email?: string | null
+          fbclid?: string | null
+          group_size?: number | null
+          id?: string
+          ip_address?: string | null
+          lead_score?: number | null
+          lead_status?: string | null
+          message?: string | null
+          name?: string
+          original_event_id?: string | null
+          package_id?: string | null
+          passport_ready?: boolean | null
+          payment_value?: number | null
+          phone?: string
+          travel_month?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_pages: {
         Row: {
           content: string
@@ -771,6 +860,87 @@ export type Database = {
           is_active?: boolean
           page_key?: string
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_event_logs: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          lead_id: string | null
+          request_payload: Json | null
+          response_payload: Json | null
+          retry_count: number | null
+          status: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          lead_id?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          retry_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          lead_id?: string | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          retry_count?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_event_logs_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_event_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
           updated_at?: string
         }
         Relationships: []

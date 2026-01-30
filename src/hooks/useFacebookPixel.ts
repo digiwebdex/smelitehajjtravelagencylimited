@@ -162,12 +162,14 @@ export const useFacebookPixel = () => {
   const trackLead = useCallback((params?: {
     contentName?: string;
     value?: number;
+    currency?: string;
     userData?: { email?: string; phone?: string };
   }) => {
     trackEvent({
       eventName: "Lead",
       contentName: params?.contentName,
       value: params?.value,
+      currency: params?.currency || "BDT",
       userData: params?.userData,
     });
   }, [trackEvent]);

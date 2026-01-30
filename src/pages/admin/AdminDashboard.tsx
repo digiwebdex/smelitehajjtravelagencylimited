@@ -47,6 +47,8 @@ import AdminReportsAnalytics from "@/components/admin/AdminReportsAnalytics";
 import AdminAuditLog from "@/components/admin/AdminAuditLog";
 import AdminPaymentReconciliation from "@/components/admin/AdminPaymentReconciliation";
 import AdminNotificationRetry from "@/components/admin/AdminNotificationRetry";
+import AdminLeadsManagement from "@/components/admin/AdminLeadsManagement";
+import AdminMarketingAnalytics from "@/components/admin/AdminMarketingAnalytics";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -175,6 +177,10 @@ const AdminDashboard = () => {
         return <AdminBookings onUpdate={fetchStats} />;
       case "visa-applications":
         return <AdminVisaApplications />;
+      case "leads":
+        return <AdminLeadsManagement />;
+      case "marketing-analytics":
+        return <AdminMarketingAnalytics />;
       case "packages":
         return <AdminPackages onUpdate={fetchStats} />;
       case "package-sections":

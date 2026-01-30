@@ -1,9 +1,11 @@
 import { Phone, MessageCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 
 const MobileCTABar = () => {
   const { contactDetails, appearance } = useSiteSettings();
+  const { trackEvent } = useFacebookPixel();
 
   const whatsappNumber = contactDetails.whatsapp?.replace(/[^0-9]/g, '') || '8801867666888';
 
@@ -11,6 +13,19 @@ const MobileCTABar = () => {
   if (appearance.show_mobile_cta_bar === false) {
     return null;
   }
+
+  const handleWhatsAppClick = () => {
+    // Track Contact event via Facebook Pixel
+    trackEvent({
+      eventName: 'Contact',
+      contentName: 'Mobile CTA WhatsApp Click',
+      customData: {
+        contact_method: 'whatsapp',
+        whatsapp_number: whatsappNumber,
+        source: 'mobile_cta_bar',
+      },
+    });
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/95 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.15)]">
@@ -47,6 +62,7 @@ const MobileCTABar = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1"
+          onClick={handleWhatsAppClick}
         >
           <Button 
             variant="outline" 

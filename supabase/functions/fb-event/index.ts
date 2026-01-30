@@ -155,24 +155,66 @@ Deno.serve(async (req) => {
       payload.test_event_code = settings.test_event_code;
     }
 
-    // Send to Facebook Conversions API
-    const fbResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${settings.pixel_id}/events?access_token=${settings.access_token}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+    // Send to Facebook Conversions API with retry logic
+    let fbResult: any = null;
+    let lastError: string | null = null;
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        const fbResponse = await fetch(
+          `https://graph.facebook.com/v18.0/${settings.pixel_id}/events?access_token=${settings.access_token}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        fbResult = await fbResponse.json();
+
+        if (fbResponse.ok) {
+          lastError = null;
+          break; // Success, exit retry loop
+        } else {
+          lastError = fbResult.error?.message || "API error";
+          retryCount++;
+          if (retryCount < maxRetries) {
+            // Exponential backoff: 1s, 2s, 4s
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount - 1) * 1000));
+          }
+        }
+      } catch (fetchError) {
+        lastError = fetchError instanceof Error ? fetchError.message : "Network error";
+        retryCount++;
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount - 1) * 1000));
+        }
       }
-    );
+    }
 
-    const fbResult = await fbResponse.json();
+    // Log the event to marketing_event_logs
+    try {
+      await supabase.from("marketing_event_logs").insert({
+        event_type: event_name,
+        event_id: event_id,
+        request_payload: payload,
+        response_payload: fbResult || { error: lastError },
+        status: lastError ? "failed" : "success",
+        error_message: lastError,
+        retry_count: retryCount,
+      });
+    } catch (logError) {
+      console.error("Failed to log event:", logError);
+    }
 
-    if (!fbResponse.ok) {
-      console.error("Facebook API error:", fbResult);
+    if (lastError) {
+      console.error("Facebook API error after retries:", lastError);
       return new Response(
-        JSON.stringify({ success: false, error: fbResult.error?.message || "API error" }),
+        JSON.stringify({ success: false, error: lastError, retries: retryCount }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -182,6 +224,7 @@ Deno.serve(async (req) => {
       event_id,
       test_mode: !!settings.test_event_code,
       result: fbResult,
+      retries: retryCount,
     });
 
     return new Response(
@@ -189,6 +232,7 @@ Deno.serve(async (req) => {
         success: true,
         events_received: fbResult.events_received || 1,
         test_mode: !!settings.test_event_code,
+        retries: retryCount,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -1,9 +1,11 @@
 import { MessageCircle, ArrowUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useFacebookPixel } from "@/hooks/useFacebookPixel";
 
 const WhatsAppButton = () => {
   const { contactDetails } = useSiteSettings();
+  const { trackEvent } = useFacebookPixel();
   const [showBackToTop, setShowBackToTop] = useState(false);
   
   // Extract digits only from the WhatsApp number, fallback to default
@@ -24,6 +26,16 @@ const WhatsAppButton = () => {
   };
 
   const openWhatsApp = () => {
+    // Track Contact event via Facebook Pixel
+    trackEvent({
+      eventName: 'Contact',
+      contentName: 'WhatsApp Button Click',
+      customData: {
+        contact_method: 'whatsapp',
+        whatsapp_number: whatsappNumber,
+      },
+    });
+
     const encodedMessage = encodeURIComponent(defaultMessage);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");

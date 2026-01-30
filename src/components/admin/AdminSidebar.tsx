@@ -25,6 +25,8 @@ import {
   Shield,
   Activity,
   AlertTriangle,
+  UserPlus,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -47,6 +49,8 @@ const menuItems = [
   { value: "overview", label: "Overview", icon: BarChart3 },
   { value: "bookings", label: "Bookings", icon: Package },
   { value: "visa-applications", label: "Visa Applications", icon: Globe },
+  { value: "leads", label: "Leads CRM", icon: UserPlus },
+  { value: "marketing-analytics", label: "Marketing Analytics", icon: TrendingUp },
   { value: "packages", label: "Packages", icon: LayoutDashboard },
   { value: "package-sections", label: "Package Sections", icon: Layers },
   { value: "revenue", label: "Revenue", icon: Wallet },
