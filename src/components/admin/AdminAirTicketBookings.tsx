@@ -51,6 +51,8 @@ interface AirTicketBooking {
   travel_date: string;
   return_date: string | null;
   is_round_trip: boolean;
+  trip_type: "one_way" | "round_trip" | "multi_city" | null;
+  cabin_class: "economy" | "premium_economy" | "business" | "first" | null;
   passenger_count: number;
   contact_email: string;
   contact_phone: string;
@@ -66,6 +68,28 @@ interface AirTicketBooking {
   guest_name: string | null;
   created_at: string;
 }
+
+interface AirTicketRoute {
+  id: string;
+  booking_id: string;
+  route_order: number;
+  from_city: string;
+  to_city: string;
+  travel_date: string;
+}
+
+const tripTypeLabels: Record<string, string> = {
+  one_way: "One Way",
+  round_trip: "Round Trip",
+  multi_city: "Multi-City",
+};
+
+const cabinClassLabels: Record<string, string> = {
+  economy: "Economy",
+  premium_economy: "Premium Economy",
+  business: "Business",
+  first: "First Class",
+};
 
 interface Passenger {
   id: string;
@@ -395,9 +419,16 @@ export default function AdminAirTicketBookings() {
                         <Plane className="w-3 h-3 text-muted-foreground" />
                         <span>{booking.to_city}</span>
                       </div>
-                      {booking.is_round_trip && (
-                        <span className="text-xs text-muted-foreground">(Round Trip)</span>
-                      )}
+                      <div className="flex gap-1 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {tripTypeLabels[booking.trip_type || "one_way"]}
+                        </Badge>
+                        {booking.cabin_class && (
+                          <Badge variant="secondary" className="text-xs">
+                            {cabinClassLabels[booking.cabin_class]}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>{format(new Date(booking.travel_date), "PP")}</TableCell>
                     <TableCell>{booking.passenger_count}</TableCell>

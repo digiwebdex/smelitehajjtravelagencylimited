@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import AdminBookings from "@/components/admin/AdminBookings";
 import AdminAirTicketBookings from "@/components/admin/AdminAirTicketBookings";
+import AdminAirTicketSettings from "@/components/admin/AdminAirTicketSettings";
 import AdminPackages from "@/components/admin/AdminPackages";
 import AdminPackageSections from "@/components/admin/AdminPackageSections";
 import AdminRevenue from "@/components/admin/AdminRevenue";
@@ -192,6 +193,8 @@ const AdminDashboard = () => {
         return <AdminBookings onUpdate={fetchStats} />;
       case "air-ticket-bookings":
         return <AdminAirTicketBookings />;
+      case "air-ticket-settings":
+        return <AdminAirTicketSettings />;
       case "visa-applications":
         return <AdminVisaApplications />;
       case "leads":

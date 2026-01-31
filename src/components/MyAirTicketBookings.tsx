@@ -25,6 +25,8 @@ interface AirTicketBooking {
   travel_date: string;
   return_date: string | null;
   is_round_trip: boolean;
+  trip_type: "one_way" | "round_trip" | "multi_city" | null;
+  cabin_class: "economy" | "premium_economy" | "business" | "first" | null;
   passenger_count: number;
   contact_email: string;
   contact_phone: string;
@@ -36,6 +38,28 @@ interface AirTicketBooking {
   ticket_file_url: string | null;
   created_at: string;
 }
+
+interface AirTicketRoute {
+  id: string;
+  booking_id: string;
+  route_order: number;
+  from_city: string;
+  to_city: string;
+  travel_date: string;
+}
+
+const tripTypeLabels: Record<string, string> = {
+  one_way: "One Way",
+  round_trip: "Round Trip",
+  multi_city: "Multi-City",
+};
+
+const cabinClassLabels: Record<string, string> = {
+  economy: "Economy",
+  premium_economy: "Premium Economy",
+  business: "Business",
+  first: "First Class",
+};
 
 interface Passenger {
   id: string;
@@ -183,8 +207,15 @@ export default function MyAirTicketBookings() {
                       <span className="font-medium">{booking.from_city}</span>
                       <Plane className="w-4 h-4 text-primary" />
                       <span className="font-medium">{booking.to_city}</span>
-                      {booking.is_round_trip && (
-                        <span className="text-muted-foreground">(Round Trip)</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs">
+                        {tripTypeLabels[booking.trip_type || "one_way"]}
+                      </Badge>
+                      {booking.cabin_class && (
+                        <Badge variant="secondary" className="text-xs">
+                          {cabinClassLabels[booking.cabin_class]}
+                        </Badge>
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground">
@@ -223,8 +254,8 @@ export default function MyAirTicketBookings() {
                 </div>
 
                 {booking.status === "rejected" && booking.rejection_reason && (
-                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-sm text-red-700">
+                  <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                    <p className="text-sm text-destructive">
                       <strong>Rejection Reason:</strong> {booking.rejection_reason}
                     </p>
                   </div>
@@ -283,9 +314,17 @@ export default function MyAirTicketBookings() {
                   <div>
                     <Label className="text-muted-foreground">Trip Type</Label>
                     <p className="font-medium">
-                      {selectedBooking.is_round_trip ? "Round Trip" : "One Way"}
+                      {tripTypeLabels[selectedBooking.trip_type || "one_way"]}
                     </p>
                   </div>
+                  {selectedBooking.cabin_class && (
+                    <div>
+                      <Label className="text-muted-foreground">Cabin Class</Label>
+                      <p className="font-medium">
+                        {cabinClassLabels[selectedBooking.cabin_class]}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <Label className="text-muted-foreground">Passengers</Label>
                     <p className="font-medium">{selectedBooking.passenger_count}</p>

@@ -61,6 +61,7 @@ const menuGroups = [
     items: [
       { value: "bookings", label: "Package Bookings", icon: Package },
       { value: "air-ticket-bookings", label: "Air Ticket Bookings", icon: Plane },
+      { value: "air-ticket-settings", label: "Air Ticket Settings", icon: Settings },
       { value: "visa-applications", label: "Visa Applications", icon: Globe },
       { value: "group-inquiries", label: "Group Inquiries", icon: Users },
     ]
