@@ -63,6 +63,7 @@ import AdminRetargetingSegments from "@/components/admin/AdminRetargetingSegment
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminTranslations from "@/components/admin/AdminTranslations";
 import AdminTransactionLogs from "@/components/admin/AdminTransactionLogs";
+import AdminHotels from "@/components/admin/AdminHotels";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -215,6 +216,8 @@ const AdminDashboard = () => {
         return <AdminPackages onUpdate={fetchStats} />;
       case "package-sections":
         return <AdminPackageSections />;
+      case "hotels":
+        return <AdminHotels />;
       case "revenue":
         return <AdminRevenue />;
       case "financial-analytics":

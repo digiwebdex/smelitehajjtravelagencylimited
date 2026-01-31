@@ -18,11 +18,12 @@ import {
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
 import MakkahIcon from "./icons/MakkahIcon";
 import MadinahIcon from "./icons/MadinahIcon";
 import AirTicketBookingModal from "./AirTicketBookingModal";
+import HotelSection from "./HotelSection";
 
 interface Service {
   id: string;
@@ -92,6 +93,7 @@ const ServicesOverview = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [airTicketModalOpen, setAirTicketModalOpen] = useState(false);
+  const [hotelSectionOpen, setHotelSectionOpen] = useState(false);
   const [parentCompany, setParentCompany] = useState<ParentCompanySettings>({
     button_text: "Visit Parent Company",
     button_link: "",
@@ -183,6 +185,12 @@ const ServicesOverview = () => {
     // Check if this is the Air Ticket service
     if (service.title.toLowerCase().includes('air ticket') || service.icon_name === 'Ticket') {
       setAirTicketModalOpen(true);
+      return;
+    }
+    
+    // Check if this is the Hotel service
+    if (service.title.toLowerCase().includes('hotel') || service.icon_name === 'Hotel' || service.icon_name === 'Building2') {
+      setHotelSectionOpen(true);
       return;
     }
     
@@ -342,6 +350,13 @@ const ServicesOverview = () => {
         open={airTicketModalOpen} 
         onOpenChange={setAirTicketModalOpen} 
       />
+
+      {/* Hotel Section */}
+      <AnimatePresence>
+        {hotelSectionOpen && (
+          <HotelSection onClose={() => setHotelSectionOpen(false)} />
+        )}
+      </AnimatePresence>
     </IslamicBorder>
   );
 };

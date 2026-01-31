@@ -89,10 +89,11 @@ const menuGroups = [
     ]
   },
   {
-    label: "Packages",
+    label: "Packages & Hotels",
     items: [
       { value: "packages", label: "Packages", icon: LayoutDashboard },
       { value: "package-sections", label: "Package Sections", icon: Layers },
+      { value: "hotels", label: "Hotels", icon: Building2 },
     ]
   },
   {
