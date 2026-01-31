@@ -170,6 +170,158 @@ export type Database = {
         }
         Relationships: []
       }
+      air_ticket_bookings: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          booking_id: string
+          contact_email: string
+          contact_phone: string
+          country_code: string | null
+          created_at: string
+          from_city: string
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
+          id: string
+          is_round_trip: boolean | null
+          passenger_count: number
+          pnr_number: string | null
+          price: number | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          remarks: string | null
+          return_date: string | null
+          status: Database["public"]["Enums"]["air_ticket_status"]
+          ticket_file_url: string | null
+          ticket_number: string | null
+          to_city: string
+          travel_date: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_id?: string
+          contact_email: string
+          contact_phone: string
+          country_code?: string | null
+          created_at?: string
+          from_city: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          is_round_trip?: boolean | null
+          passenger_count?: number
+          pnr_number?: string | null
+          price?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          remarks?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["air_ticket_status"]
+          ticket_file_url?: string | null
+          ticket_number?: string | null
+          to_city: string
+          travel_date: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_id?: string
+          contact_email?: string
+          contact_phone?: string
+          country_code?: string | null
+          created_at?: string
+          from_city?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
+          id?: string
+          is_round_trip?: boolean | null
+          passenger_count?: number
+          pnr_number?: string | null
+          price?: number | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          remarks?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["air_ticket_status"]
+          ticket_file_url?: string | null
+          ticket_number?: string | null
+          to_city?: string
+          travel_date?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      air_ticket_passengers: {
+        Row: {
+          booking_id: string
+          created_at: string
+          date_of_birth: string
+          first_name: string
+          frequent_flyer_number: string | null
+          gender: Database["public"]["Enums"]["gender_type"]
+          id: string
+          last_name: string
+          nationality: string
+          passport_expiry: string | null
+          passport_number: string | null
+          special_service_request: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          date_of_birth: string
+          first_name: string
+          frequent_flyer_number?: string | null
+          gender: Database["public"]["Enums"]["gender_type"]
+          id?: string
+          last_name: string
+          nationality?: string
+          passport_expiry?: string | null
+          passport_number?: string | null
+          special_service_request?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          date_of_birth?: string
+          first_name?: string
+          frequent_flyer_number?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"]
+          id?: string
+          last_name?: string
+          nationality?: string
+          passport_expiry?: string | null
+          passport_number?: string | null
+          special_service_request?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "air_ticket_passengers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "air_ticket_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audience_segments: {
         Row: {
           created_at: string
@@ -383,6 +535,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      booking_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+        }
+        Relationships: []
       }
       booking_status_history: {
         Row: {
@@ -1562,6 +1741,45 @@ export type Database = {
           is_enabled?: boolean
           setting_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          created_at: string
+          email_subject: string | null
+          email_template: string | null
+          id: string
+          is_active: boolean | null
+          sms_template: string | null
+          template_key: string
+          template_name: string
+          updated_at: string
+          variables: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          email_subject?: string | null
+          email_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          sms_template?: string | null
+          template_key: string
+          template_name: string
+          updated_at?: string
+          variables?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          email_subject?: string | null
+          email_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          sms_template?: string | null
+          template_key?: string
+          template_name?: string
+          updated_at?: string
+          variables?: string[] | null
         }
         Relationships: []
       }
@@ -2789,7 +3007,9 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
+      air_ticket_status: "pending" | "confirmed" | "rejected" | "cancelled"
       booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      gender_type: "male" | "female" | "other"
       package_type: "hajj" | "umrah"
       staff_role: "admin" | "manager" | "agent" | "support"
       tracking_status:
@@ -2927,7 +3147,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      air_ticket_status: ["pending", "confirmed", "rejected", "cancelled"],
       booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      gender_type: ["male", "female", "other"],
       package_type: ["hajj", "umrah"],
       staff_role: ["admin", "manager", "agent", "support"],
       tracking_status: [
