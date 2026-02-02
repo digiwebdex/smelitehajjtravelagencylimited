@@ -130,15 +130,15 @@ const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; p
   }
 };
 
-const COUNTRY_CODES: Record<string, string> = {
-  "Saudi Arabia": "SA",
-  "Dubai": "AE",
-  "Turkey": "TR",
-  "Malaysia": "MY",
-  "Thailand": "TH",
-  "Singapore": "SG",
-  "Indonesia": "ID",
-  "Egypt": "EG",
+const COUNTRY_FLAGS: Record<string, string> = {
+  "Saudi Arabia": "🇸🇦",
+  "Dubai": "🇦🇪",
+  "Turkey": "🇹🇷",
+  "Malaysia": "🇲🇾",
+  "Thailand": "🇹🇭",
+  "Singapore": "🇸🇬",
+  "Indonesia": "🇮🇩",
+  "Egypt": "🇪🇬",
 };
 
 const HotelSection = () => {
@@ -312,8 +312,8 @@ const HotelSection = () => {
                     onClick={() => setSelectedCountry(country)}
                     className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-left border"
                   >
-                    <span className="text-2xl font-bold text-foreground mb-1 block">{COUNTRY_CODES[country] || country.substring(0, 2).toUpperCase()}</span>
-                    <span className="text-muted-foreground">{country}</span>
+                    <span className="text-4xl mb-2 block">{COUNTRY_FLAGS[country] || "🌍"}</span>
+                    <span className="font-medium">{country}</span>
                   </button>
                 ))}
               </div>
