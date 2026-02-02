@@ -3277,7 +3277,7 @@ export type Database = {
         | "processing"
         | "completed"
       trip_type: "one_way" | "round_trip" | "multi_city"
-      user_role: "customer" | "admin"
+      user_role: "customer" | "admin" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3420,7 +3420,7 @@ export const Constants = {
         "completed",
       ],
       trip_type: ["one_way", "round_trip", "multi_city"],
-      user_role: ["customer", "admin"],
+      user_role: ["customer", "admin", "viewer"],
     },
   },
 } as const
