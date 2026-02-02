@@ -22,53 +22,16 @@ interface OfferPopupSettings {
   overlay_opacity: number;
 }
 
-interface OfficeLocation {
-  id: string;
-  name: string;
-  address: string;
-  map_query: string | null;
-}
-
 const STORAGE_KEY = "offer_popup_shown";
-
-// Hardcoded embed URLs for reliable map display
-const OFFICE_MAP_EMBEDS: Record<string, string> = {
-  "Banani Office": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.7458566447815!2d90.40168641498246!3d23.79400059293687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c70a2c53c5a5%3A0x8e9e4c8f6b0c8a8b!2sHouse%2037%2C%20Block%20C%2C%20Road%206%2C%20Banani%2C%20Dhaka%201213!5e0!3m2!1sen!2sbd!4v1704067200000!5m2!1sen!2sbd",
-  "Savar Office": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3649.6324567123456!2d90.25857241498246!3d23.84699959293687!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c70a2c53c5a5%3A0x8e9e4c8f6b0c8a8b!2sSavar%20Bazar%20Bus%20Stand%2C%20Savar%2C%20Dhaka%201340!5e0!3m2!1sen!2sbd!4v1704067200000!5m2!1sen!2sbd"
-};
-
-const getEmbedUrl = (officeName: string, address: string) => {
-  // Use hardcoded embed if available, otherwise fallback to address search
-  if (OFFICE_MAP_EMBEDS[officeName]) {
-    return OFFICE_MAP_EMBEDS[officeName];
-  }
-  // Fallback: Use address for embed
-  const query = encodeURIComponent(`S M Elite Hajj Limited ${address}`);
-  return `https://maps.google.com/maps?q=${query}&z=15&output=embed`;
-};
 
 const OfferPopup = () => {
   const [settings, setSettings] = useState<OfferPopupSettings | null>(null);
-  const [offices, setOffices] = useState<OfficeLocation[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchSettings();
-    fetchOffices();
   }, []);
-
-  const fetchOffices = async () => {
-    const { data } = await supabase
-      .from("office_locations")
-      .select("id, name, address, map_query")
-      .eq("is_active", true)
-      .order("order_index");
-    
-    if (data) {
-      setOffices(data as OfficeLocation[]);
-    }
-  };
 
   useEffect(() => {
     if (!settings || !settings.is_enabled || loading) return;
@@ -156,48 +119,14 @@ const OfferPopup = () => {
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Office Maps Section - First View */}
-              {offices.length > 0 && (
-                <div className="p-4 pb-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    <h3 className="text-lg font-bold text-foreground">Visit Our Offices</h3>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {offices.map((office) => (
-                      <div key={office.id} className="rounded-xl overflow-hidden border border-border shadow-sm">
-                        <div className="bg-primary/10 px-3 py-2">
-                          <p className="font-semibold text-sm text-foreground">{office.name}</p>
-                          <p className="text-xs text-muted-foreground line-clamp-1">{office.address}</p>
-                        </div>
-                        <iframe
-                          src={getEmbedUrl(office.name, office.address)}
-                          width="100%"
-                          height="150"
-                          style={{ border: 0 }}
-                          allowFullScreen
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          title={`${office.name} Location`}
-                          className="w-full"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Divider */}
-              <div className="h-px bg-border mx-4" />
-
-              {/* Offer Content Section */}
-              <div 
-                className="rounded-xl mx-2 my-2 overflow-hidden"
-                style={{ 
-                  backgroundColor: settings.background_color,
-                  color: settings.text_color
-                }}
-              >
+            {/* Offer Content Section */}
+            <div 
+              className="rounded-xl mx-2 my-2 overflow-hidden"
+              style={{ 
+                backgroundColor: settings.background_color,
+                color: settings.text_color
+              }}
+            >
                 {/* Badge */}
                 {settings.badge_text && (
                   <div className="text-center py-2" style={{ backgroundColor: "rgba(0,0,0,0.2)" }}>
