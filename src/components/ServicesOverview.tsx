@@ -313,56 +313,35 @@ const ServicesOverview = () => {
           >
             <button
               onClick={() => window.open(parentCompany.button_link, '_blank')}
-              className="group relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold overflow-hidden rounded-xl transition-all duration-500 hover:scale-105"
+              className="group relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold overflow-hidden rounded-xl transition-all duration-500"
             >
-              {/* Fixed green background with subtle gradient */}
-              <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-primary/95 rounded-xl" />
+              {/* Fixed green background */}
+              <span className="absolute inset-0 bg-primary rounded-xl" />
               
-              {/* Animated golden shine sweep - main effect */}
+              {/* Animated golden shine sweep - continuous animation */}
               <span 
-                className="absolute inset-0 overflow-hidden rounded-xl"
-              >
-                <span 
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/70 to-transparent animate-shine-sweep"
-                  style={{ width: '50%' }}
-                />
-              </span>
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/60 to-transparent animate-[shine-sweep_2.5s_ease-in-out_infinite]"
+                style={{
+                  backgroundSize: '200% 100%',
+                }}
+              />
               
-              {/* Secondary subtle shimmer */}
-              <span 
-                className="absolute inset-0 overflow-hidden rounded-xl"
-              >
-                <span 
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine-sweep"
-                  style={{ width: '30%', animationDelay: '1.2s' }}
-                />
-              </span>
+              {/* Golden glow pulse */}
+              <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-secondary/40 via-secondary/60 to-secondary/40 blur-md animate-[glow-pulse_2s_ease-in-out_infinite] -z-10" />
               
-              {/* Golden glow pulse - outer */}
-              <span className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-secondary/50 via-secondary/70 to-secondary/50 blur-xl animate-glow-pulse -z-10" />
+              {/* Border with golden accent */}
+              <span className="absolute inset-0 rounded-xl border-2 border-secondary/30 group-hover:border-secondary/60 transition-colors duration-300" />
               
-              {/* Inner golden edge glow */}
-              <span className="absolute inset-0 rounded-xl shadow-[inset_0_0_20px_rgba(196,164,106,0.3)] group-hover:shadow-[inset_0_0_30px_rgba(196,164,106,0.5)] transition-shadow duration-500" />
+              {/* Icon */}
+              <ExternalLink className="relative z-10 w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
               
-              {/* Animated border */}
-              <span className="absolute inset-0 rounded-xl border-2 border-secondary/40 group-hover:border-secondary/70 transition-colors duration-300" />
-              
-              {/* Corner sparkles */}
-              <span className="absolute top-1 right-1 w-2 h-2 bg-secondary/80 rounded-full blur-[2px] animate-pulse" />
-              <span className="absolute bottom-1 left-1 w-1.5 h-1.5 bg-secondary/60 rounded-full blur-[1px] animate-pulse" style={{ animationDelay: '0.5s' }} />
-              
-              {/* Icon with glow */}
-              <span className="relative z-10 flex items-center justify-center">
-                <ExternalLink className="w-6 h-6 text-white group-hover:rotate-12 group-hover:text-secondary transition-all duration-300 drop-shadow-[0_0_8px_rgba(196,164,106,0.5)]" />
-              </span>
-              
-              {/* Text with enhanced styling */}
-              <span className="relative z-10 text-white tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] group-hover:text-white/95 transition-colors">
+              {/* Text */}
+              <span className="relative z-10 text-white tracking-wide drop-shadow-md">
                 {parentCompany.button_text}
               </span>
               
-              {/* Arrow indicator with glow */}
-              <span className="relative z-10 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-secondary drop-shadow-[0_0_6px_rgba(196,164,106,0.8)]">
+              {/* Arrow indicator */}
+              <span className="relative z-10 ml-1 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-white">
                 →
               </span>
             </button>
