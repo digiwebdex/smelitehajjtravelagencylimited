@@ -33,30 +33,30 @@ interface SectionSettings {
 }
 
 // Demo fallback data
-const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; price: string }[]>> = {
+const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; price: string; country: string }[]>> = {
   "Saudi Arabia": {
     "3": [
-      { name: "Al Ebaa Hotel", city: "Makkah", price: "$80/night" },
-      { name: "Diyar Al Salam", city: "Madinah", price: "$75/night" }
+      { name: "Al Ebaa Hotel", city: "Makkah", price: "৳8,000/night", country: "Saudi Arabia" },
+      { name: "Diyar Al Salam", city: "Madinah", price: "৳7,500/night", country: "Saudi Arabia" }
     ],
     "4": [
-      { name: "Elaf Ajyad Hotel", city: "Makkah", price: "$120/night" },
-      { name: "Saja Al Madinah", city: "Madinah", price: "$110/night" }
+      { name: "Elaf Ajyad Hotel", city: "Makkah", price: "৳12,000/night", country: "Saudi Arabia" },
+      { name: "Saja Al Madinah", city: "Madinah", price: "৳11,000/night", country: "Saudi Arabia" }
     ],
     "5": [
-      { name: "Swissotel Makkah", city: "Makkah", price: "$250/night" },
-      { name: "Anwar Al Madinah Mövenpick", city: "Madinah", price: "$230/night" }
+      { name: "Swissotel Makkah", city: "Makkah", price: "৳25,000/night", country: "Saudi Arabia" },
+      { name: "Anwar Al Madinah Mövenpick", city: "Madinah", price: "৳23,000/night", country: "Saudi Arabia" }
     ]
   },
   "Dubai": {
     "3": [
-      { name: "Citymax Hotel", city: "Dubai", price: "$70/night" }
+      { name: "Citymax Hotel", city: "Dubai", price: "৳7,000/night", country: "Dubai" }
     ],
     "4": [
-      { name: "Golden Tulip Deira", city: "Dubai", price: "$130/night" }
+      { name: "Golden Tulip Deira", city: "Dubai", price: "৳13,000/night", country: "Dubai" }
     ],
     "5": [
-      { name: "Atlantis The Palm", city: "Dubai", price: "$450/night" }
+      { name: "Atlantis The Palm", city: "Dubai", price: "৳45,000/night", country: "Dubai" }
     ]
   }
 };
@@ -159,6 +159,28 @@ const HotelSection = () => {
 
   const handleBookNow = (hotel: Hotel) => {
     setSelectedHotel(hotel);
+    setBookingModalOpen(true);
+  };
+
+  // Handle demo hotel booking - create a temporary hotel object
+  const handleDemoBookNow = (demoHotel: { name: string; city: string; price: string; country: string }) => {
+    const tempHotel: Hotel = {
+      id: `demo-${Date.now()}`,
+      name: demoHotel.name,
+      city: demoHotel.city,
+      country: demoHotel.country,
+      star_rating: selectedStarRating || 3,
+      distance_from_haram: 0,
+      description: null,
+      facilities: [],
+      images: [],
+      google_map_link: null,
+      google_map_embed_url: null,
+      contact_phone: null,
+      contact_email: null,
+      is_active: true,
+    };
+    setSelectedHotel(tempHotel);
     setBookingModalOpen(true);
   };
 
@@ -319,7 +341,9 @@ const HotelSection = () => {
                       <h3 className="text-lg font-bold">{hotel.name}</h3>
                       <p className="text-muted-foreground">{hotel.city}</p>
                       <p className="text-primary font-semibold mt-2">{hotel.price}</p>
-                      <Button className="mt-4 w-full">Book Now</Button>
+                      <Button className="mt-4 w-full" onClick={() => handleDemoBookNow(hotel)}>
+                        Book Now
+                      </Button>
                     </div>
                   ))}
                 </div>
