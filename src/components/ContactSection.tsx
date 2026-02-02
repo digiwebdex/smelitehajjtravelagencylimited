@@ -430,23 +430,50 @@ const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-12 bg-card rounded-2xl overflow-hidden shadow-elegant"
+          className="mt-12 space-y-4"
         >
-          <div className="bg-primary/10 px-4 py-3 flex items-center gap-2 border-b border-border">
+          <div className="bg-primary/10 px-4 py-3 flex items-center gap-2 rounded-t-2xl border-b border-border">
             <MapPin className="w-5 h-5 text-primary" />
             <h3 className="font-heading font-bold text-foreground">Our Office Locations</h3>
           </div>
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d58396.34251963422!2d90.29000000000002!3d23.82!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1704067200000!5m2!1sen!2sbd"
-            width="100%"
-            height="350"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="SM Elite Hajj Office Locations - Banani & Savar"
-            className="w-full"
-          />
+          
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Banani Office Map */}
+            <div className="bg-card rounded-xl overflow-hidden shadow-elegant">
+              <div className="bg-secondary/10 px-4 py-2 border-b border-border">
+                <h4 className="font-heading font-semibold text-sm text-foreground">📍 Banani Office (Head Office)</h4>
+              </div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.7372270873812d90.40006317353787!3d23.79236988716717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1769162756109!5m2!1sen!2sbd"
+                width="100%"
+                height="280"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="SM Elite Hajj - Banani Office"
+                className="w-full"
+              />
+            </div>
+
+            {/* Savar Office Map */}
+            <div className="bg-card rounded-xl overflow-hidden shadow-elegant">
+              <div className="bg-secondary/10 px-4 py-2 border-b border-border">
+                <h4 className="font-heading font-semibold text-sm text-foreground">📍 Savar Office</h4>
+              </div>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3648.8!2d90.25!3d23.85!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDUxJzAwLjAiTiA5MMKwMTUnMDAuMCJF!5e0!3m2!1sen!2sbd!4v1704067200000!5m2!1sen!2sbd&q=S+M+Elite+Hajj+Savar"
+                width="100%"
+                height="280"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="SM Elite Hajj - Savar Office"
+                className="w-full"
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
       </section>
