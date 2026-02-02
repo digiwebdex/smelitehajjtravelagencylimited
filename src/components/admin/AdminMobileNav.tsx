@@ -58,6 +58,7 @@ const menuGroups = [
     items: [
       { value: "leads", label: "Leads CRM", icon: Users },
       { value: "marketing-analytics", label: "Marketing Analytics", icon: BarChart3 },
+      { value: "offer-popup", label: "Offer Popup", icon: Megaphone },
       { value: "lead-magnets", label: "Lead Magnets", icon: FileText },
       { value: "webinars", label: "Webinars", icon: Megaphone },
       { value: "retargeting", label: "Retargeting Segments", icon: Activity },
