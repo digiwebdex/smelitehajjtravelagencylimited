@@ -33,9 +33,14 @@ interface EmailConfig {
 
 interface WhatsAppConfig {
   provider: string;
-  account_sid: string;
-  auth_token: string;
-  from_number: string;
+  // Meta WhatsApp Business API fields
+  api_key: string;
+  phone_number_id: string;
+  business_account_id: string;
+  // Legacy Twilio fields (for backwards compatibility)
+  account_sid?: string;
+  auth_token?: string;
+  from_number?: string;
   message_template: string;
   welcome_message_enabled?: boolean;
   welcome_message_template?: string;
@@ -67,7 +72,11 @@ const AdminNotifications = () => {
   const [logs, setLogs] = useState<NotificationLog[]>([]);
   const [showSmsApiKey, setShowSmsApiKey] = useState(false);
   const [showSmtpPassword, setShowSmtpPassword] = useState(false);
-  const [showWhatsappAuthToken, setShowWhatsappAuthToken] = useState(false);
+  const [showWhatsappApiKey, setShowWhatsappApiKey] = useState(false);
+  const [showWhatsappPhoneId, setShowWhatsappPhoneId] = useState(false);
+  const [showWhatsappBusinessId, setShowWhatsappBusinessId] = useState(false);
+  const [testingWhatsapp, setTestingWhatsapp] = useState(false);
+  const [testPhoneNumber, setTestPhoneNumber] = useState("");
 
   useEffect(() => {
     fetchSettings();
@@ -398,99 +407,118 @@ const AdminNotifications = () => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <WhatsAppIcon className="h-5 w-5" />
-                    WhatsApp Business Configuration
+                    WhatsApp Business API
                   </CardTitle>
                   <CardDescription>
-                    Configure Twilio WhatsApp API to send booking status notifications via WhatsApp. 
-                    Notifications are automatically sent when booking status changes.
+                    Configure WhatsApp Business API from Meta. You'll need a Business Account ID, Phone Number ID, and API Key.
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="whatsapp-enabled">Enable WhatsApp</Label>
-                  <Switch
-                    id="whatsapp-enabled"
-                    checked={whatsappSettings?.is_enabled || false}
-                    onCheckedChange={(checked) =>
-                      setWhatsappSettings(prev => prev ? { ...prev, is_enabled: checked } : null)
-                    }
-                  />
-                </div>
+                <Switch
+                  id="whatsapp-enabled"
+                  checked={whatsappSettings?.is_enabled || false}
+                  onCheckedChange={(checked) =>
+                    setWhatsappSettings(prev => prev ? { ...prev, is_enabled: checked } : null)
+                  }
+                />
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h4 className="font-medium text-blue-800 mb-2">Setup Instructions</h4>
-                <ol className="text-sm text-blue-700 list-decimal list-inside space-y-1">
-                  <li>Create a Twilio account at <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" className="underline">twilio.com</a></li>
-                  <li>Enable WhatsApp in Twilio Console → Messaging → Try It Out → Send a WhatsApp message</li>
-                  <li>Get your Account SID and Auth Token from Twilio Console</li>
-                  <li>Your WhatsApp number will be in format: whatsapp:+14155238886 (Twilio sandbox) or your own number</li>
-                </ol>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp-account-sid">Twilio Account SID</Label>
-                  <Input
-                    id="whatsapp-account-sid"
-                    placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                    value={(whatsappSettings?.config as WhatsAppConfig)?.account_sid || ""}
-                    onChange={(e) => updateWhatsappConfig("account_sid", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp-from-number">From WhatsApp Number</Label>
-                  <Input
-                    id="whatsapp-from-number"
-                    placeholder="whatsapp:+14155238886"
-                    value={(whatsappSettings?.config as WhatsAppConfig)?.from_number || ""}
-                    onChange={(e) => updateWhatsappConfig("from_number", e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">Include "whatsapp:" prefix</p>
-                </div>
-              </div>
+            <CardContent className="space-y-6">
+              {/* WhatsApp API Key */}
               <div className="space-y-2">
-                <Label htmlFor="whatsapp-auth-token">Twilio Auth Token</Label>
-                <div className="relative">
+                <Label htmlFor="whatsapp-api-key">WhatsApp API Key</Label>
+                <div className="flex gap-2">
                   <Input
-                    id="whatsapp-auth-token"
-                    type={showWhatsappAuthToken ? "text" : "password"}
-                    placeholder="Enter your Twilio Auth Token"
-                    value={(whatsappSettings?.config as WhatsAppConfig)?.auth_token || ""}
-                    onChange={(e) => updateWhatsappConfig("auth_token", e.target.value)}
+                    id="whatsapp-api-key"
+                    type={showWhatsappApiKey ? "text" : "password"}
+                    placeholder="Enter your WhatsApp API Key"
+                    value={(whatsappSettings?.config as WhatsAppConfig)?.api_key || ""}
+                    onChange={(e) => updateWhatsappConfig("api_key", e.target.value)}
+                    className="flex-1"
                   />
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => setShowWhatsappAuthToken(!showWhatsappAuthToken)}
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowWhatsappApiKey(!showWhatsappApiKey)}
                   >
-                    {showWhatsappAuthToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showWhatsappApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
+
+              {/* Phone Number ID */}
               <div className="space-y-2">
-                <Label htmlFor="whatsapp-template">Status Update Template</Label>
-                <Textarea
-                  id="whatsapp-template"
-                  placeholder="Hello {{name}}, your booking status has been updated to: {{status}}. Booking ID: {{booking_id}}"
-                  value={(whatsappSettings?.config as WhatsAppConfig)?.message_template || ""}
-                  onChange={(e) => updateWhatsappConfig("message_template", e.target.value)}
-                  rows={3}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Available variables: {"{{name}}"}, {"{{status}}"}, {"{{booking_id}}"}, {"{{package}}"}, {"{{notes}}"}
-                </p>
+                <Label htmlFor="whatsapp-phone-id">Phone Number ID</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="whatsapp-phone-id"
+                    type={showWhatsappPhoneId ? "text" : "password"}
+                    placeholder="Enter your Phone Number ID"
+                    value={(whatsappSettings?.config as WhatsAppConfig)?.phone_number_id || ""}
+                    onChange={(e) => updateWhatsappConfig("phone_number_id", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowWhatsappPhoneId(!showWhatsappPhoneId)}
+                  >
+                    {showWhatsappPhoneId ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Business Account ID */}
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp-business-id">Business Account ID</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="whatsapp-business-id"
+                    type={showWhatsappBusinessId ? "text" : "password"}
+                    placeholder="Enter your Business Account ID"
+                    value={(whatsappSettings?.config as WhatsAppConfig)?.business_account_id || ""}
+                    onChange={(e) => updateWhatsappConfig("business_account_id", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowWhatsappBusinessId(!showWhatsappBusinessId)}
+                  >
+                    {showWhatsappBusinessId ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Message Templates Section */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-4">Message Templates</h4>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="whatsapp-template">Status Update Template</Label>
+                    <Textarea
+                      id="whatsapp-template"
+                      placeholder="Hello {{name}}, your booking status has been updated to: {{status}}. Booking ID: {{booking_id}}"
+                      value={(whatsappSettings?.config as WhatsAppConfig)?.message_template || ""}
+                      onChange={(e) => updateWhatsappConfig("message_template", e.target.value)}
+                      rows={3}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Available variables: {"{{name}}"}, {"{{status}}"}, {"{{booking_id}}"}, {"{{package}}"}, {"{{notes}}"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Welcome Message Section */}
-              <div className="border-t pt-4 mt-4">
+              <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h4 className="font-medium">Welcome Message</h4>
                     <p className="text-sm text-muted-foreground">
-                      Send a welcome WhatsApp message when new customers sign up with their phone number
+                      Send a welcome WhatsApp message when new customers sign up
                     </p>
                   </div>
                   <Switch
@@ -514,6 +542,48 @@ const AdminNotifications = () => {
                     Available variables: {"{{name}}"}
                   </p>
                 </div>
+              </div>
+
+              {/* Test Section */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-4">Test WhatsApp</h4>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter phone number to test (e.g., 8801712345678)"
+                    value={testPhoneNumber}
+                    onChange={(e) => setTestPhoneNumber(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      if (!testPhoneNumber) {
+                        toast.error("Please enter a phone number");
+                        return;
+                      }
+                      setTestingWhatsapp(true);
+                      try {
+                        const response = await supabase.functions.invoke("send-whatsapp-test", {
+                          body: { phoneNumber: testPhoneNumber }
+                        });
+                        if (response.error) throw response.error;
+                        toast.success("Test message sent successfully!");
+                      } catch (error: any) {
+                        console.error("Test failed:", error);
+                        toast.error(error.message || "Failed to send test message");
+                      } finally {
+                        setTestingWhatsapp(false);
+                      }
+                    }}
+                    disabled={testingWhatsapp || !whatsappSettings?.is_enabled}
+                  >
+                    {testingWhatsapp ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Send Test
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Send a test message to verify your WhatsApp Business API configuration
+                </p>
               </div>
 
               <div className="flex gap-2 pt-4">
