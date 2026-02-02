@@ -318,16 +318,19 @@ const ServicesOverview = () => {
               {/* Fixed green background */}
               <span className="absolute inset-0 bg-primary rounded-xl" />
               
-              {/* Animated golden shine sweep - moves from left to right */}
+              {/* Animated golden shine sweep - continuous animation */}
               <span 
-                className="absolute inset-0 w-[200%] -left-full bg-gradient-to-r from-transparent via-secondary/70 to-transparent animate-shine-sweep"
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/60 to-transparent animate-[shine-sweep_2.5s_ease-in-out_infinite]"
+                style={{
+                  backgroundSize: '200% 100%',
+                }}
               />
               
-              {/* Golden glow pulse around button */}
-              <span className="absolute -inset-2 rounded-xl bg-secondary/30 blur-lg animate-glow-pulse -z-10" />
+              {/* Golden glow pulse */}
+              <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-secondary/40 via-secondary/60 to-secondary/40 blur-md animate-[glow-pulse_2s_ease-in-out_infinite] -z-10" />
               
               {/* Border with golden accent */}
-              <span className="absolute inset-0 rounded-xl border-2 border-secondary/40 group-hover:border-secondary/70 transition-colors duration-300" />
+              <span className="absolute inset-0 rounded-xl border-2 border-secondary/30 group-hover:border-secondary/60 transition-colors duration-300" />
               
               {/* Icon */}
               <ExternalLink className="relative z-10 w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
