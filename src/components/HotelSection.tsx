@@ -310,7 +310,7 @@ const HotelSection = () => {
                   <button
                     key={country}
                     onClick={() => setSelectedCountry(country)}
-                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-left border"
+                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-center border flex flex-col items-center"
                   >
                     <img 
                       src={COUNTRY_FLAGS[country] || "https://flagcdn.com/w80/xx.png"} 
@@ -341,12 +341,12 @@ const HotelSection = () => {
               <h2 className="text-xl font-semibold mb-6">
                 {selectedCountry} - Select Category
               </h2>
-              <div className="grid grid-cols-3 gap-4 max-w-2xl">
+              <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
                 {starRatings.map((rating) => (
                   <button
                     key={rating}
                     onClick={() => setSelectedStarRating(rating)}
-                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors border"
+                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors border text-center"
                   >
                     <div className="flex justify-center gap-0.5 mb-2">
                       {Array.from({ length: rating }).map((_, i) => (
@@ -382,7 +382,7 @@ const HotelSection = () => {
               {filteredHotels.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredHotels.map((hotel) => (
-                    <div key={hotel.id} className="bg-card p-6 shadow-lg rounded-xl border">
+                    <div key={hotel.id} className="bg-card p-6 shadow-lg rounded-xl border text-center">
                       {hotel.images?.[0] && (
                         <img
                           src={hotel.images[0]}
@@ -414,7 +414,7 @@ const HotelSection = () => {
               {filteredHotels.length === 0 && demoHotels.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {demoHotels.map((hotel, index) => (
-                    <div key={index} className="bg-card shadow-lg rounded-xl border overflow-hidden">
+                    <div key={index} className="bg-card shadow-lg rounded-xl border overflow-hidden text-center">
                       <img
                         src={hotel.image}
                         alt={hotel.name}
@@ -424,7 +424,7 @@ const HotelSection = () => {
                         <h3 className="text-lg font-bold">{hotel.name}</h3>
                         <p className="text-muted-foreground">{hotel.city}</p>
                         <p className="text-primary font-semibold mt-2">{hotel.price}</p>
-                        <div className="flex gap-2 mt-4">
+                        <div className="flex gap-2 mt-4 justify-center">
                           <Button 
                             variant="outline" 
                             size="sm"
