@@ -315,23 +315,28 @@ const ServicesOverview = () => {
               onClick={() => window.open(parentCompany.button_link, '_blank')}
               className="group relative inline-flex items-center gap-3 px-10 py-5 text-lg font-bold overflow-hidden rounded-xl transition-all duration-500"
             >
-              {/* Animated gradient background */}
-              <span className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-secondary transition-all duration-500 group-hover:scale-105" />
+              {/* Fixed green background */}
+              <span className="absolute inset-0 bg-primary rounded-xl" />
               
-              {/* Shine effect */}
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              {/* Animated golden shine sweep - continuous animation */}
+              <span 
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-secondary/60 to-transparent animate-[shine-sweep_2.5s_ease-in-out_infinite]"
+                style={{
+                  backgroundSize: '200% 100%',
+                }}
+              />
               
-              {/* Border glow */}
-              <span className="absolute inset-0 rounded-xl border-2 border-white/20 group-hover:border-white/40 transition-colors duration-300" />
+              {/* Golden glow pulse */}
+              <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-secondary/40 via-secondary/60 to-secondary/40 blur-md animate-[glow-pulse_2s_ease-in-out_infinite] -z-10" />
               
-              {/* Outer glow on hover */}
-              <span className="absolute -inset-1 rounded-xl bg-gradient-to-r from-primary/50 to-secondary/50 opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-500 -z-10" />
+              {/* Border with golden accent */}
+              <span className="absolute inset-0 rounded-xl border-2 border-secondary/30 group-hover:border-secondary/60 transition-colors duration-300" />
               
               {/* Icon */}
               <ExternalLink className="relative z-10 w-6 h-6 text-white group-hover:rotate-12 transition-transform duration-300" />
               
               {/* Text */}
-              <span className="relative z-10 text-white tracking-wide">
+              <span className="relative z-10 text-white tracking-wide drop-shadow-md">
                 {parentCompany.button_text}
               </span>
               
