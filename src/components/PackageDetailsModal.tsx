@@ -40,31 +40,56 @@ interface PackageDetailsModalProps {
 
 // Helper component to format description text with proper sections
 const FormattedDescription = ({ text }: { text: string }) => {
-  // Split by section headers (text wrapped in ** **)
-  const regex = /\*\*([^*]+)\*\*/g;
+  // Normalize text: replace different bullet types with a standard marker
+  const normalizedText = text
+    .replace(/❖/g, '\n• ') // Replace ❖ with bullet
+    .replace(/✓/g, '\n• ') // Replace ✓ with bullet
+    .replace(/➤/g, '\n• ') // Replace ➤ with bullet
+    .replace(/►/g, '\n• ') // Replace ► with bullet
+    .replace(/→/g, '\n• ') // Replace → with bullet
+    .replace(/\*\s/g, '\n• ') // Replace * with bullet
+    .replace(/–\s/g, '\n• ') // Replace – with bullet
+    .replace(/-\s(?=[A-Z])/g, '\n• '); // Replace - followed by capital with bullet
+
+  // Split by section headers (text wrapped in ** ** or ending with :)
+  const sectionHeaderRegex = /(?:\*\*([^*]+)\*\*|^([A-Z][^:]{3,50}):(?=\s))/gm;
   const parsedSections: { title: string; content: { type: 'bullet' | 'text'; value: string }[] }[] = [];
   
   let lastIndex = 0;
   let match;
   let currentSection: { title: string; content: { type: 'bullet' | 'text'; value: string }[] } | null = null;
   
-  while ((match = regex.exec(text)) !== null) {
+  // Helper function to parse content into bullets or text
+  const parseContent = (content: string): { type: 'bullet' | 'text'; value: string }[] => {
+    const result: { type: 'bullet' | 'text'; value: string }[] = [];
+    const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+    
+    lines.forEach(line => {
+      // Check if line starts with bullet markers
+      if (line.match(/^[•●○◦‣⁃]\s*/)) {
+        const cleanedLine = line.replace(/^[•●○◦‣⁃]\s*/, '').trim();
+        if (cleanedLine) {
+          result.push({ type: 'bullet', value: cleanedLine });
+        }
+      } else if (line.length > 0) {
+        // Check if it's a sentence that should be a bullet (has period, moderate length)
+        if (line.length > 20 && !line.endsWith(':')) {
+          result.push({ type: 'bullet', value: line });
+        } else {
+          result.push({ type: 'text', value: line });
+        }
+      }
+    });
+    
+    return result;
+  };
+  
+  while ((match = sectionHeaderRegex.exec(normalizedText)) !== null) {
     // Get content before this match (belongs to previous section)
-    const contentBefore = text.slice(lastIndex, match.index).trim();
+    const contentBefore = normalizedText.slice(lastIndex, match.index).trim();
     
     if (currentSection && contentBefore) {
-      // Parse the content for the previous section
-      if (contentBefore.includes('•')) {
-        const items = contentBefore.split('•').filter(item => item.trim());
-        items.forEach(item => {
-          currentSection!.content.push({ type: 'bullet', value: item.trim() });
-        });
-      } else {
-        const paragraphs = contentBefore.split('\n').filter(p => p.trim());
-        paragraphs.forEach(p => {
-          currentSection!.content.push({ type: 'text', value: p.trim() });
-        });
-      }
+      currentSection.content.push(...parseContent(contentBefore));
     }
     
     // Save previous section if exists
@@ -73,30 +98,31 @@ const FormattedDescription = ({ text }: { text: string }) => {
     }
     
     // Start new section with the matched title
-    const title = match[1].trim().replace(/:$/, '');
+    const title = (match[1] || match[2] || '').trim().replace(/:$/, '');
     currentSection = { title, content: [] };
-    lastIndex = regex.lastIndex;
+    lastIndex = sectionHeaderRegex.lastIndex;
   }
   
   // Get remaining content after last match
-  const remainingContent = text.slice(lastIndex).trim();
+  const remainingContent = normalizedText.slice(lastIndex).trim();
   if (currentSection && remainingContent) {
-    if (remainingContent.includes('•')) {
-      const items = remainingContent.split('•').filter(item => item.trim());
-      items.forEach(item => {
-        currentSection!.content.push({ type: 'bullet', value: item.trim() });
-      });
-    } else {
-      const paragraphs = remainingContent.split('\n').filter(p => p.trim());
-      paragraphs.forEach(p => {
-        currentSection!.content.push({ type: 'text', value: p.trim() });
-      });
-    }
+    currentSection.content.push(...parseContent(remainingContent));
   }
   
   // Add last section
   if (currentSection && currentSection.content.length > 0) {
     parsedSections.push(currentSection);
+  }
+
+  // If no sections were parsed, treat entire text as one section
+  if (parsedSections.length === 0 && normalizedText.trim()) {
+    const content = parseContent(normalizedText);
+    if (content.length > 0) {
+      parsedSections.push({
+        title: 'Package Details',
+        content
+      });
+    }
   }
 
   return (
