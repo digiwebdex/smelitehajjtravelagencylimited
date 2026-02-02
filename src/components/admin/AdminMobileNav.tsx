@@ -180,9 +180,11 @@ const AdminMobileNav = ({ activeTab, onTabChange }: AdminMobileNavProps) => {
             <nav className="space-y-4 p-2">
               {menuGroups.map((group) => (
                 <div key={group.label} className="space-y-1">
-                  <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {group.label}
-                  </p>
+                  <div className="mx-1 px-2 py-1.5 rounded-md border border-primary/40 bg-primary/5">
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wider">
+                      {group.label}
+                    </p>
+                  </div>
                   {group.items.map((item) => {
                     const isActive = activeTab === item.value;
                     const Icon = item.icon;
