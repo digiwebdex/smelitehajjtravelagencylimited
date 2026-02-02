@@ -59,6 +59,7 @@ interface ContactDetails {
   whatsapp: string;
   address: string;
   google_map_embed_url: string;
+  savar_google_map_embed_url: string;
 }
 
 interface SocialLinks {
@@ -146,7 +147,8 @@ const AdminSettings = () => {
     phone: "+880 1234-567890",
     whatsapp: "+8801712345678",
     address: "Dhaka, Bangladesh",
-    google_map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.5484611458387!2d90.39729221498282!3d23.79416879319868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c709be6be7b5%3A0x7e53f4e8b8be1a24!2sBanani%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd",
+    google_map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.73722708738!2d90.40006317353787!3d23.79236988716717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1769162756109!5m2!1sen!2sbd",
+    savar_google_map_embed_url: "",
   });
 
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({
@@ -504,11 +506,12 @@ const AdminSettings = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
+                {/* Banani Office Map */}
                 <div className="space-y-2">
                   <Label htmlFor="google_map_embed_url" className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-red-500" />
-                    Google Maps Embed URL
+                    Banani Office - Google Maps Embed URL
                   </Label>
                   <Textarea
                     id="google_map_embed_url"
@@ -544,31 +547,99 @@ const AdminSettings = () => {
                       Search your location → Click "Share" → "Embed a map" → Copy the src URL
                     </p>
                   </div>
-                </div>
-                
-                {/* Map Preview - only show if valid URL */}
-                {contactDetails.google_map_embed_url && 
-                 contactDetails.google_map_embed_url.match(/^https:\/\/(www\.)?google\.com\/maps\/embed\?pb=/) && (
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-medium text-green-600">
-                      <Eye className="w-4 h-4" />
-                      Map Preview ✓
-                    </Label>
-                    <div className="rounded-lg overflow-hidden border border-green-200">
-                      <iframe
-                        src={contactDetails.google_map_embed_url}
-                        width="100%"
-                        height="250"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title="Google Maps Preview"
-                        className="w-full"
-                      />
+                  
+                  {/* Banani Map Preview */}
+                  {contactDetails.google_map_embed_url && 
+                   contactDetails.google_map_embed_url.match(/^https:\/\/(www\.)?google\.com\/maps\/embed\?pb=/) && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2 text-sm font-medium text-green-600">
+                        <Eye className="w-4 h-4" />
+                        Banani Office Map Preview ✓
+                      </Label>
+                      <div className="rounded-lg overflow-hidden border border-green-200">
+                        <iframe
+                          src={contactDetails.google_map_embed_url}
+                          width="100%"
+                          height="200"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Banani Office Map Preview"
+                          className="w-full"
+                        />
+                      </div>
                     </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Savar Office Map */}
+                <div className="space-y-2">
+                  <Label htmlFor="savar_google_map_embed_url" className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-500" />
+                    Savar Office - Google Maps Embed URL
+                  </Label>
+                  <Textarea
+                    id="savar_google_map_embed_url"
+                    value={contactDetails.savar_google_map_embed_url || ""}
+                    onChange={(e) => setContactDetails({ ...contactDetails, savar_google_map_embed_url: e.target.value })}
+                    placeholder="https://www.google.com/maps/embed?pb=..."
+                    rows={3}
+                    className={
+                      contactDetails.savar_google_map_embed_url && 
+                      !contactDetails.savar_google_map_embed_url.match(/^https:\/\/(www\.)?google\.com\/maps\/embed\?pb=/) 
+                        ? "border-destructive" 
+                        : ""
+                    }
+                  />
+                  {contactDetails.savar_google_map_embed_url && 
+                   !contactDetails.savar_google_map_embed_url.match(/^https:\/\/(www\.)?google\.com\/maps\/embed\?pb=/) && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      ⚠️ Invalid format. URL must start with "https://www.google.com/maps/embed?pb="
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open('https://www.google.com/maps', '_blank')}
+                      className="flex items-center gap-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Open Google Maps
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Search your location → Click "Share" → "Embed a map" → Copy the src URL
+                    </p>
                   </div>
-                )}
+                  
+                  {/* Savar Map Preview */}
+                  {contactDetails.savar_google_map_embed_url && 
+                   contactDetails.savar_google_map_embed_url.match(/^https:\/\/(www\.)?google\.com\/maps\/embed\?pb=/) && (
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2 text-sm font-medium text-green-600">
+                        <Eye className="w-4 h-4" />
+                        Savar Office Map Preview ✓
+                      </Label>
+                      <div className="rounded-lg overflow-hidden border border-green-200">
+                        <iframe
+                          src={contactDetails.savar_google_map_embed_url}
+                          width="100%"
+                          height="200"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Savar Office Map Preview"
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
 
