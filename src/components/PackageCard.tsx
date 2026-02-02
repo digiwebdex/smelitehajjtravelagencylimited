@@ -50,7 +50,7 @@ const PackageCard = ({ name, price, features, isPopular, flightDate, index = 0 }
           <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary-foreground/10 rounded-full" />
           <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-primary-foreground/5 rounded-full" />
           
-          <h3 className="font-display text-2xl font-bold tracking-wide mb-2 relative z-10 text-white">{name}</h3>
+          <h3 className="font-display text-2xl font-medium tracking-wide mb-2 relative z-10 text-white">{name}</h3>
           {flightDate && (
             <p className="text-sm text-primary-foreground/80 mb-3 relative z-10">
               ✈️ Flight Date: {flightDate}
