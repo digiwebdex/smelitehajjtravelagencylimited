@@ -2,11 +2,14 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+type UserRole = "admin" | "viewer" | "customer";
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
   isViewer: boolean;
+  canAccessAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -16,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isAdmin: false,
   isViewer: false,
+  canAccessAdmin: false,
   loading: true,
   signOut: async () => {},
 });
@@ -36,10 +40,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (!error && data) {
+        const role = data.role as UserRole;
         // Admin has full access
-        setIsAdmin(data.role === "admin");
+        setIsAdmin(role === "admin");
         // Viewer can see admin panel but in read-only mode
-        setIsViewer(data.role === "viewer");
+        setIsViewer(role === "viewer");
       }
     } catch (err) {
       console.error("Error checking admin status:", err);
@@ -85,8 +90,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setIsViewer(false);
   };
 
+  // Can access admin if either admin or viewer
+  const canAccessAdmin = isAdmin || isViewer;
+
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, isViewer, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isViewer, canAccessAdmin, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

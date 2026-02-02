@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useViewerMode } from "@/contexts/ViewerModeContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText, Lock } from "lucide-react";
 import * as XLSX from "xlsx";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
@@ -43,6 +44,7 @@ import AdminTrackingStatus from "./AdminTrackingStatus";
 import AdminEMIManagement from "./AdminEMIManagement";
 import AdminBankTransferVerification from "./AdminBankTransferVerification";
 import AdminDocumentReview from "./AdminDocumentReview";
+import { AdminActionButton } from "./AdminActionButton";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
 
@@ -110,6 +112,7 @@ interface AdminBookingsProps {
 
 const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const { toast } = useToast();
+  const { isViewerMode } = useViewerMode();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -685,7 +688,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                       <div className="flex flex-col gap-1">
                         {getPaymentStatusBadge(booking.payment_status, booking.payment_method)}
                         {booking.payment_status === "pending_cash" && (
-                          <Button
+                          <AdminActionButton
                             size="sm"
                             variant="outline"
                             className="h-6 text-xs gap-1 mt-1"
@@ -693,11 +696,11 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                           >
                             <Banknote className="w-3 h-3" />
                             Mark Paid
-                          </Button>
+                          </AdminActionButton>
                         )}
                         {/* Bank Transfer Verification Button */}
                         {booking.payment_status === "pending_verification" && booking.payment_method === "bank_transfer" && (
-                          <Button
+                          <AdminActionButton
                             size="sm"
                             variant="default"
                             className="h-6 text-xs gap-1 mt-1"
@@ -705,7 +708,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                           >
                             <ShieldCheck className="w-3 h-3" />
                             Verify Payment
-                          </Button>
+                          </AdminActionButton>
                         )}
                         {/* Installment Button */}
                         <Button
@@ -942,7 +945,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
                 <div className="flex gap-2">
                   {selectedBooking.payment_status === "pending_cash" && (
-                    <Button
+                    <AdminActionButton
                       size="sm"
                       className="gap-1"
                       onClick={() => {
@@ -952,7 +955,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                     >
                       <Banknote className="w-4 h-4" />
                       Mark as Paid
-                    </Button>
+                    </AdminActionButton>
                   )}
                   <Button
                     size="sm"
@@ -963,7 +966,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                     }}
                   >
                     <Calculator className="w-4 h-4 mr-1" />
-                    Manage Installments
+                    View Installments
                   </Button>
                 </div>
               </div>

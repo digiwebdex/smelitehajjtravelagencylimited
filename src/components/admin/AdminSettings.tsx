@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
+import { useViewerMode } from "@/contexts/ViewerModeContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,13 +39,15 @@ import {
   ExternalLink,
   Smartphone,
   BarChart3,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CURRENCY } from "@/lib/currency";
 import ImageUpload from "./ImageUpload";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useTheme } from "next-themes";
+import { AdminActionButton } from "./AdminActionButton";
 
 interface CompanyInfo {
   name: string;
@@ -129,6 +132,7 @@ const ThemeSelector = () => {
 const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { isViewerMode } = useViewerMode();
   
   const { uploadImage, uploading } = useImageUpload({
     bucket: "admin-uploads",
@@ -436,10 +440,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+              <AdminActionButton onClick={handleSaveAll} disabled={saving} className="gap-2">
                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 
@@ -644,10 +648,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+              <AdminActionButton onClick={handleSaveAll} disabled={saving} className="gap-2">
                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 
@@ -714,10 +718,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+              <AdminActionButton onClick={handleSaveAll} disabled={saving} className="gap-2">
                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 
@@ -846,10 +850,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+              <AdminActionButton onClick={handleSaveAll} disabled={saving} className="gap-2">
                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 
@@ -947,10 +951,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAnalytics} disabled={savingAnalytics} className="gap-2">
+              <AdminActionButton onClick={handleSaveAnalytics} disabled={savingAnalytics} className="gap-2">
                 {savingAnalytics ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Analytics Settings
-              </Button>
+              </AdminActionButton>
             </div>
 
             {/* Facebook Pixel Section */}
@@ -1098,10 +1102,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveFacebookPixel} disabled={savingFacebookPixel} className="gap-2">
+              <AdminActionButton onClick={handleSaveFacebookPixel} disabled={savingFacebookPixel} className="gap-2">
                 {savingFacebookPixel ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Facebook Pixel Settings
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 
@@ -1151,10 +1155,10 @@ const AdminSettings = () => {
             </motion.div>
 
             <div className="flex justify-end">
-              <Button onClick={handleSaveAll} disabled={saving} className="gap-2">
+              <AdminActionButton onClick={handleSaveAll} disabled={saving} className="gap-2">
                 {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Changes
-              </Button>
+              </AdminActionButton>
             </div>
           </TabsContent>
 

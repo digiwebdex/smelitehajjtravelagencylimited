@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ViewerModeProvider } from "@/contexts/ViewerModeContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { 
@@ -11,9 +12,11 @@ import {
   TrendingUp,
   ArrowLeft,
   LogOut,
-  Wallet
+  Wallet,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import AdminBookings from "@/components/admin/AdminBookings";
 import AdminAirTicketBookings from "@/components/admin/AdminAirTicketBookings";
 import AdminAirTicketSettings from "@/components/admin/AdminAirTicketSettings";
@@ -79,7 +82,7 @@ interface Stats {
 }
 
 const AdminDashboard = () => {
-  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { user, isAdmin, isViewer, canAccessAdmin, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -96,17 +99,17 @@ const AdminDashboard = () => {
     if (!authLoading) {
       if (!user) {
         navigate("/auth");
-      } else if (!isAdmin) {
+      } else if (!canAccessAdmin) {
         navigate("/");
       }
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, canAccessAdmin, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && isAdmin) {
+    if (user && canAccessAdmin) {
       fetchStats();
     }
-  }, [user, isAdmin]);
+  }, [user, canAccessAdmin]);
 
   const fetchStats = async () => {
     try {
@@ -149,7 +152,7 @@ const AdminDashboard = () => {
     navigate("/");
   };
 
-  if (authLoading || loading || !isAdmin) {
+  if (authLoading || loading || !canAccessAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -300,80 +303,98 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="px-4 lg:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="font-heading font-bold text-lg">Admin Dashboard</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">SM Elite Hajj Management</p>
+    <ViewerModeProvider>
+      <div className="min-h-screen bg-muted/30">
+        {/* Header */}
+        <header className="bg-card border-b border-border sticky top-0 z-50">
+          <div className="px-4 lg:px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+              </Link>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
+                  <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-heading font-bold text-lg">Admin Dashboard</h1>
+                    {isViewer && (
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Eye className="w-3 h-3" />
+                        View Only
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">SM Elite Hajj Management</p>
+                </div>
               </div>
             </div>
+            <Button variant="outline" onClick={handleSignOut} className="gap-2">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
-          <Button variant="outline" onClick={handleSignOut} className="gap-2">
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </Button>
+        </header>
+
+        {/* Mobile Navigation */}
+        <AdminMobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+        <div className="flex">
+          {/* Desktop Sidebar */}
+          <AdminSidebar 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab}
+            collapsed={sidebarCollapsed}
+            onCollapsedChange={setSidebarCollapsed}
+          />
+
+          {/* Main Content */}
+          <main className="flex-1 p-4 lg:p-6 min-w-0">
+            {/* Viewer Mode Banner */}
+            {isViewer && (
+              <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">Demo Mode: You are viewing as a read-only demo account. Editing is disabled.</span>
+              </div>
+            )}
+            
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+              {statCards.map((stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card>
+                    <CardContent className="pt-4 lg:pt-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs lg:text-sm text-muted-foreground">{stat.title}</p>
+                          <p className="text-xl lg:text-3xl font-bold mt-1">{stat.value}</p>
+                        </div>
+                        <div className={`${stat.bgColor} p-2 lg:p-3 rounded-xl`}>
+                          <stat.icon className={`w-4 h-4 lg:w-6 lg:h-6 ${stat.color}`} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="animate-in fade-in-50 duration-300">
+              {renderContent()}
+            </div>
+          </main>
         </div>
-      </header>
-
-      {/* Mobile Navigation */}
-      <AdminMobileNav activeTab={activeTab} onTabChange={setActiveTab} />
-
-      <div className="flex">
-        {/* Desktop Sidebar */}
-        <AdminSidebar 
-          activeTab={activeTab} 
-          onTabChange={setActiveTab}
-          collapsed={sidebarCollapsed}
-          onCollapsedChange={setSidebarCollapsed}
-        />
-
-        {/* Main Content */}
-        <main className="flex-1 p-4 lg:p-6 min-w-0">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
-            {statCards.map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card>
-                  <CardContent className="pt-4 lg:pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs lg:text-sm text-muted-foreground">{stat.title}</p>
-                        <p className="text-xl lg:text-3xl font-bold mt-1">{stat.value}</p>
-                      </div>
-                      <div className={`${stat.bgColor} p-2 lg:p-3 rounded-xl`}>
-                        <stat.icon className={`w-4 h-4 lg:w-6 lg:h-6 ${stat.color}`} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className="animate-in fade-in-50 duration-300">
-            {renderContent()}
-          </div>
-        </main>
       </div>
-    </div>
+    </ViewerModeProvider>
   );
 };
 

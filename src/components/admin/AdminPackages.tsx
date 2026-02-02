@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useViewerMode } from "@/contexts/ViewerModeContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, CURRENCY } from "@/lib/currency";
 import ImageUpload from "./ImageUpload";
+import { AdminActionButton } from "./AdminActionButton";
 
 interface Package {
   id: string;
@@ -65,6 +67,7 @@ interface AdminPackagesProps {
 
 const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
   const { toast } = useToast();
+  const { isViewerMode } = useViewerMode();
   const { uploadImage, uploading } = useImageUpload({
     bucket: "admin-uploads",
     folder: "packages",
@@ -268,14 +271,15 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
         <CardTitle className="flex items-center justify-between">
           <span>Packages ({packages.length})</span>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            if (isViewerMode) return;
             setIsDialogOpen(open);
             if (!open) resetForm();
           }}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <AdminActionButton className="gap-2">
                 <Plus className="w-4 h-4" />
                 Add Package
-              </Button>
+              </AdminActionButton>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -564,21 +568,22 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
                     <Switch
                       checked={pkg.is_active}
                       onCheckedChange={() => toggleActive(pkg.id, pkg.is_active)}
+                      disabled={isViewerMode}
                     />
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(pkg)}>
+                      <AdminActionButton variant="ghost" size="icon" onClick={() => handleEdit(pkg)}>
                         <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
+                      </AdminActionButton>
+                      <AdminActionButton
                         variant="ghost"
                         size="icon"
                         className="text-destructive"
                         onClick={() => handleDelete(pkg.id)}
                       >
                         <Trash2 className="w-4 h-4" />
-                      </Button>
+                      </AdminActionButton>
                     </div>
                   </TableCell>
                 </TableRow>
