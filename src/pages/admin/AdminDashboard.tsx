@@ -67,6 +67,7 @@ import AdminTransactionLogs from "@/components/admin/AdminTransactionLogs";
 import AdminHotels from "@/components/admin/AdminHotels";
 import AdminHotelBookings from "@/components/admin/AdminHotelBookings";
 import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
+import AdminOfferPopup from "@/components/admin/AdminOfferPopup";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -209,6 +210,8 @@ const AdminDashboard = () => {
         return <AdminWebinars />;
       case "retargeting":
         return <AdminRetargetingSegments />;
+      case "offer-popup":
+        return <AdminOfferPopup />;
       case "referrals":
         return <AdminReferrals />;
       case "agents":

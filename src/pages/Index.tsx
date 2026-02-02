@@ -5,6 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load non-critical components for faster initial page load
+const OfferPopup = lazy(() => import("@/components/OfferPopup"));
 const NoticeBoard = lazy(() => import("@/components/NoticeBoard"));
 const ServicesOverview = lazy(() => import("@/components/ServicesOverview"));
 const HajjPackages = lazy(() => import("@/components/HajjPackages"));
@@ -93,6 +94,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      
+      {/* Offer Popup - shows once per session when enabled */}
+      <Suspense fallback={null}>
+        <OfferPopup />
+      </Suspense>
+      
       <main>
         {sectionVisibility.hero && <HeroSection />}
         
