@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Home } from "lucide-react";
+import { ArrowLeft, Star, Home, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import HotelDetailsModal from "./HotelDetailsModal";
 import HotelBookingModal from "./HotelBookingModal";
@@ -33,30 +33,30 @@ interface SectionSettings {
 }
 
 // Demo fallback data
-const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; price: string; country: string }[]>> = {
+const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; price: string; country: string; image: string; mapLink: string }[]>> = {
   "Saudi Arabia": {
     "3": [
-      { name: "Al Ebaa Hotel", city: "Makkah", price: "৳8,000/night", country: "Saudi Arabia" },
-      { name: "Diyar Al Salam", city: "Madinah", price: "৳7,500/night", country: "Saudi Arabia" }
+      { name: "Al Ebaa Hotel", city: "Makkah", price: "৳8,000/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Al+Ebaa+Hotel+Makkah" },
+      { name: "Diyar Al Salam", city: "Madinah", price: "৳7,500/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Diyar+Al+Salam+Hotel+Madinah" }
     ],
     "4": [
-      { name: "Elaf Ajyad Hotel", city: "Makkah", price: "৳12,000/night", country: "Saudi Arabia" },
-      { name: "Saja Al Madinah", city: "Madinah", price: "৳11,000/night", country: "Saudi Arabia" }
+      { name: "Elaf Ajyad Hotel", city: "Makkah", price: "৳12,000/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Elaf+Ajyad+Hotel+Makkah" },
+      { name: "Saja Al Madinah", city: "Madinah", price: "৳11,000/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Saja+Al+Madinah+Hotel" }
     ],
     "5": [
-      { name: "Swissotel Makkah", city: "Makkah", price: "৳25,000/night", country: "Saudi Arabia" },
-      { name: "Anwar Al Madinah Mövenpick", city: "Madinah", price: "৳23,000/night", country: "Saudi Arabia" }
+      { name: "Swissotel Makkah", city: "Makkah", price: "৳25,000/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Swissotel+Makkah" },
+      { name: "Anwar Al Madinah Mövenpick", city: "Madinah", price: "৳23,000/night", country: "Saudi Arabia", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Anwar+Al+Madinah+Movenpick" }
     ]
   },
   "Dubai": {
     "3": [
-      { name: "Citymax Hotel", city: "Dubai", price: "৳7,000/night", country: "Dubai" }
+      { name: "Citymax Hotel", city: "Dubai", price: "৳7,000/night", country: "Dubai", image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Citymax+Hotel+Dubai" }
     ],
     "4": [
-      { name: "Golden Tulip Deira", city: "Dubai", price: "৳13,000/night", country: "Dubai" }
+      { name: "Golden Tulip Deira", city: "Dubai", price: "৳13,000/night", country: "Dubai", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Golden+Tulip+Deira+Dubai" }
     ],
     "5": [
-      { name: "Atlantis The Palm", city: "Dubai", price: "৳45,000/night", country: "Dubai" }
+      { name: "Atlantis The Palm", city: "Dubai", price: "৳45,000/night", country: "Dubai", image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Atlantis+The+Palm+Dubai" }
     ]
   }
 };
@@ -163,7 +163,7 @@ const HotelSection = () => {
   };
 
   // Handle demo hotel booking - create a temporary hotel object
-  const handleDemoBookNow = (demoHotel: { name: string; city: string; price: string; country: string }) => {
+  const handleDemoBookNow = (demoHotel: { name: string; city: string; price: string; country: string; image: string; mapLink: string }) => {
     const tempHotel: Hotel = {
       id: `demo-${Date.now()}`,
       name: demoHotel.name,
@@ -173,8 +173,8 @@ const HotelSection = () => {
       distance_from_haram: 0,
       description: null,
       facilities: [],
-      images: [],
-      google_map_link: null,
+      images: [demoHotel.image],
+      google_map_link: demoHotel.mapLink,
       google_map_embed_url: null,
       contact_phone: null,
       contact_email: null,
@@ -337,13 +337,31 @@ const HotelSection = () => {
               {filteredHotels.length === 0 && demoHotels.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {demoHotels.map((hotel, index) => (
-                    <div key={index} className="bg-card p-6 shadow-lg rounded-xl border">
-                      <h3 className="text-lg font-bold">{hotel.name}</h3>
-                      <p className="text-muted-foreground">{hotel.city}</p>
-                      <p className="text-primary font-semibold mt-2">{hotel.price}</p>
-                      <Button className="mt-4 w-full" onClick={() => handleDemoBookNow(hotel)}>
-                        Book Now
-                      </Button>
+                    <div key={index} className="bg-card shadow-lg rounded-xl border overflow-hidden">
+                      <img
+                        src={hotel.image}
+                        alt={hotel.name}
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="p-5">
+                        <h3 className="text-lg font-bold">{hotel.name}</h3>
+                        <p className="text-muted-foreground">{hotel.city}</p>
+                        <p className="text-primary font-semibold mt-2">{hotel.price}</p>
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => window.open(hotel.mapLink, '_blank')}
+                          >
+                            <MapPin className="h-4 w-4" />
+                            Map
+                          </Button>
+                          <Button className="flex-1" onClick={() => handleDemoBookNow(hotel)}>
+                            Book Now
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
