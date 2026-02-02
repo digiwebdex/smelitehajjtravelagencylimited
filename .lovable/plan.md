@@ -1,57 +1,275 @@
 
+# Offer Popup System Implementation Plan
 
-# Hotel Bookings - Separate Page Implementation
+## Overview
+Create a fully customizable promotional popup that displays when visitors first enter the website. The popup will feature eye-catching Hajj/Umrah exclusive offers with complete admin control over content, styling, and enable/disable functionality.
 
-## Problem
-Currently, when clicking "Hotel Bookings" from the services section on the home page, the hotel selection wizard appears as a full-screen overlay on top of the home page content. The user wants the hotel booking experience to open on its own dedicated page with a proper URL route.
+---
 
-## Solution
-Create a dedicated `/hotels` page route that displays the hotel selection wizard as a standalone page, with proper navigation back to the home page.
+## Feature Summary
 
-## Changes Required
+### Frontend Popup Component
+- **Eye-catching modal design** with animated entrance
+- **Rich content support**: Title, subtitle, description, image/banner, CTA button
+- **Smart display logic**: Shows only once per session (using localStorage)
+- **Delay option**: Configurable delay before popup appears
+- **Dismissible**: Close button and click-outside-to-close functionality
+- **Responsive design**: Works seamlessly on mobile and desktop
 
-### 1. Create New Hotels Page
-Create a new page component at `src/pages/Hotels.tsx` that:
-- Includes the Header component for consistent navigation
-- Renders the hotel selection wizard content
-- Uses a "Back to Home" navigation instead of a close button
-- Has a proper page layout (not an overlay)
+### Admin Management Panel
+- **Enable/Disable toggle**: Quickly turn the popup on or off
+- **Content editing**: All text fields, images, and links are editable
+- **Display settings**: Control timing, animation, and frequency
+- **Preview capability**: See changes before publishing
 
-### 2. Convert HotelSection to Page-Based Component
-Modify `src/components/HotelSection.tsx` to:
-- Remove the fixed overlay styling (`fixed inset-0 z-50`)
-- Convert to a regular page section layout
-- Replace the close button (X) with a "Back to Home" link
-- Keep all the multi-step wizard logic intact
+---
 
-### 3. Update ServicesOverview Navigation
-Modify `src/components/ServicesOverview.tsx` to:
-- Remove the `hotelSectionOpen` state and overlay rendering
-- Navigate to `/hotels` route when clicking the Hotel service
-- Use React Router's `useNavigate` hook for navigation
+## Technical Implementation
 
-### 4. Add Route to App.tsx
-Add a new route `/hotels` that renders the Hotels page.
+### 1. Database Schema
+Create a new `offer_popup_settings` entry in `site_settings` table:
 
-## Technical Details
-
-### Files to Create
-- `src/pages/Hotels.tsx` - New dedicated page for hotel bookings
-
-### Files to Modify
-- `src/App.tsx` - Add `/hotels` route
-- `src/components/ServicesOverview.tsx` - Change from overlay to navigation
-- `src/components/HotelSection.tsx` - Convert from overlay to page content
-
-### Navigation Flow
 ```text
-Home (/) → Click "Hotel Bookings" → Navigate to /hotels
-Hotels (/hotels) → Click "Back to Home" → Navigate to /
+Key: offer_popup
+Category: marketing
+
+Value Structure (JSON):
+├── is_enabled: boolean
+├── title: string (e.g., "Exclusive Hajj Offer!")
+├── subtitle: string (e.g., "Limited Time Only")
+├── description: string
+├── image_url: string (banner image)
+├── button_text: string (e.g., "Book Now")
+├── button_link: string (e.g., "#hajj")
+├── badge_text: string (e.g., "🔥 Special Offer")
+├── discount_text: string (e.g., "Save up to 20%")
+├── display_delay_seconds: number (default: 2)
+├── show_once_per_session: boolean (default: true)
+├── background_color: string
+├── text_color: string
+└── overlay_opacity: number (0-100)
 ```
 
-## User Experience Improvements
-- Proper browser history - users can use back/forward buttons
-- Bookmarkable URL for the hotels page
-- Cleaner separation between home page and hotel booking
-- Better mobile experience without overlay z-index issues
+### 2. New Components
 
+#### `OfferPopup.tsx` (Frontend Popup)
+```text
+Location: src/components/OfferPopup.tsx
+
+Features:
+├── Fetches settings from site_settings table
+├── Uses Dialog component from shadcn/ui
+├── Animated entrance with framer-motion
+├── Checks localStorage for session tracking
+├── Configurable display delay
+├── Eye-catching gradient backgrounds
+├── Responsive image display
+├── CTA button with configurable link
+└── Close button and overlay click dismiss
+```
+
+#### `AdminOfferPopup.tsx` (Admin Panel)
+```text
+Location: src/components/admin/AdminOfferPopup.tsx
+
+Features:
+├── Master enable/disable toggle (prominent at top)
+├── Content section:
+│   ├── Title input
+│   ├── Subtitle input
+│   ├── Description textarea
+│   ├── Badge text input
+│   └── Discount text input
+├── Media section:
+│   └── Image upload with ImageUpload component
+├── CTA section:
+│   ├── Button text input
+│   └── Button link input (with section shortcuts)
+├── Display settings:
+│   ├── Delay before showing (seconds slider)
+│   ├── Show once per session toggle
+│   └── Background/text color pickers
+├── Live preview panel
+└── Save button with loading state
+```
+
+### 3. Integration Points
+
+#### Index Page (`src/pages/Index.tsx`)
+- Add `OfferPopup` component as the first child after `<Header />`
+- Uses Suspense for lazy loading (non-blocking)
+
+#### Admin Sidebar (`src/components/admin/AdminSidebar.tsx`)
+- Add "Offer Popup" under "Marketing & Leads" category
+- Icon: `Gift` or `Megaphone`
+
+#### Admin Dashboard (`src/pages/admin/AdminDashboard.tsx`)
+- Import and register `AdminOfferPopup` component
+- Add case for "offer-popup" in `renderContent()` switch
+
+#### Admin Mobile Nav (`src/components/admin/AdminMobileNav.tsx`)
+- Add "Offer Popup" entry under Marketing category
+
+---
+
+## Popup Design Mockup
+
+```text
+┌─────────────────────────────────────────────────┐
+│  ╔═══════════════════════════════════════════╗  │
+│  ║  [X Close]                                ║  │
+│  ║                                           ║  │
+│  ║     🔥 Special Offer                      ║  │
+│  ║                                           ║  │
+│  ║  ┌─────────────────────────────────────┐  ║  │
+│  ║  │                                     │  ║  │
+│  ║  │     [Hajj/Umrah Banner Image]       │  ║  │
+│  ║  │                                     │  ║  │
+│  ║  └─────────────────────────────────────┘  ║  │
+│  ║                                           ║  │
+│  ║     ✨ Exclusive Hajj Offer! ✨           ║  │
+│  ║                                           ║  │
+│  ║     Limited Time Only                     ║  │
+│  ║                                           ║  │
+│  ║     Book your sacred journey now and     ║  │
+│  ║     save up to 20% on all packages!      ║  │
+│  ║                                           ║  │
+│  ║           Save up to 20%                  ║  │
+│  ║                                           ║  │
+│  ║       ┌─────────────────────┐            ║  │
+│  ║       │    BOOK NOW  →      │            ║  │
+│  ║       └─────────────────────┘            ║  │
+│  ║                                           ║  │
+│  ╚═══════════════════════════════════════════╝  │
+│                                                 │
+│            (Dark Overlay Background)            │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Admin Panel Layout
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│  📣 Offer Popup Settings                                │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  🟢 Enable Offer Popup                    [ON]   │   │
+│  │  Show promotional popup to new visitors          │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  ┌─ Content ───────────────────────────────────────┐   │
+│  │  Title:     [Exclusive Hajj Offer!          ]   │   │
+│  │  Subtitle:  [Limited Time Only              ]   │   │
+│  │  Badge:     [🔥 Special Offer               ]   │   │
+│  │  Discount:  [Save up to 20%                 ]   │   │
+│  │  Description: [Book your sacred journey...  ]   │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  ┌─ Banner Image ──────────────────────────────────┐   │
+│  │  [Upload Image] [URL Input Field            ]   │   │
+│  │  ┌─────────────────────────────────────────┐    │   │
+│  │  │         Image Preview Area              │    │   │
+│  │  └─────────────────────────────────────────┘    │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  ┌─ Call to Action ────────────────────────────────┐   │
+│  │  Button Text: [Book Now                     ]   │   │
+│  │  Button Link: [#hajj      ▼ Quick Links     ]   │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  ┌─ Display Settings ──────────────────────────────┐   │
+│  │  Delay before showing: [2] seconds              │   │
+│  │  Show once per session: [✓]                     │   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│                               [ 💾 Save Changes ]       │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Files to Create/Modify
+
+### New Files
+| File | Purpose |
+|------|---------|
+| `src/components/OfferPopup.tsx` | Frontend popup component |
+| `src/components/admin/AdminOfferPopup.tsx` | Admin management interface |
+
+### Modified Files
+| File | Changes |
+|------|---------|
+| `src/pages/Index.tsx` | Add OfferPopup component |
+| `src/components/admin/AdminSidebar.tsx` | Add navigation entry |
+| `src/components/admin/AdminMobileNav.tsx` | Add mobile navigation entry |
+| `src/pages/admin/AdminDashboard.tsx` | Register component and routing |
+
+---
+
+## Session Tracking Logic
+
+```text
+1. User visits site
+2. OfferPopup component mounts
+3. Check localStorage for "offer_popup_shown" key
+4. If NOT shown (or show_once_per_session is false):
+   a. Wait for display_delay_seconds
+   b. Show popup with animation
+   c. Set localStorage key (if show_once_per_session is true)
+5. User can dismiss via:
+   - Close button (X)
+   - Click outside modal
+   - CTA button click (auto-close after navigation)
+```
+
+---
+
+## Default Values
+
+```text
+{
+  is_enabled: false,
+  title: "Exclusive Hajj Offer!",
+  subtitle: "Limited Time Only",
+  description: "Book your sacred journey now and enjoy special discounts on all our premium packages.",
+  image_url: "",
+  button_text: "Explore Packages",
+  button_link: "#hajj",
+  badge_text: "🔥 Special Offer",
+  discount_text: "Save up to 20%",
+  display_delay_seconds: 2,
+  show_once_per_session: true,
+  background_color: "#1a5f4a",
+  text_color: "#ffffff",
+  overlay_opacity: 80
+}
+```
+
+---
+
+## Implementation Order
+
+1. **Create Admin Component** (`AdminOfferPopup.tsx`)
+   - Full CRUD interface for popup settings
+   - Uses existing patterns from AdminSettings
+
+2. **Integrate Admin Panel**
+   - Add to sidebar navigation
+   - Register in AdminDashboard
+
+3. **Create Frontend Popup** (`OfferPopup.tsx`)
+   - Fetch settings and display logic
+   - Session tracking with localStorage
+
+4. **Add to Index Page**
+   - Lazy load with Suspense
+   - Non-blocking initialization
+
+5. **Testing**
+   - Verify enable/disable toggle works
+   - Test session tracking (shows once)
+   - Verify mobile responsiveness
+   - Confirm CTA navigation works
