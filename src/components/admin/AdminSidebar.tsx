@@ -95,6 +95,8 @@ const menuGroups = [
       { value: "packages", label: "Packages", icon: LayoutDashboard },
       { value: "package-sections", label: "Package Sections", icon: Layers },
       { value: "hotels", label: "Hotels", icon: Building2 },
+      { value: "hotel-bookings", label: "Hotel Bookings", icon: Building2 },
+      { value: "hotel-settings", label: "Hotel Settings", icon: Settings },
     ]
   },
   {

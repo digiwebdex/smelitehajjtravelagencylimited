@@ -65,6 +65,8 @@ import AdminBlog from "@/components/admin/AdminBlog";
 import AdminTranslations from "@/components/admin/AdminTranslations";
 import AdminTransactionLogs from "@/components/admin/AdminTransactionLogs";
 import AdminHotels from "@/components/admin/AdminHotels";
+import AdminHotelBookings from "@/components/admin/AdminHotelBookings";
+import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -221,6 +223,10 @@ const AdminDashboard = () => {
         return <AdminPackageSections />;
       case "hotels":
         return <AdminHotels />;
+      case "hotel-bookings":
+        return <AdminHotelBookings />;
+      case "hotel-settings":
+        return <AdminHotelSettings />;
       case "revenue":
         return <AdminRevenue />;
       case "financial-analytics":
