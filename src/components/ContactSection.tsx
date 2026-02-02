@@ -424,7 +424,7 @@ const ContactSection = () => {
           </motion.div>
         </div>
 
-        {/* Full-width Map */}
+        {/* Full-width Map with Both Office Locations */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -432,15 +432,19 @@ const ContactSection = () => {
           transition={{ delay: 0.4 }}
           className="mt-12 bg-card rounded-2xl overflow-hidden shadow-elegant"
         >
+          <div className="bg-primary/10 px-4 py-3 flex items-center gap-2 border-b border-border">
+            <MapPin className="w-5 h-5 text-primary" />
+            <h3 className="font-heading font-bold text-foreground">Our Office Locations</h3>
+          </div>
           <iframe
-            src={contactDetails.google_map_embed_url || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.5484611458387!2d90.39729221498282!3d23.79416879319868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c709be6be7b5%3A0x7e53f4e8b8be1a24!2sBanani%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"}
+            src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d58396.34251963422!2d90.29000000000002!3d23.82!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1704067200000!5m2!1sen!2sbd"
             width="100%"
-            height="300"
+            height="350"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="SM Elite Hajj Head Office Location"
+            title="SM Elite Hajj Office Locations - Banani & Savar"
             className="w-full"
           />
         </motion.div>
