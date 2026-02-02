@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, X, Star } from "lucide-react";
+import { ArrowLeft, Star, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import HotelDetailsModal from "./HotelDetailsModal";
 import HotelBookingModal from "./HotelBookingModal";
@@ -29,10 +30,6 @@ interface SectionSettings {
   is_enabled: boolean;
   booking_enabled: boolean;
   star_label: string;
-}
-
-interface HotelSectionProps {
-  onClose: () => void;
 }
 
 // Demo fallback data
@@ -71,7 +68,8 @@ const COUNTRY_FLAGS: Record<string, string> = {
   "Turkey": "🇹🇷",
 };
 
-const HotelSection = ({ onClose }: HotelSectionProps) => {
+const HotelSection = () => {
+  const navigate = useNavigate();
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -166,7 +164,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -178,21 +176,26 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
   const demoHotels = getDemoHotels();
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-muted/50 overflow-auto"
-    >
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background border-b">
-        <div className="container py-4 flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold text-primary">
-            {settings.title}
-          </h1>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
+    <div className="min-h-[60vh]">
+      {/* Page Header */}
+      <div className="bg-primary/5 border-b">
+        <div className="container py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                {settings.title}
+              </h1>
+              <p className="text-muted-foreground mt-1">{settings.subtitle}</p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/")}
+              className="gap-2"
+            >
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -212,7 +215,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
                   <button
                     key={country}
                     onClick={() => setSelectedCountry(country)}
-                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-left"
+                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-left border"
                   >
                     <span className="text-3xl mb-2 block">{COUNTRY_FLAGS[country] || "🌍"}</span>
                     <span className="font-medium">{country}</span>
@@ -244,7 +247,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
                   <button
                     key={rating}
                     onClick={() => setSelectedStarRating(rating)}
-                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors"
+                    className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors border"
                   >
                     <div className="flex justify-center gap-0.5 mb-2">
                       {Array.from({ length: rating }).map((_, i) => (
@@ -280,7 +283,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
               {filteredHotels.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredHotels.map((hotel) => (
-                    <div key={hotel.id} className="bg-card p-6 shadow-lg rounded-xl">
+                    <div key={hotel.id} className="bg-card p-6 shadow-lg rounded-xl border">
                       {hotel.images?.[0] && (
                         <img
                           src={hotel.images[0]}
@@ -312,7 +315,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
               {filteredHotels.length === 0 && demoHotels.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {demoHotels.map((hotel, index) => (
-                    <div key={index} className="bg-card p-6 shadow-lg rounded-xl">
+                    <div key={index} className="bg-card p-6 shadow-lg rounded-xl border">
                       <h3 className="text-lg font-bold">{hotel.name}</h3>
                       <p className="text-muted-foreground">{hotel.city}</p>
                       <p className="text-primary font-semibold mt-2">{hotel.price}</p>
@@ -350,7 +353,7 @@ const HotelSection = ({ onClose }: HotelSectionProps) => {
         open={bookingModalOpen}
         onOpenChange={setBookingModalOpen}
       />
-    </motion.div>
+    </div>
   );
 };
 

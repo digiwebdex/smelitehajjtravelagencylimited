@@ -15,6 +15,7 @@ import MyBookings from "./pages/MyBookings";
 import ProfileSettings from "./pages/ProfileSettings";
 import TrackOrder from "./pages/TrackOrder";
 import TrackVisa from "./pages/TrackVisa";
+import Hotels from "./pages/Hotels";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import LegalPage from "./pages/LegalPage";
 import PaymentResult from "./pages/PaymentResult";
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/track-visa" element={<TrackVisa />} />
+                <Route path="/hotels" element={<Hotels />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmation />} />
                 <Route path="/legal/:pageKey" element={<LegalPage />} />

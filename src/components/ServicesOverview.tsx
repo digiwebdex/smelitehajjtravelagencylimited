@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Plane, 
@@ -18,12 +19,11 @@ import {
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import IslamicBorder from "./IslamicBorder";
 import MakkahIcon from "./icons/MakkahIcon";
 import MadinahIcon from "./icons/MadinahIcon";
 import AirTicketBookingModal from "./AirTicketBookingModal";
-import HotelSection from "./HotelSection";
 
 interface Service {
   id: string;
@@ -90,10 +90,10 @@ const CustomServiceIcon = ({ icon: Icon }: { icon: React.FC<{ size?: number; cla
 );
 
 const ServicesOverview = () => {
+  const navigate = useNavigate();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [airTicketModalOpen, setAirTicketModalOpen] = useState(false);
-  const [hotelSectionOpen, setHotelSectionOpen] = useState(false);
   const [parentCompany, setParentCompany] = useState<ParentCompanySettings>({
     button_text: "Visit Parent Company",
     button_link: "",
@@ -188,9 +188,9 @@ const ServicesOverview = () => {
       return;
     }
     
-    // Check if this is the Hotel service
+    // Check if this is the Hotel service - navigate to /hotels page
     if (service.title.toLowerCase().includes('hotel') || service.icon_name === 'Hotel' || service.icon_name === 'Building2') {
-      setHotelSectionOpen(true);
+      navigate('/hotels');
       return;
     }
     
@@ -355,13 +355,6 @@ const ServicesOverview = () => {
         open={airTicketModalOpen} 
         onOpenChange={setAirTicketModalOpen} 
       />
-
-      {/* Hotel Section */}
-      <AnimatePresence>
-        {hotelSectionOpen && (
-          <HotelSection onClose={() => setHotelSectionOpen(false)} />
-        )}
-      </AnimatePresence>
     </IslamicBorder>
   );
 };
