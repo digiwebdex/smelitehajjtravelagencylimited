@@ -58,14 +58,87 @@ const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; p
     "5": [
       { name: "Atlantis The Palm", city: "Dubai", price: "৳45,000/night", country: "Dubai", image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Atlantis+The+Palm+Dubai" }
     ]
+  },
+  "Turkey": {
+    "3": [
+      { name: "Grand Hilarium Hotel", city: "Istanbul", price: "৳6,500/night", country: "Turkey", image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Grand+Hilarium+Hotel+Istanbul" }
+    ],
+    "4": [
+      { name: "Dosso Dossi Downtown", city: "Istanbul", price: "৳10,000/night", country: "Turkey", image: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Dosso+Dossi+Downtown+Istanbul" },
+      { name: "Ramada Plaza Antalya", city: "Antalya", price: "৳9,500/night", country: "Turkey", image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Ramada+Plaza+Antalya" }
+    ],
+    "5": [
+      { name: "Four Seasons Sultanahmet", city: "Istanbul", price: "৳35,000/night", country: "Turkey", image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Four+Seasons+Sultanahmet+Istanbul" }
+    ]
+  },
+  "Malaysia": {
+    "3": [
+      { name: "Ancasa Express", city: "Kuala Lumpur", price: "৳5,000/night", country: "Malaysia", image: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Ancasa+Express+Kuala+Lumpur" }
+    ],
+    "4": [
+      { name: "Sunway Putra Hotel", city: "Kuala Lumpur", price: "৳8,500/night", country: "Malaysia", image: "https://images.unsplash.com/photo-1587213811864-46e59f6873b1?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Sunway+Putra+Hotel+Kuala+Lumpur" },
+      { name: "DoubleTree Langkawi", city: "Langkawi", price: "৳9,000/night", country: "Malaysia", image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=DoubleTree+Langkawi" }
+    ],
+    "5": [
+      { name: "Mandarin Oriental KL", city: "Kuala Lumpur", price: "৳28,000/night", country: "Malaysia", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Mandarin+Oriental+Kuala+Lumpur" }
+    ]
+  },
+  "Thailand": {
+    "3": [
+      { name: "Ibis Bangkok Siam", city: "Bangkok", price: "৳4,500/night", country: "Thailand", image: "https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Ibis+Bangkok+Siam" }
+    ],
+    "4": [
+      { name: "Novotel Bangkok", city: "Bangkok", price: "৳7,500/night", country: "Thailand", image: "https://images.unsplash.com/photo-1549294413-26f195200c16?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Novotel+Bangkok" },
+      { name: "Centara Pattaya", city: "Pattaya", price: "৳8,000/night", country: "Thailand", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Centara+Pattaya" }
+    ],
+    "5": [
+      { name: "Shangri-La Bangkok", city: "Bangkok", price: "৳22,000/night", country: "Thailand", image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Shangri-La+Bangkok" }
+    ]
+  },
+  "Singapore": {
+    "3": [
+      { name: "Hotel Boss", city: "Singapore", price: "৳7,000/night", country: "Singapore", image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Hotel+Boss+Singapore" }
+    ],
+    "4": [
+      { name: "Park Hotel Clarke Quay", city: "Singapore", price: "৳12,000/night", country: "Singapore", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Park+Hotel+Clarke+Quay+Singapore" }
+    ],
+    "5": [
+      { name: "Marina Bay Sands", city: "Singapore", price: "৳55,000/night", country: "Singapore", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Marina+Bay+Sands+Singapore" }
+    ]
+  },
+  "Indonesia": {
+    "3": [
+      { name: "Fave Hotel Kuta", city: "Bali", price: "৳4,000/night", country: "Indonesia", image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Fave+Hotel+Kuta+Bali" }
+    ],
+    "4": [
+      { name: "Swiss-Belhotel Rainforest", city: "Bali", price: "৳8,000/night", country: "Indonesia", image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Swiss-Belhotel+Rainforest+Bali" }
+    ],
+    "5": [
+      { name: "The Mulia Bali", city: "Bali", price: "৳40,000/night", country: "Indonesia", image: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=The+Mulia+Bali" }
+    ]
+  },
+  "Egypt": {
+    "3": [
+      { name: "Pyramids View Inn", city: "Cairo", price: "৳5,500/night", country: "Egypt", image: "https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Pyramids+View+Inn+Cairo" }
+    ],
+    "4": [
+      { name: "Steigenberger Pyramids", city: "Cairo", price: "৳9,000/night", country: "Egypt", image: "https://images.unsplash.com/photo-1549294413-26f195200c16?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Steigenberger+Pyramids+Cairo" }
+    ],
+    "5": [
+      { name: "Four Seasons Cairo", city: "Cairo", price: "৳32,000/night", country: "Egypt", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=300&fit=crop", mapLink: "https://maps.google.com/?q=Four+Seasons+Cairo" }
+    ]
   }
 };
 
 const COUNTRY_FLAGS: Record<string, string> = {
   "Saudi Arabia": "🇸🇦",
   "Dubai": "🇦🇪",
-  "Malaysia": "🇲🇾",
   "Turkey": "🇹🇷",
+  "Malaysia": "🇲🇾",
+  "Thailand": "🇹🇭",
+  "Singapore": "🇸🇬",
+  "Indonesia": "🇮🇩",
+  "Egypt": "🇪🇬",
 };
 
 const HotelSection = () => {
