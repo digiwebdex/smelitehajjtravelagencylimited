@@ -1581,6 +1581,7 @@ export type Database = {
           city: string
           contact_email: string | null
           contact_phone: string | null
+          country: string | null
           created_at: string
           description: string | null
           distance_from_haram: number
@@ -1599,6 +1600,7 @@ export type Database = {
           city: string
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           distance_from_haram: number
@@ -1617,6 +1619,7 @@ export type Database = {
           city?: string
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           distance_from_haram?: number

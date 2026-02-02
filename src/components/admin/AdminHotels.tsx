@@ -49,6 +49,7 @@ interface Hotel {
   id: string;
   name: string;
   city: string;
+  country: string;
   star_rating: number;
   distance_from_haram: number;
   description: string | null;
@@ -61,6 +62,15 @@ interface Hotel {
   is_active: boolean;
   order_index: number;
 }
+
+const COUNTRY_OPTIONS = [
+  "Saudi Arabia",
+  "Dubai",
+  "Malaysia",
+  "Turkey",
+  "Indonesia",
+  "Egypt",
+];
 
 interface SectionSettings {
   id: string;
@@ -109,10 +119,12 @@ const AdminHotels = () => {
   const [editingHotel, setEditingHotel] = useState<Hotel | null>(null);
   const [activeTab, setActiveTab] = useState("hotels");
   const [cityFilter, setCityFilter] = useState<string>("all");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
 
   const [formData, setFormData] = useState({
     name: "",
     city: "makkah",
+    country: "Saudi Arabia",
     star_rating: 3,
     distance_from_haram: 500,
     description: "",
@@ -161,6 +173,7 @@ const AdminHotels = () => {
     setFormData({
       name: "",
       city: "makkah",
+      country: "Saudi Arabia",
       star_rating: 3,
       distance_from_haram: 500,
       description: "",
@@ -180,6 +193,7 @@ const AdminHotels = () => {
     setFormData({
       name: hotel.name,
       city: hotel.city,
+      country: hotel.country || "Saudi Arabia",
       star_rating: hotel.star_rating,
       distance_from_haram: hotel.distance_from_haram,
       description: hotel.description || "",
@@ -205,6 +219,7 @@ const AdminHotels = () => {
       const hotelData = {
         name: formData.name,
         city: formData.city,
+        country: formData.country,
         star_rating: formData.star_rating,
         distance_from_haram: formData.distance_from_haram,
         description: formData.description || null,
@@ -317,10 +332,14 @@ const AdminHotels = () => {
     }
   };
 
-  const filteredHotels =
-    cityFilter === "all"
-      ? hotels
-      : hotels.filter((h) => h.city === cityFilter);
+  const filteredHotels = hotels.filter((h) => {
+    const matchesCity = cityFilter === "all" || h.city === cityFilter;
+    const matchesCountry = countryFilter === "all" || (h.country || "Saudi Arabia") === countryFilter;
+    return matchesCity && matchesCountry;
+  });
+
+  // Get unique countries from hotels
+  const uniqueCountries = [...new Set(hotels.map(h => h.country || "Saudi Arabia"))];
 
   if (loading) {
     return (
@@ -343,6 +362,17 @@ const AdminHotels = () => {
         <TabsContent value="hotels" className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
+              <Select value={countryFilter} onValueChange={setCountryFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Filter by country" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Countries</SelectItem>
+                  {uniqueCountries.map(country => (
+                    <SelectItem key={country} value={country}>{country}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={cityFilter} onValueChange={setCityFilter}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Filter by city" />
@@ -369,6 +399,7 @@ const AdminHotels = () => {
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
                   <TableHead>Hotel</TableHead>
+                  <TableHead>Country</TableHead>
                   <TableHead>City</TableHead>
                   <TableHead>Rating</TableHead>
                   <TableHead>Distance</TableHead>
@@ -397,6 +428,11 @@ const AdminHotels = () => {
                         )}
                         <span className="font-medium">{hotel.name}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {hotel.country || "Saudi Arabia"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="capitalize">
@@ -447,7 +483,7 @@ const AdminHotels = () => {
                 ))}
                 {filteredHotels.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No hotels found. Add your first hotel!
                     </TableCell>
                   </TableRow>
@@ -633,6 +669,27 @@ const AdminHotels = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label>Country *</Label>
+                <Select
+                  value={formData.country}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, country: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_OPTIONS.map(country => (
+                      <SelectItem key={country} value={country}>{country}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label>City *</Label>
                 <Select
                   value={formData.city}
@@ -646,6 +703,10 @@ const AdminHotels = () => {
                   <SelectContent>
                     <SelectItem value="makkah">Makkah</SelectItem>
                     <SelectItem value="madinah">Madinah</SelectItem>
+                    <SelectItem value="dubai">Dubai</SelectItem>
+                    <SelectItem value="kuala-lumpur">Kuala Lumpur</SelectItem>
+                    <SelectItem value="istanbul">Istanbul</SelectItem>
+                    <SelectItem value="cairo">Cairo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
