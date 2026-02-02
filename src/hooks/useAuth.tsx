@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isViewer: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   isAdmin: false,
+  isViewer: false,
   loading: true,
   signOut: async () => {},
 });
@@ -22,6 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isViewer, setIsViewer] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const checkAdminStatus = async (userId: string) => {
@@ -33,7 +36,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (!error && data) {
+        // Admin has full access
         setIsAdmin(data.role === "admin");
+        // Viewer can see admin panel but in read-only mode
+        setIsViewer(data.role === "viewer");
       }
     } catch (err) {
       console.error("Error checking admin status:", err);
@@ -52,6 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }, 0);
         } else {
           setIsAdmin(false);
+          setIsViewer(false);
         }
         setLoading(false);
       }
@@ -75,10 +82,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
+    setIsViewer(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isAdmin, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, isViewer, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
