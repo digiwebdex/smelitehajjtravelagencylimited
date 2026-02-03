@@ -208,7 +208,7 @@ const PackageDetailsModal = ({ isOpen, onClose, package_info, onBookNow }: Packa
   return (
     <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
       <DialogContent 
-        className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col"
+        className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex flex-col"
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         <AnimatePresence>
