@@ -95,7 +95,7 @@ const ExpandablePackageCard = ({
         boxShadow: { duration: 0.2 }
       }}
       className={cn(
-        "w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex cursor-pointer relative",
+        "w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex cursor-pointer relative h-auto",
         isCompareSelected && "ring-2 ring-primary ring-offset-2"
       )}
     >
@@ -103,7 +103,7 @@ const ExpandablePackageCard = ({
       <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500 -z-10" />
       <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-primary via-secondary to-primary opacity-0 group-hover:opacity-70 transition-opacity duration-500 -z-10" />
       
-      <Card className="h-full w-full flex flex-col overflow-hidden transition-all duration-300 group border-border/50 bg-card relative z-10">
+      <Card className="h-full w-full flex flex-col overflow-hidden transition-all duration-300 group border-border/50 bg-card relative z-10 min-h-[580px] sm:min-h-[620px]">
           {/* Compare Checkbox */}
           <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20">
             <div 
