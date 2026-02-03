@@ -40,94 +40,91 @@ interface PackageDetailsModalProps {
 
 // Helper component to format description text with proper sections
 const FormattedDescription = ({ text }: { text: string }) => {
-  // Normalize text: replace different bullet types with a standard marker
-  const normalizedText = text
-    .replace(/❖/g, '\n• ') // Replace ❖ with bullet
-    .replace(/✓/g, '\n• ') // Replace ✓ with bullet
-    .replace(/➤/g, '\n• ') // Replace ➤ with bullet
-    .replace(/►/g, '\n• ') // Replace ► with bullet
-    .replace(/→/g, '\n• ') // Replace → with bullet
-    .replace(/\*\s/g, '\n• ') // Replace * with bullet
-    .replace(/–\s/g, '\n• ') // Replace – with bullet
-    .replace(/-\s(?=[A-Z])/g, '\n• '); // Replace - followed by capital with bullet
-
-  // Split by section headers (text wrapped in ** ** or ending with :)
-  const sectionHeaderRegex = /(?:\*\*([^*]+)\*\*|^([A-Z][^:]{3,50}):(?=\s))/gm;
-  const parsedSections: { title: string; content: { type: 'bullet' | 'text'; value: string }[] }[] = [];
+  // Remove horizontal dividers (underscores)
+  let cleanText = text.replace(/_{5,}/g, '\n');
   
-  let lastIndex = 0;
-  let match;
-  let currentSection: { title: string; content: { type: 'bullet' | 'text'; value: string }[] } | null = null;
+  // Split by emoji-based section headers or bold headers
+  const emojiHeaderRegex = /(?:^|\n)\s*((?:✈️|🏨|🚌|💰|✨|📋|📝|⚠️|ℹ️|🎯|🌟|⭐|💡|📍|🕌|🕋|🛫|🛬|🚗|🏆|💎|📦|🎁|✅|❌|⏰|📅|🔔|💳|🎫|📌)?\s*[^\n]{3,80})(?=\n•|\n\t•|\no\t|\n\s*[•●○◦‣⁃\-*]\s)/gm;
+  const boldHeaderRegex = /\*\*([^*]+)\*\*/g;
   
-  // Helper function to parse content into bullets or text
-  const parseContent = (content: string): { type: 'bullet' | 'text'; value: string }[] => {
-    const result: { type: 'bullet' | 'text'; value: string }[] = [];
-    const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+  // Process text to identify sections
+  const lines = cleanText.split('\n');
+  const sections: { title: string; content: { type: 'bullet' | 'text' | 'sub-bullet'; value: string }[] }[] = [];
+  let currentSection: { title: string; content: { type: 'bullet' | 'text' | 'sub-bullet'; value: string }[] } | null = null;
+  
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) return;
     
-    lines.forEach(line => {
-      // Check if line starts with bullet markers
-      if (line.match(/^[•●○◦‣⁃]\s*/)) {
-        const cleanedLine = line.replace(/^[•●○◦‣⁃]\s*/, '').trim();
-        if (cleanedLine) {
-          result.push({ type: 'bullet', value: cleanedLine });
-        }
-      } else if (line.length > 0) {
-        // Check if it's a sentence that should be a bullet (has period, moderate length)
-        if (line.length > 20 && !line.endsWith(':')) {
-          result.push({ type: 'bullet', value: line });
-        } else {
-          result.push({ type: 'text', value: line });
-        }
+    // Check if line is a header (emoji at start, bold, or ends with specific patterns)
+    const isEmojiHeader = /^(✈️|🏨|🚌|💰|✨|📋|📝|⚠️|ℹ️|🎯|🌟|⭐|💡|📍|🕌|🕋|🛫|🛬|🚗|🏆|💎|📦|🎁|✅|❌|⏰|📅|🔔|💳|🎫|📌)/.test(trimmedLine);
+    const isBoldHeader = /^\*\*[^*]+\*\*/.test(trimmedLine);
+    const isColonHeader = /^[A-Z][^:]{3,50}:$/.test(trimmedLine);
+    const isNextLineBullet = lines[index + 1] && /^\s*[•●○◦‣⁃\-*o]\s/.test(lines[index + 1].trim());
+    
+    // Determine if this is a section header
+    const isHeader = isEmojiHeader || isBoldHeader || (isColonHeader && trimmedLine.length < 60);
+    
+    if (isHeader || (trimmedLine.length < 80 && isNextLineBullet && !trimmedLine.match(/^[•●○◦‣⁃\-*o]\s/))) {
+      // Save previous section
+      if (currentSection && currentSection.content.length > 0) {
+        sections.push(currentSection);
       }
-    });
-    
-    return result;
-  };
-  
-  while ((match = sectionHeaderRegex.exec(normalizedText)) !== null) {
-    // Get content before this match (belongs to previous section)
-    const contentBefore = normalizedText.slice(lastIndex, match.index).trim();
-    
-    if (currentSection && contentBefore) {
-      currentSection.content.push(...parseContent(contentBefore));
+      // Clean the title
+      let title = trimmedLine
+        .replace(/^\*\*/, '')
+        .replace(/\*\*$/, '')
+        .replace(/:$/, '')
+        .trim();
+      currentSection = { title, content: [] };
+    } else if (currentSection) {
+      // Check for bullet points
+      const bulletMatch = trimmedLine.match(/^[•●○◦‣⁃\-*]\s*(.+)/);
+      const subBulletMatch = trimmedLine.match(/^o\s+(.+)/);
+      
+      if (subBulletMatch) {
+        currentSection.content.push({ type: 'sub-bullet', value: subBulletMatch[1].trim() });
+      } else if (bulletMatch) {
+        currentSection.content.push({ type: 'bullet', value: bulletMatch[1].trim() });
+      } else if (trimmedLine.length > 0) {
+        // Regular text line
+        currentSection.content.push({ type: 'text', value: trimmedLine });
+      }
+    } else {
+      // No section yet, create a default one
+      currentSection = { title: 'Package Details', content: [] };
+      const bulletMatch = trimmedLine.match(/^[•●○◦‣⁃\-*]\s*(.+)/);
+      if (bulletMatch) {
+        currentSection.content.push({ type: 'bullet', value: bulletMatch[1].trim() });
+      } else {
+        currentSection.content.push({ type: 'text', value: trimmedLine });
+      }
     }
-    
-    // Save previous section if exists
-    if (currentSection && currentSection.content.length > 0) {
-      parsedSections.push(currentSection);
-    }
-    
-    // Start new section with the matched title
-    const title = (match[1] || match[2] || '').trim().replace(/:$/, '');
-    currentSection = { title, content: [] };
-    lastIndex = sectionHeaderRegex.lastIndex;
-  }
+  });
   
-  // Get remaining content after last match
-  const remainingContent = normalizedText.slice(lastIndex).trim();
-  if (currentSection && remainingContent) {
-    currentSection.content.push(...parseContent(remainingContent));
-  }
-  
-  // Add last section
+  // Add the last section
   if (currentSection && currentSection.content.length > 0) {
-    parsedSections.push(currentSection);
+    sections.push(currentSection);
   }
-
+  
   // If no sections were parsed, treat entire text as one section
-  if (parsedSections.length === 0 && normalizedText.trim()) {
-    const content = parseContent(normalizedText);
-    if (content.length > 0) {
-      parsedSections.push({
-        title: 'Package Details',
-        content
-      });
-    }
+  if (sections.length === 0 && cleanText.trim()) {
+    sections.push({
+      title: 'Package Details',
+      content: cleanText.split('\n')
+        .map(l => l.trim())
+        .filter(Boolean)
+        .map(l => {
+          const bulletMatch = l.match(/^[•●○◦‣⁃\-*]\s*(.+)/);
+          if (bulletMatch) return { type: 'bullet' as const, value: bulletMatch[1].trim() };
+          return { type: 'text' as const, value: l };
+        })
+    });
   }
 
   return (
     <div className="space-y-3">
-      {parsedSections.map((section, idx) => (
+      {sections.map((section, idx) => (
         <div key={idx} className="bg-muted/30 rounded-xl p-4 border border-border/50">
           <h5 className="font-semibold text-primary text-sm mb-3 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-secondary"></span>
@@ -138,6 +135,11 @@ const FormattedDescription = ({ text }: { text: string }) => {
               item.type === 'bullet' ? (
                 <div key={itemIdx} className="flex items-start gap-2 text-sm text-foreground/85">
                   <span className="text-secondary mt-0.5 font-bold">•</span>
+                  <span>{item.value}</span>
+                </div>
+              ) : item.type === 'sub-bullet' ? (
+                <div key={itemIdx} className="flex items-start gap-2 text-sm text-foreground/75 ml-4">
+                  <span className="text-muted-foreground mt-0.5">○</span>
                   <span>{item.value}</span>
                 </div>
               ) : (
