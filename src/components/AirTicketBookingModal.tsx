@@ -126,7 +126,7 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
       cabin_class: "economy",
       from_city: "",
       to_city: "",
-      contact_email: user?.email || "",
+      contact_email: "",
       contact_phone: "",
       country_code: "+880",
       remarks: "",
