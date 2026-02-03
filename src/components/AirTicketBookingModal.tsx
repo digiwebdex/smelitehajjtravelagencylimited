@@ -672,30 +672,56 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
 
               {/* Section 3: Traveler Information */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
                     <span className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm">3</span>
                     Traveler Information
                   </h3>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      appendPassenger({
-                        first_name: "",
-                        last_name: "",
-                        gender: "male",
-                        date_of_birth: undefined as any,
-                        nationality: "Bangladeshi",
-                        passport_number: "",
-                        frequent_flyer_number: "",
-                        special_service_request: "",
-                      })
-                    }
-                  >
-                    <Plus className="w-4 h-4 mr-1" /> Add Passenger
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        appendPassenger({
+                          first_name: "",
+                          last_name: "",
+                          gender: "male",
+                          date_of_birth: undefined as any,
+                          nationality: "Bangladeshi",
+                          passport_number: "",
+                          frequent_flyer_number: "",
+                          special_service_request: "",
+                          is_child: false,
+                          child_age: undefined,
+                        })
+                      }
+                    >
+                      <Plus className="w-4 h-4 mr-1" /> Add Passenger
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-primary/50 text-primary hover:bg-primary/10"
+                      onClick={() =>
+                        appendPassenger({
+                          first_name: "",
+                          last_name: "",
+                          gender: "male",
+                          date_of_birth: undefined as any,
+                          nationality: "Bangladeshi",
+                          passport_number: "",
+                          frequent_flyer_number: "",
+                          special_service_request: "",
+                          is_child: true,
+                          child_age: undefined,
+                        })
+                      }
+                    >
+                      <Baby className="w-4 h-4 mr-1" /> Add Child
+                    </Button>
+                  </div>
                 </div>
 
                 {passengerFields.map((field, index) => (
