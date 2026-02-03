@@ -130,15 +130,44 @@ const DEMO_HOTELS: Record<string, Record<string, { name: string; city: string; p
   }
 };
 
-const COUNTRY_FLAGS: Record<string, string> = {
-  "Saudi Arabia": "https://flagcdn.com/w80/sa.png",
-  "Dubai": "https://flagcdn.com/w80/ae.png",
-  "Turkey": "https://flagcdn.com/w80/tr.png",
-  "Malaysia": "https://flagcdn.com/w80/my.png",
-  "Thailand": "https://flagcdn.com/w80/th.png",
-  "Singapore": "https://flagcdn.com/w80/sg.png",
-  "Indonesia": "https://flagcdn.com/w80/id.png",
-  "Egypt": "https://flagcdn.com/w80/eg.png",
+// Comprehensive country name to ISO code mapping
+const COUNTRY_CODES: Record<string, string> = {
+  "Afghanistan": "af", "Albania": "al", "Algeria": "dz", "Andorra": "ad", "Angola": "ao",
+  "Argentina": "ar", "Armenia": "am", "Australia": "au", "Austria": "at", "Azerbaijan": "az",
+  "Bahrain": "bh", "Bangladesh": "bd", "Belarus": "by", "Belgium": "be", "Bhutan": "bt",
+  "Bolivia": "bo", "Bosnia and Herzegovina": "ba", "Brazil": "br", "Brunei": "bn", "Bulgaria": "bg",
+  "Cambodia": "kh", "Canada": "ca", "Chile": "cl", "China": "cn", "Colombia": "co",
+  "Croatia": "hr", "Cuba": "cu", "Cyprus": "cy", "Czech Republic": "cz", "Czechia": "cz",
+  "Denmark": "dk", "Dubai": "ae", "Ecuador": "ec", "Egypt": "eg", "Estonia": "ee",
+  "Ethiopia": "et", "Finland": "fi", "France": "fr", "Georgia": "ge", "Germany": "de",
+  "Ghana": "gh", "Greece": "gr", "Hong Kong": "hk", "Hungary": "hu", "Iceland": "is",
+  "India": "in", "Indonesia": "id", "Iran": "ir", "Iraq": "iq", "Ireland": "ie",
+  "Israel": "il", "Italy": "it", "Japan": "jp", "Jordan": "jo", "Kazakhstan": "kz",
+  "Kenya": "ke", "Kuwait": "kw", "Kyrgyzstan": "kg", "Laos": "la", "Latvia": "lv",
+  "Lebanon": "lb", "Libya": "ly", "Lithuania": "lt", "Luxembourg": "lu", "Macau": "mo",
+  "Malaysia": "my", "Maldives": "mv", "Malta": "mt", "Mexico": "mx", "Mongolia": "mn",
+  "Morocco": "ma", "Myanmar": "mm", "Nepal": "np", "Netherlands": "nl", "New Zealand": "nz",
+  "Nigeria": "ng", "North Korea": "kp", "Norway": "no", "Oman": "om", "Pakistan": "pk",
+  "Palestine": "ps", "Panama": "pa", "Peru": "pe", "Philippines": "ph", "Poland": "pl",
+  "Portugal": "pt", "Qatar": "qa", "Romania": "ro", "Russia": "ru", "Saudi Arabia": "sa",
+  "Serbia": "rs", "Singapore": "sg", "Slovakia": "sk", "Slovenia": "si", "Somalia": "so",
+  "South Africa": "za", "South Korea": "kr", "Spain": "es", "Sri Lanka": "lk", "Sudan": "sd",
+  "Sweden": "se", "Switzerland": "ch", "Syria": "sy", "Taiwan": "tw", "Tajikistan": "tj",
+  "Tanzania": "tz", "Thailand": "th", "Tunisia": "tn", "Turkey": "tr", "Turkmenistan": "tm",
+  "UAE": "ae", "United Arab Emirates": "ae", "Uganda": "ug", "Ukraine": "ua", "United Kingdom": "gb",
+  "UK": "gb", "USA": "us", "United States": "us", "Uzbekistan": "uz", "Venezuela": "ve",
+  "Vietnam": "vn", "Yemen": "ye", "Zimbabwe": "zw"
+};
+
+// Get country flag URL with fallback
+const getCountryFlagUrl = (countryName: string): string => {
+  const code = COUNTRY_CODES[countryName];
+  if (code) {
+    return `https://flagcdn.com/w80/${code}.png`;
+  }
+  // Fallback: try lowercase first two letters as a guess
+  const fallbackCode = countryName.toLowerCase().substring(0, 2);
+  return `https://flagcdn.com/w80/${fallbackCode}.png`;
 };
 
 const HotelSection = () => {
@@ -312,9 +341,13 @@ const HotelSection = () => {
                     className="bg-card p-6 shadow-md rounded-xl hover:bg-primary/10 transition-colors text-center border flex flex-col items-center"
                   >
                     <img 
-                      src={COUNTRY_FLAGS[country] || "https://flagcdn.com/w80/xx.png"} 
+                      src={getCountryFlagUrl(country)} 
                       alt={`${country} flag`}
                       className="w-12 h-8 object-cover rounded mb-2"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
                     />
                     <span className="font-medium">{country}</span>
                   </button>
