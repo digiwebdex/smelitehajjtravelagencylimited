@@ -103,6 +103,74 @@ const nationalities = [
   "American", "Canadian", "Australian", "Other",
 ];
 
+// Comprehensive list of country codes
+const countryCodes = [
+  { code: "+880", country: "Bangladesh", flag: "🇧🇩" },
+  { code: "+91", country: "India", flag: "🇮🇳" },
+  { code: "+92", country: "Pakistan", flag: "🇵🇰" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
+  { code: "+971", country: "UAE", flag: "🇦🇪" },
+  { code: "+974", country: "Qatar", flag: "🇶🇦" },
+  { code: "+965", country: "Kuwait", flag: "🇰🇼" },
+  { code: "+973", country: "Bahrain", flag: "🇧🇭" },
+  { code: "+968", country: "Oman", flag: "🇴🇲" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬" },
+  { code: "+62", country: "Indonesia", flag: "🇮🇩" },
+  { code: "+66", country: "Thailand", flag: "🇹🇭" },
+  { code: "+63", country: "Philippines", flag: "🇵🇭" },
+  { code: "+84", country: "Vietnam", flag: "🇻🇳" },
+  { code: "+977", country: "Nepal", flag: "🇳🇵" },
+  { code: "+94", country: "Sri Lanka", flag: "🇱🇰" },
+  { code: "+95", country: "Myanmar", flag: "🇲🇲" },
+  { code: "+86", country: "China", flag: "🇨🇳" },
+  { code: "+81", country: "Japan", flag: "🇯🇵" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷" },
+  { code: "+852", country: "Hong Kong", flag: "🇭🇰" },
+  { code: "+886", country: "Taiwan", flag: "🇹🇼" },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
+  { code: "+44", country: "UK", flag: "🇬🇧" },
+  { code: "+49", country: "Germany", flag: "🇩🇪" },
+  { code: "+33", country: "France", flag: "🇫🇷" },
+  { code: "+39", country: "Italy", flag: "🇮🇹" },
+  { code: "+34", country: "Spain", flag: "🇪🇸" },
+  { code: "+31", country: "Netherlands", flag: "🇳🇱" },
+  { code: "+32", country: "Belgium", flag: "🇧🇪" },
+  { code: "+41", country: "Switzerland", flag: "🇨🇭" },
+  { code: "+43", country: "Austria", flag: "🇦🇹" },
+  { code: "+46", country: "Sweden", flag: "🇸🇪" },
+  { code: "+47", country: "Norway", flag: "🇳🇴" },
+  { code: "+45", country: "Denmark", flag: "🇩🇰" },
+  { code: "+358", country: "Finland", flag: "🇫🇮" },
+  { code: "+48", country: "Poland", flag: "🇵🇱" },
+  { code: "+90", country: "Turkey", flag: "🇹🇷" },
+  { code: "+30", country: "Greece", flag: "🇬🇷" },
+  { code: "+351", country: "Portugal", flag: "🇵🇹" },
+  { code: "+353", country: "Ireland", flag: "🇮🇪" },
+  { code: "+7", country: "Russia", flag: "🇷🇺" },
+  { code: "+380", country: "Ukraine", flag: "🇺🇦" },
+  { code: "+61", country: "Australia", flag: "🇦🇺" },
+  { code: "+64", country: "New Zealand", flag: "🇳🇿" },
+  { code: "+20", country: "Egypt", flag: "🇪🇬" },
+  { code: "+27", country: "South Africa", flag: "🇿🇦" },
+  { code: "+234", country: "Nigeria", flag: "🇳🇬" },
+  { code: "+254", country: "Kenya", flag: "🇰🇪" },
+  { code: "+212", country: "Morocco", flag: "🇲🇦" },
+  { code: "+216", country: "Tunisia", flag: "🇹🇳" },
+  { code: "+213", country: "Algeria", flag: "🇩🇿" },
+  { code: "+962", country: "Jordan", flag: "🇯🇴" },
+  { code: "+961", country: "Lebanon", flag: "🇱🇧" },
+  { code: "+964", country: "Iraq", flag: "🇮🇶" },
+  { code: "+98", country: "Iran", flag: "🇮🇷" },
+  { code: "+93", country: "Afghanistan", flag: "🇦🇫" },
+  { code: "+55", country: "Brazil", flag: "🇧🇷" },
+  { code: "+52", country: "Mexico", flag: "🇲🇽" },
+  { code: "+54", country: "Argentina", flag: "🇦🇷" },
+  { code: "+56", country: "Chile", flag: "🇨🇱" },
+  { code: "+57", country: "Colombia", flag: "🇨🇴" },
+  { code: "+51", country: "Peru", flag: "🇵🇪" },
+];
+
 const cabinClassLabels: Record<string, string> = {
   economy: "Economy",
   premium_economy: "Premium Economy",
@@ -989,13 +1057,12 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="+880">+880</SelectItem>
-                              <SelectItem value="+91">+91</SelectItem>
-                              <SelectItem value="+971">+971</SelectItem>
-                              <SelectItem value="+966">+966</SelectItem>
-                              <SelectItem value="+1">+1</SelectItem>
-                              <SelectItem value="+44">+44</SelectItem>
+                            <SelectContent className="max-h-[300px]">
+                              {countryCodes.map((country) => (
+                                <SelectItem key={country.code} value={country.code}>
+                                  {country.flag} {country.code}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
