@@ -54,6 +54,7 @@ interface Hotel {
   star_rating: number;
   distance_from_haram: number;
   description: string | null;
+  details: string[];
   facilities: string[];
   images: string[];
   google_map_link: string | null;
@@ -173,6 +174,7 @@ const AdminHotels = () => {
     star_rating: 3,
     distance_from_haram: 500,
     description: "",
+    details: [] as string[],
     facilities: [] as string[],
     images: [] as string[],
     google_map_link: "",
@@ -222,6 +224,7 @@ const AdminHotels = () => {
       star_rating: 3,
       distance_from_haram: 500,
       description: "",
+      details: [],
       facilities: [],
       images: [],
       google_map_link: "",
@@ -242,6 +245,7 @@ const AdminHotels = () => {
       star_rating: hotel.star_rating,
       distance_from_haram: hotel.distance_from_haram,
       description: hotel.description || "",
+      details: hotel.details || [],
       facilities: hotel.facilities || [],
       images: hotel.images || [],
       google_map_link: hotel.google_map_link || "",
@@ -268,6 +272,7 @@ const AdminHotels = () => {
         star_rating: formData.star_rating,
         distance_from_haram: formData.distance_from_haram,
         description: formData.description || null,
+        details: formData.details,
         facilities: formData.facilities,
         images: formData.images,
         google_map_link: formData.google_map_link || null,
@@ -787,6 +792,34 @@ const AdminHotels = () => {
                 placeholder="Describe the hotel..."
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Hotel Details (Bullet Points)</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                প্রতিটি লাইনে একটি করে বুলেট পয়েন্ট লিখুন। Enter চাপলে নতুন পয়েন্ট যোগ হবে।
+              </p>
+              <Textarea
+                value={formData.details.join("\n")}
+                onChange={(e) =>
+                  setFormData({ 
+                    ...formData, 
+                    details: e.target.value.split("\n").filter(line => line.trim() !== "") 
+                  })
+                }
+                placeholder="• 24/7 Room Service&#10;• Free Airport Pickup&#10;• Halal Restaurant&#10;• Prayer Facilities"
+                rows={6}
+              />
+              {formData.details.length > 0 && (
+                <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs font-medium mb-2">Preview:</p>
+                  <ul className="list-disc list-inside text-sm space-y-1">
+                    {formData.details.map((detail, idx) => (
+                      <li key={idx}>{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

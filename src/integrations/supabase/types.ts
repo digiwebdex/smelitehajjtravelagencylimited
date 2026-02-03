@@ -1590,6 +1590,7 @@ export type Database = {
           country: string | null
           created_at: string
           description: string | null
+          details: string[] | null
           distance_from_haram: number
           facilities: string[] | null
           google_map_embed_url: string | null
@@ -1609,6 +1610,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           description?: string | null
+          details?: string[] | null
           distance_from_haram: number
           facilities?: string[] | null
           google_map_embed_url?: string | null
@@ -1628,6 +1630,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           description?: string | null
+          details?: string[] | null
           distance_from_haram?: number
           facilities?: string[] | null
           google_map_embed_url?: string | null

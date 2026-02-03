@@ -35,6 +35,7 @@ interface Hotel {
   star_rating: number;
   distance_from_haram: number;
   description: string | null;
+  details?: string[];
   facilities: string[];
   images: string[];
   google_map_link: string | null;
@@ -206,6 +207,21 @@ const HotelDetailsModal = ({
                   <p className="text-muted-foreground leading-relaxed">
                     {hotel.description}
                   </p>
+                </div>
+              )}
+
+              {/* Hotel Details (Bullet Points) */}
+              {hotel.details && hotel.details.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-semibold mb-3">Hotel Details</h3>
+                  <ul className="space-y-2">
+                    {hotel.details.map((detail, index) => (
+                      <li key={index} className="flex items-start gap-2 text-muted-foreground">
+                        <span className="text-primary mt-1">•</span>
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 

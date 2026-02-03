@@ -15,6 +15,7 @@ interface Hotel {
   star_rating: number;
   distance_from_haram: number;
   description: string | null;
+  details: string[];
   facilities: string[];
   images: string[];
   google_map_link: string | null;
@@ -274,6 +275,7 @@ const HotelSection = () => {
       star_rating: selectedStarRating || 3,
       distance_from_haram: 0,
       description: null,
+      details: [],
       facilities: [],
       images: [demoHotel.image],
       google_map_link: demoHotel.mapLink,
@@ -429,14 +431,26 @@ const HotelSection = () => {
                           {hotel.description}
                         </p>
                       )}
-                      {settings.booking_enabled && (
+                      <div className="flex gap-2 mt-4">
                         <Button
-                          className="mt-4 w-full"
-                          onClick={() => handleBookNow(hotel)}
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedHotel(hotel);
+                            setDetailsModalOpen(true);
+                          }}
                         >
-                          Book Now
+                          View Details
                         </Button>
-                      )}
+                        {settings.booking_enabled && (
+                          <Button
+                            className="flex-1"
+                            onClick={() => handleBookNow(hotel)}
+                          >
+                            Book Now
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
