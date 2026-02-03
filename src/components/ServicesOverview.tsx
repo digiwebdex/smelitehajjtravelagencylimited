@@ -183,7 +183,7 @@ const ServicesOverview = () => {
 
   const handleServiceClick = (service: Service) => {
     // Check if this is the Air Ticket service
-    if (service.title.toLowerCase().includes('air ticket') || service.icon_name === 'Ticket') {
+    if (service.title.toLowerCase().includes('air ticket') || service.icon_name === 'Ticket' || (service.icon_name === 'Plane' && service.title.toLowerCase().includes('air'))) {
       setAirTicketModalOpen(true);
       return;
     }
