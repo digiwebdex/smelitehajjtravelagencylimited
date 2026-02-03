@@ -273,7 +273,7 @@ const HotelSection = () => {
   return (
     <div className="min-h-[60vh]">
       {/* Page Header with Back Navigation */}
-      <div className="bg-primary/5 border-b sticky top-[72px] z-40">
+      <div className="bg-background border-b sticky top-[72px] z-40">
         <div className="container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
