@@ -53,7 +53,7 @@ const Header = () => {
     }
     return false;
   });
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, canAccessAdmin, signOut } = useAuth();
   const { companyInfo, contactDetails, appearance } = useSiteSettings();
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -294,7 +294,7 @@ const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-card border border-border shadow-lg z-[100]">
-                    {isAdmin && (
+                    {canAccessAdmin && (
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <LayoutDashboard className="w-4 h-4 mr-2" />
                         Admin Dashboard
@@ -369,7 +369,7 @@ const Header = () => {
                           Profile Settings
                         </Button>
                       </Link>
-                      {isAdmin && (
+                      {canAccessAdmin && (
                         <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                           <Button variant="outline" className="w-full gap-2">
                             <LayoutDashboard className="w-4 h-4" />
