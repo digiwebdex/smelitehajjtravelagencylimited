@@ -273,27 +273,22 @@ const HotelSection = () => {
   return (
     <div className="min-h-[60vh]">
       {/* Page Header with Back Navigation */}
-      <div className="bg-background border-b sticky top-[72px] z-50 shadow-sm">
-        <div className="container py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/")}
-                className="gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back to Home</span>
-                <Home className="h-4 w-4 sm:hidden" />
-              </Button>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                  {settings.title}
-                </h1>
-                <p className="text-muted-foreground text-sm hidden sm:block">{settings.subtitle}</p>
-              </div>
-            </div>
+      <div className="bg-muted/30 border-b py-4">
+        <div className="container">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="gap-2 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+              {settings.title}
+            </h1>
+            <p className="text-muted-foreground mt-1">{settings.subtitle}</p>
           </div>
         </div>
       </div>
