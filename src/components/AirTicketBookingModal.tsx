@@ -3,7 +3,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Plane, User, Phone, Plus, Trash2, Loader2, ArrowRight, RotateCw, Route } from "lucide-react";
+import { Calendar as CalendarIcon, Plane, User, Phone, Plus, Trash2, Loader2, ArrowRight, RotateCw, Route, Baby } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +39,8 @@ const passengerSchema = z.object({
   passport_expiry: z.date().optional(),
   frequent_flyer_number: z.string().optional(),
   special_service_request: z.string().optional(),
+  is_child: z.boolean().default(false),
+  child_age: z.number().min(0).max(17).optional(),
 });
 
 const formSchema = z.object({
@@ -143,6 +146,8 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
           passport_number: "",
           frequent_flyer_number: "",
           special_service_request: "",
+          is_child: false,
+          child_age: undefined,
         },
       ],
     },
@@ -253,6 +258,8 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
         passport_expiry: p.passport_expiry ? format(p.passport_expiry, "yyyy-MM-dd") : null,
         frequent_flyer_number: p.frequent_flyer_number || null,
         special_service_request: p.special_service_request || null,
+        is_child: p.is_child || false,
+        child_age: p.is_child ? p.child_age : null,
       }));
 
       const { error: passengersError } = await supabase
@@ -840,6 +847,56 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
                             </FormItem>
                           )}
                         />
+                      </div>
+
+                      {/* Is Child and Child Age */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name={`passengers.${index}.is_child`}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="flex items-center gap-2">
+                                  <Baby className="w-4 h-4 text-primary" />
+                                  Is Child Passenger
+                                </FormLabel>
+                                <p className="text-xs text-muted-foreground">
+                                  Check if this passenger is under 18 years old
+                                </p>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch(`passengers.${index}.is_child`) && (
+                          <FormField
+                            control={form.control}
+                            name={`passengers.${index}.child_age`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Child Age *</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    max={17}
+                                    placeholder="Enter age (0-17)"
+                                    value={field.value ?? ""}
+                                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
                       </div>
 
                       <FormField

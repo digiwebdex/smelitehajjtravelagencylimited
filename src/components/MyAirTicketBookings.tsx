@@ -69,6 +69,8 @@ interface Passenger {
   date_of_birth: string;
   nationality: string;
   special_service_request: string | null;
+  is_child: boolean | null;
+  child_age: number | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -395,6 +397,14 @@ export default function MyAirTicketBookings() {
                         <Label className="text-muted-foreground text-xs">Nationality</Label>
                         <p className="font-medium">{passenger.nationality}</p>
                       </div>
+                      {passenger.is_child && (
+                        <div className="col-span-2">
+                          <Label className="text-muted-foreground text-xs">Child Passenger</Label>
+                          <p className="font-medium">
+                            Yes {passenger.child_age !== null && `(Age: ${passenger.child_age})`}
+                          </p>
+                        </div>
+                      )}
                       {passenger.special_service_request && (
                         <div className="col-span-2">
                           <Label className="text-muted-foreground text-xs">Special Request</Label>

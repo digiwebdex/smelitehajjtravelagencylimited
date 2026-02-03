@@ -275,12 +275,14 @@ export type Database = {
       air_ticket_passengers: {
         Row: {
           booking_id: string
+          child_age: number | null
           created_at: string
           date_of_birth: string
           first_name: string
           frequent_flyer_number: string | null
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
+          is_child: boolean | null
           last_name: string
           nationality: string
           passport_expiry: string | null
@@ -290,12 +292,14 @@ export type Database = {
         }
         Insert: {
           booking_id: string
+          child_age?: number | null
           created_at?: string
           date_of_birth: string
           first_name: string
           frequent_flyer_number?: string | null
           gender: Database["public"]["Enums"]["gender_type"]
           id?: string
+          is_child?: boolean | null
           last_name: string
           nationality?: string
           passport_expiry?: string | null
@@ -305,12 +309,14 @@ export type Database = {
         }
         Update: {
           booking_id?: string
+          child_age?: number | null
           created_at?: string
           date_of_birth?: string
           first_name?: string
           frequent_flyer_number?: string | null
           gender?: Database["public"]["Enums"]["gender_type"]
           id?: string
+          is_child?: boolean | null
           last_name?: string
           nationality?: string
           passport_expiry?: string | null
