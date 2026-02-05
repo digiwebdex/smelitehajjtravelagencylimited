@@ -21,11 +21,11 @@ const AdminDemoAccount = () => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [demoAccount, setDemoAccount] = useState<DemoAccountInfo>({
     email: "demo@smelitehajj.com",
-    password: "Demo@2024",
+    password: "SmElite#Hajj@2025!Secure",
   });
   const [formData, setFormData] = useState({
     email: "demo@smelitehajj.com",
-    password: "Demo@2024",
+    password: "SmElite#Hajj@2025!Secure",
     full_name: "Demo Viewer",
   });
 
