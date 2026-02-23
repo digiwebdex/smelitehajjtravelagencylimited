@@ -240,7 +240,7 @@ export const generateBookingPDF = (booking: BookingData): void => {
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   doc.text('For any queries, please contact us:', pageWidth / 2, footerY + 18, { align: 'center' });
-  doc.text('Phone: +880 1234 567890 | Email: info@smelitehajj.com', pageWidth / 2, footerY + 25, { align: 'center' });
+  doc.text('Phone: +8801867666888 | Email: info@smelitehajj.com', pageWidth / 2, footerY + 25, { align: 'center' });
 
   // Save the PDF
   const fileName = `Booking_Receipt_${booking.id.slice(0, 8).toUpperCase()}.pdf`;
