@@ -300,14 +300,18 @@ const Header = () => {
                         Admin Dashboard
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
-                      <ClipboardList className="w-4 h-4 mr-2" />
-                      My Bookings
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Profile Settings
-                    </DropdownMenuItem>
+                    {!canAccessAdmin && (
+                      <>
+                        <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
+                          <ClipboardList className="w-4 h-4 mr-2" />
+                          My Bookings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate("/profile")}>
+                          <Settings className="w-4 h-4 mr-2" />
+                          Profile Settings
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
@@ -357,18 +361,22 @@ const Header = () => {
                   </Link>
                   {user ? (
                     <>
-                      <Link to="/my-bookings" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" className="w-full gap-2">
-                          <ClipboardList className="w-4 h-4" />
-                          My Bookings
-                        </Button>
-                      </Link>
-                      <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" className="w-full gap-2">
-                          <Settings className="w-4 h-4" />
-                          Profile Settings
-                        </Button>
-                      </Link>
+                      {!canAccessAdmin && (
+                        <>
+                          <Link to="/my-bookings" onClick={() => setIsMenuOpen(false)}>
+                            <Button variant="outline" className="w-full gap-2">
+                              <ClipboardList className="w-4 h-4" />
+                              My Bookings
+                            </Button>
+                          </Link>
+                          <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
+                            <Button variant="outline" className="w-full gap-2">
+                              <Settings className="w-4 h-4" />
+                              Profile Settings
+                            </Button>
+                          </Link>
+                        </>
+                      )}
                       {canAccessAdmin && (
                         <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
                           <Button variant="outline" className="w-full gap-2">
