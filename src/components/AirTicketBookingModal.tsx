@@ -61,7 +61,7 @@ const formSchema = z.object({
   // Contact Details
   contact_email: z.string().email("Valid email is required"),
   contact_phone: z.string().min(10, "Valid phone number is required"),
-  country_code: z.string().default("+880"),
+  country_code: z.string().min(1, "Required"),
   remarks: z.string().optional(),
   
   // Passengers
@@ -113,6 +113,8 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
+  const [showCodeDropdown, setShowCodeDropdown] = useState(false);
+  const [codeSearch, setCodeSearch] = useState("");
   const [settings, setSettings] = useState<AirTicketSettings>({
     trip_types: { one_way: true, round_trip: true, multi_city: true },
     cabin_classes: { economy: true, premium_economy: true, business: true, first: true },
@@ -129,7 +131,7 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
       to_city: "",
       contact_email: "",
       contact_phone: "",
-      country_code: "+880",
+      country_code: "",
       remarks: "",
       routes: [
         { from_city: "", to_city: "", travel_date: undefined as any },
@@ -989,22 +991,49 @@ export default function AirTicketBookingModal({ open, onOpenChange }: AirTicketB
                       control={form.control}
                       name="country_code"
                       render={({ field }) => (
-                        <FormItem className="w-24">
+                        <FormItem className="w-32">
                           <FormLabel>Code</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="max-h-[300px]">
-                              {worldCountries.map((country) => (
-                                <SelectItem key={`${country.iso}-${country.code}`} value={country.code}>
-                                  {country.flag} {country.code}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                placeholder="+880"
+                                value={field.value}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  setCodeSearch(e.target.value);
+                                  setShowCodeDropdown(true);
+                                }}
+                                onFocus={() => setShowCodeDropdown(true)}
+                                onBlur={() => setTimeout(() => setShowCodeDropdown(false), 200)}
+                              />
+                              {showCodeDropdown && field.value && (
+                                <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-[200px] overflow-y-auto bg-popover border border-border rounded-md shadow-md">
+                                  {worldCountries
+                                    .filter(c => 
+                                      c.code.includes(field.value) || 
+                                      c.iso.toLowerCase().includes(field.value.toLowerCase()) ||
+                                      c.country.toLowerCase().includes(field.value.toLowerCase())
+                                    )
+                                    .slice(0, 15)
+                                    .map((country) => (
+                                      <button
+                                        key={`${country.iso}-${country.code}`}
+                                        type="button"
+                                        className="w-full text-left px-3 py-1.5 text-sm hover:bg-accent cursor-pointer"
+                                        onMouseDown={(e) => {
+                                          e.preventDefault();
+                                          field.onChange(country.code);
+                                          setShowCodeDropdown(false);
+                                        }}
+                                      >
+                                        {country.flag} {country.iso} {country.code}
+                                      </button>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
