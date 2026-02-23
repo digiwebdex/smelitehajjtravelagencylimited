@@ -57,7 +57,7 @@ export const generateBookingPDF = (booking: BookingData): void => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(24);
   doc.setFont('helvetica', 'bold');
-  doc.text('SM Elite Hajj Travel', pageWidth / 2, yPos, { align: 'center' });
+  doc.text('S. M. Elite Hajj Limited', pageWidth / 2, yPos, { align: 'center' });
   
   yPos += 10;
   doc.setFontSize(12);
@@ -175,10 +175,12 @@ export const generateBookingPDF = (booking: BookingData): void => {
   
   yPos += 8;
 
+  const formatPDFCurrency = (amount: number) => `Tk ${amount.toLocaleString("en-BD")}`;
+
   const paymentData: [string, string][] = [
-    ['Price Per Person', formatCurrency(perPersonPrice)],
+    ['Price Per Person', formatPDFCurrency(perPersonPrice)],
     ['Number of Passengers', booking.passenger_count.toString()],
-    ['Total Amount', formatCurrency(booking.total_price)],
+    ['Total Amount', formatPDFCurrency(booking.total_price)],
     ['Payment Status', paymentLabels[booking.payment_status || 'pending'] || 'Pending'],
   ];
 
@@ -233,7 +235,7 @@ export const generateBookingPDF = (booking: BookingData): void => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('Thank you for choosing SM Elite Hajj Travel!', pageWidth / 2, footerY + 10, { align: 'center' });
+  doc.text('Thank you for choosing S. M. Elite Hajj Limited!', pageWidth / 2, footerY + 10, { align: 'center' });
   
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
