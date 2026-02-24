@@ -406,7 +406,8 @@ const HeroSection = () => {
               {/* Title */}
               <motion.h1
                 variants={itemVariants}
-                className={`font-moolboran text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
+                className={`font-moolboran text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 leading-tight tracking-widest overflow-visible ${textPrimary}`}
+                style={{ textShadow: isLight ? 'none' : '0 2px 20px rgba(201, 162, 39, 0.35), 0 0 40px rgba(201, 162, 39, 0.15)' }}
               >
                 <span className="inline-block">{content.title}</span>
                 {content.subtitle && (
@@ -504,7 +505,8 @@ const HeroSection = () => {
                   {/* Title */}
                   <motion.h1
                     variants={itemVariants}
-                    className={`font-moolboran text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-tight tracking-wide overflow-visible ${textPrimary}`}
+                    className={`font-moolboran text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 leading-tight tracking-widest overflow-visible ${textPrimary}`}
+                    style={{ textShadow: isLight ? 'none' : '0 2px 20px rgba(201, 162, 39, 0.35), 0 0 40px rgba(201, 162, 39, 0.15)' }}
                   >
                     <span className="inline-block">{content.title}</span>
                     {content.subtitle && (
