@@ -269,7 +269,7 @@ const Header = () => {
                   key={link.id}
                   href={link.href}
                   onClick={(e) => handleSmoothScroll(e, link.href)}
-                  className="text-foreground hover:text-primary text-sm xl:text-base font-medium transition-colors relative group cursor-pointer whitespace-nowrap"
+                  className="text-foreground hover:text-primary text-xs xl:text-sm font-medium transition-colors relative group cursor-pointer whitespace-nowrap"
                 >
                   {link.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-secondary group-hover:w-full transition-all duration-300" />
