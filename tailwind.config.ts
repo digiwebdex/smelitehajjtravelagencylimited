@@ -25,6 +25,7 @@ export default {
         calligraphy: ['Aref Ruqaa', 'serif'],
         thuluth: ['Scheherazade New', 'serif'],
         pilgrimage: ['Yellow Peas', 'Cormorant Garamond', 'serif'],
+        moolboran: ['MoolBoran', 'Amiri', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
