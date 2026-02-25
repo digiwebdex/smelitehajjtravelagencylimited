@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,7 +27,10 @@ import {
   Plane,
   Globe,
   CreditCard,
-  Download
+  Download,
+  Wallet,
+  TrendingUp,
+  Receipt,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import OrderTrackingModal from "@/components/OrderTrackingModal";
@@ -36,6 +39,7 @@ import InstallmentDetails from "@/components/InstallmentDetails";
 import { generateBookingPDF } from "@/utils/generateBookingPDF";
 import { getGuestBookingInfo } from "@/utils/guestBookingStorage";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 type TrackingStatus = 'order_submitted' | 'documents_received' | 'under_review' | 'approved' | 'processing' | 'completed';
 
@@ -77,6 +81,18 @@ interface VisaApplication {
   };
 }
 
+interface Transaction {
+  id: string;
+  amount: number;
+  payment_method: string;
+  gateway_name: string;
+  status: string;
+  transaction_id: string | null;
+  created_at: string;
+  booking_id: string | null;
+  currency: string;
+}
+
 const statusConfig: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
   pending: { color: "bg-yellow-500", icon: <Clock className="w-4 h-4" />, label: "Pending" },
   confirmed: { color: "bg-green-500", icon: <CheckCircle className="w-4 h-4" />, label: "Confirmed" },
@@ -98,6 +114,14 @@ const paymentStatusConfig: Record<string, { color: string; label: string }> = {
   pending_verification: { color: "bg-blue-500/20 text-blue-700 border-blue-500/30", label: "Verifying Payment" },
   paid: { color: "bg-green-500/20 text-green-700 border-green-500/30", label: "Paid" },
   failed: { color: "bg-red-500/20 text-red-700 border-red-500/30", label: "Failed" },
+};
+
+const txnStatusConfig: Record<string, { color: string; label: string }> = {
+  pending: { color: "bg-yellow-500/20 text-yellow-700 border-yellow-500/30", label: "Pending" },
+  success: { color: "bg-green-500/20 text-green-700 border-green-500/30", label: "Success" },
+  completed: { color: "bg-green-500/20 text-green-700 border-green-500/30", label: "Completed" },
+  failed: { color: "bg-red-500/20 text-red-700 border-red-500/30", label: "Failed" },
+  cancelled: { color: "bg-muted text-muted-foreground border-muted", label: "Cancelled" },
 };
 
 const trackingSteps: { status: TrackingStatus; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -130,29 +154,27 @@ const MyBookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [visaApplications, setVisaApplications] = useState<VisaApplication[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [documentUploadBooking, setDocumentUploadBooking] = useState<Booking | null>(null);
-  const [activeTab, setActiveTab] = useState("bookings");
+  const [activeTab, setActiveTab] = useState("overview");
   const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
-    // Check for guest bookings first
     const guestInfo = getGuestBookingInfo();
     
     if (!authLoading) {
       if (user) {
-        // Logged-in user
         setIsGuestMode(false);
         fetchBookings();
         fetchVisaApplications();
+        fetchTransactions();
         subscribeToUpdates();
       } else if (guestInfo && guestInfo.bookingIds.length > 0) {
-        // Guest with stored bookings
         setIsGuestMode(true);
         fetchGuestBookings(guestInfo.bookingIds);
       } else {
-        // No user and no guest bookings
         navigate("/auth");
       }
     }
@@ -162,25 +184,9 @@ const MyBookings = () => {
     const { data, error } = await supabase
       .from("bookings")
       .select(`
-        id,
-        status,
-        tracking_status,
-        admin_notes,
-        total_price,
-        passenger_count,
-        travel_date,
-        created_at,
-        guest_name,
-        guest_email,
-        guest_phone,
-        payment_status,
-        user_id,
-        packages (
-          title,
-          type,
-          duration_days,
-          price
-        )
+        id, status, tracking_status, admin_notes, total_price, passenger_count,
+        travel_date, created_at, guest_name, guest_email, guest_phone, payment_status, user_id,
+        packages (title, type, duration_days, price)
       `)
       .in("id", bookingIds)
       .order("created_at", { ascending: false });
@@ -195,25 +201,9 @@ const MyBookings = () => {
     const { data, error } = await supabase
       .from("bookings")
       .select(`
-        id,
-        status,
-        tracking_status,
-        admin_notes,
-        total_price,
-        passenger_count,
-        travel_date,
-        created_at,
-        guest_name,
-        guest_email,
-        guest_phone,
-        payment_status,
-        user_id,
-        packages (
-          title,
-          type,
-          duration_days,
-          price
-        )
+        id, status, tracking_status, admin_notes, total_price, passenger_count,
+        travel_date, created_at, guest_name, guest_email, guest_phone, payment_status, user_id,
+        packages (title, type, duration_days, price)
       `)
       .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
@@ -228,19 +218,9 @@ const MyBookings = () => {
     const { data, error } = await supabase
       .from("visa_applications")
       .select(`
-        id,
-        status,
-        payment_status,
-        total_price,
-        applicant_count,
-        travel_date,
-        created_at,
-        admin_notes,
-        visa_countries (
-          country_name,
-          flag_emoji,
-          processing_time
-        )
+        id, status, payment_status, total_price, applicant_count,
+        travel_date, created_at, admin_notes,
+        visa_countries (country_name, flag_emoji, processing_time)
       `)
       .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
@@ -250,45 +230,67 @@ const MyBookings = () => {
     }
   };
 
+  const fetchTransactions = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("id, amount, payment_method, gateway_name, status, transaction_id, created_at, booking_id, currency")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setTransactions(data as Transaction[]);
+    }
+  };
+
   const subscribeToUpdates = () => {
     if (!user) return;
 
     const bookingsChannel = supabase
       .channel('my-bookings')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'bookings',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchBookings();
-        }
-      )
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'bookings',
+        filter: `user_id=eq.${user.id}`,
+      }, () => { fetchBookings(); })
       .subscribe();
 
     const visaChannel = supabase
       .channel('my-visa-applications')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'visa_applications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchVisaApplications();
-        }
-      )
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'visa_applications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => { fetchVisaApplications(); })
       .subscribe();
 
     return () => {
       supabase.removeChannel(bookingsChannel);
       supabase.removeChannel(visaChannel);
     };
+  };
+
+  // Dashboard summary
+  const summary = useMemo(() => {
+    const totalSpent = bookings
+      .filter(b => b.status === "confirmed" || b.status === "completed")
+      .reduce((s, b) => s + Number(b.total_price), 0)
+      + visaApplications
+        .filter(v => v.status === "approved" || v.status === "completed")
+        .reduce((s, v) => s + Number(v.total_price), 0);
+
+    const activeBookings = bookings.filter(b => b.status === "confirmed" || b.status === "pending").length;
+    const pendingPayments = bookings.filter(b => 
+      b.payment_status === "pending" || b.payment_status === "pending_cash" || b.payment_status === "pending_verification"
+    ).length;
+    const completedBookings = bookings.filter(b => b.status === "completed").length;
+    const successfulTxns = transactions.filter(t => t.status === "success" || t.status === "completed").length;
+
+    return { totalSpent, activeBookings, pendingPayments, completedBookings, successfulTxns };
+  }, [bookings, visaApplications, transactions]);
+
+  // Find booking title for a transaction
+  const getBookingTitle = (bookingId: string | null) => {
+    if (!bookingId) return "—";
+    const booking = bookings.find(b => b.id === bookingId);
+    return booking ? booking.packages.title : bookingId.slice(0, 8).toUpperCase();
   };
 
   if (authLoading || loading) {
@@ -312,10 +314,76 @@ const MyBookings = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="font-heading text-3xl font-bold">My Bookings</h1>
-            <p className="text-muted-foreground">Track and manage your travel bookings & visa applications</p>
+            <h1 className="font-heading text-3xl font-bold">My Dashboard</h1>
+            <p className="text-muted-foreground">Your bookings, payments, and visa applications in one place</p>
           </div>
         </div>
+
+        {/* Summary Cards */}
+        {!hasNoData && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Total Spent</p>
+                      <p className="text-xl font-bold mt-1">{formatCurrency(summary.totalSpent)}</p>
+                    </div>
+                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                      <Wallet className="w-5 h-5 text-primary" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Active Bookings</p>
+                      <p className="text-xl font-bold mt-1">{summary.activeBookings}</p>
+                    </div>
+                    <div className="p-2.5 bg-green-500/10 rounded-xl">
+                      <Package className="w-5 h-5 text-green-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pending Payments</p>
+                      <p className="text-xl font-bold mt-1">{summary.pendingPayments}</p>
+                    </div>
+                    <div className="p-2.5 bg-yellow-500/10 rounded-xl">
+                      <Clock className="w-5 h-5 text-yellow-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Completed</p>
+                      <p className="text-xl font-bold mt-1">{summary.completedBookings}</p>
+                    </div>
+                    <div className="p-2.5 bg-blue-500/10 rounded-xl">
+                      <CheckCircle className="w-5 h-5 text-blue-500" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        )}
 
         {hasNoData ? (
           <Card className="text-center py-16">
@@ -337,18 +405,30 @@ const MyBookings = () => {
           </Card>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-              <TabsTrigger value="bookings" className="gap-2">
-                <Package className="w-4 h-4" />
-                Packages ({bookings.length})
+            <TabsList className={cn(
+              "grid w-full max-w-lg mb-6",
+              isGuestMode ? "grid-cols-1" : "grid-cols-3"
+            )}>
+              <TabsTrigger value="overview" className="gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Bookings ({bookings.length})
               </TabsTrigger>
-              <TabsTrigger value="visa" className="gap-2">
-                <Globe className="w-4 h-4" />
-                Visa ({visaApplications.length})
-              </TabsTrigger>
+              {!isGuestMode && (
+                <>
+                  <TabsTrigger value="payments" className="gap-2">
+                    <Receipt className="w-4 h-4" />
+                    Payments ({transactions.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="visa" className="gap-2">
+                    <Globe className="w-4 h-4" />
+                    Visa ({visaApplications.length})
+                  </TabsTrigger>
+                </>
+              )}
             </TabsList>
 
-            <TabsContent value="bookings">
+            {/* Bookings Tab */}
+            <TabsContent value="overview">
               {bookings.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
@@ -385,21 +465,30 @@ const MyBookings = () => {
                                   {booking.packages.type} Package • {booking.packages.duration_days} Days
                                 </CardDescription>
                               </div>
-                              <Badge 
-                                className={`${statusConfig[booking.status]?.color} text-white flex items-center gap-1`}
-                              >
-                                {statusConfig[booking.status]?.icon}
-                                {statusConfig[booking.status]?.label}
-                              </Badge>
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge 
+                                  className={`${statusConfig[booking.status]?.color} text-white flex items-center gap-1`}
+                                >
+                                  {statusConfig[booking.status]?.icon}
+                                  {statusConfig[booking.status]?.label}
+                                </Badge>
+                                {booking.payment_status && (
+                                  <Badge 
+                                    variant="outline"
+                                    className={paymentStatusConfig[booking.payment_status]?.color}
+                                  >
+                                    <CreditCard className="w-3 h-3 mr-1" />
+                                    {paymentStatusConfig[booking.payment_status]?.label}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </CardHeader>
                           <CardContent>
                             {/* Progress Tracker */}
                             <div className="mb-6 pt-4">
                               <div className="flex items-center justify-between relative">
-                                {/* Progress Line Background */}
                                 <div className="absolute left-0 right-0 top-4 h-1 bg-muted rounded-full" />
-                                {/* Progress Line Filled */}
                                 <div 
                                   className="absolute left-0 top-4 h-1 bg-primary rounded-full transition-all duration-500"
                                   style={{ 
@@ -512,6 +601,78 @@ const MyBookings = () => {
               )}
             </TabsContent>
 
+            {/* Payment History Tab */}
+            <TabsContent value="payments">
+              {transactions.length === 0 ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Receipt className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No Payment History</h3>
+                    <p className="text-muted-foreground">
+                      Your payment transactions will appear here once you make a booking.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {transactions.map((txn, index) => {
+                    const statusCfg = txnStatusConfig[txn.status] || txnStatusConfig.pending;
+                    return (
+                      <motion.div
+                        key={txn.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Card>
+                          <CardContent className="py-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-start gap-3">
+                                <div className={cn(
+                                  "p-2 rounded-lg",
+                                  txn.status === "success" || txn.status === "completed" 
+                                    ? "bg-green-500/10" : "bg-muted"
+                                )}>
+                                  <CreditCard className={cn(
+                                    "w-5 h-5",
+                                    txn.status === "success" || txn.status === "completed"
+                                      ? "text-green-500" : "text-muted-foreground"
+                                  )} />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">{getBookingTitle(txn.booking_id)}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {txn.gateway_name} • {txn.payment_method}
+                                  </p>
+                                  {txn.transaction_id && (
+                                    <p className="text-xs text-muted-foreground font-mono mt-0.5">
+                                      TXN: {txn.transaction_id}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4 sm:text-right">
+                                <div>
+                                  <p className="font-bold text-primary">{formatCurrency(txn.amount)}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {format(new Date(txn.created_at), "dd MMM yyyy, hh:mm a")}
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className={statusCfg.color}>
+                                  {statusCfg.label}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Visa Tab */}
             <TabsContent value="visa">
               {visaApplications.length === 0 ? (
                 <Card className="text-center py-12">
@@ -574,7 +735,6 @@ const MyBookings = () => {
                             </div>
                           </CardHeader>
                           <CardContent>
-                            {/* Progress Tracker for non-rejected applications */}
                             {!isRejected && (
                               <div className="mb-6 pt-4">
                                 <div className="flex items-center justify-between relative">
@@ -620,7 +780,6 @@ const MyBookings = () => {
                               </div>
                             )}
 
-                            {/* Rejected message */}
                             {isRejected && (
                               <div className="mb-4 p-4 bg-red-100 border border-red-200 rounded-lg flex items-start gap-3">
                                 <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
@@ -659,7 +818,6 @@ const MyBookings = () => {
                               </div>
                             </div>
 
-                            {/* Admin notes for non-rejected */}
                             {!isRejected && visa.admin_notes && (
                               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                                 <p className="text-sm text-muted-foreground">
