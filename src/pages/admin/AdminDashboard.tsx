@@ -67,6 +67,7 @@ import AdminRetargetingSegments from "@/components/admin/AdminRetargetingSegment
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminTranslations from "@/components/admin/AdminTranslations";
 import AdminTransactionLogs from "@/components/admin/AdminTransactionLogs";
+import AdminHajjiReports from "@/components/admin/AdminHajjiReports";
 import AdminHotels from "@/components/admin/AdminHotels";
 import AdminHotelBookings from "@/components/admin/AdminHotelBookings";
 import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
@@ -240,6 +241,8 @@ const AdminDashboard = () => {
         return <AdminFinancialAnalytics />;
       case "reports":
         return <AdminReportsAnalytics />;
+      case "hajji-reports":
+        return <AdminHajjiReports />;
       case "reconciliation":
         return <AdminPaymentReconciliation />;
       case "emi-report":

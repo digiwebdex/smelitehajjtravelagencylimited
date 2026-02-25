@@ -107,6 +107,7 @@ const menuGroups = [
       { value: "revenue", label: "Revenue", icon: Wallet },
       { value: "financial-analytics", label: "Financial Analytics", icon: Calculator },
       { value: "reports", label: "Reports & Analytics", icon: BarChart3 },
+      { value: "hajji-reports", label: "Hajji-wise Reports", icon: Users },
       { value: "reconciliation", label: "Payment Reconciliation", icon: AlertTriangle },
       { value: "emi-report", label: "Installment Report", icon: Calculator },
       { value: "payments", label: "Payment Methods", icon: Wallet },
