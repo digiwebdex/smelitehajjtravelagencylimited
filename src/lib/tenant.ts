@@ -1,5 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 
+function getDomain() {
+  if (typeof window === "undefined") return null;
+  return window.location.hostname
+    .replace("www.", "")
+    .toLowerCase()
+    .trim();
+}
+
 export interface Tenant {
   id: string;
   domain: string;
@@ -19,11 +27,10 @@ export async function getCurrentTenant(): Promise<Tenant | null> {
   if (cachePromise) return cachePromise;
 
   cachePromise = (async () => {
-    let hostname = window.location.hostname;
-
-    // Strip "www." prefix if present
-    if (hostname.startsWith("www.")) {
-      hostname = hostname.slice(4);
+    const hostname = getDomain();
+    if (!hostname) {
+      cachePromise = null;
+      return null;
     }
 
     const { data, error } = await (supabase as any)
