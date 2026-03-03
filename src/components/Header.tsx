@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,16 +110,14 @@ const Header = () => {
   };
 
   const fetchPackages = async () => {
-    const { data } = await supabase
-      .from("packages")
-      .select("id, title, price, type, duration_days")
-      .eq("is_active", true)
-      .eq("show_book_now", true)
-      .order("type")
-      .order("price");
-    
+    const { data } = await getTenantPackages({
+      select: "id, title, price, type, duration_days",
+      activeOnly: true,
+    });
+
     if (data) {
-      setPackages(data);
+      // Filter show_book_now client-side since getTenantPackages doesn't handle it
+      setPackages(data.filter((p: any) => p.show_book_now !== false));
     }
   };
 

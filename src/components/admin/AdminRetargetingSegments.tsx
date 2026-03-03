@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -74,10 +75,10 @@ const AdminRetargetingSegments = () => {
         }
         case "premium_interest": {
           // Leads interested in premium/VIP packages
-          const { data: packages } = await supabase
-            .from("packages")
-            .select("id")
-            .in("category", ["premium", "vip"]);
+          const { data: packages } = await getTenantPackages({
+            select: "id",
+            activeOnly: false,
+          });
           
           if (packages && packages.length > 0) {
             const pkgIds = packages.map((p) => p.id);

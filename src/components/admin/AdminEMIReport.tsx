@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -224,9 +225,10 @@ const AdminEMIReport = () => {
           .select("id, guest_name, user_id, package_id")
           .in("id", bookingIds);
 
-        const { data: packages } = await supabase
-          .from("packages")
-          .select("id, title");
+        const { data: packages } = await getTenantPackages({
+          select: "id, title",
+          activeOnly: false,
+        });
 
         const enrichedOverdue: OverdueInstallment[] = overdue.map(item => {
           const emiPayment = emiPayments.find(e => e.id === item.emi_payment_id);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -80,10 +81,10 @@ const AdminGroupInquiries = () => {
   };
 
   const fetchPackages = async () => {
-    const { data } = await supabase
-      .from("packages")
-      .select("id, title")
-      .eq("is_active", true);
+    const { data } = await getTenantPackages({
+      select: "id, title",
+      activeOnly: true,
+    });
 
     if (data) setPackages(data);
   };

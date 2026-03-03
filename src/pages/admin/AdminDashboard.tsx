@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentTenant } from "@/lib/tenant";
 import { useAuth } from "@/hooks/useAuth";
 import { ViewerModeProvider } from "@/contexts/ViewerModeContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -133,9 +134,11 @@ const AdminDashboard = () => {
         }));
       }
 
-      const { count: packagesCount } = await supabase
-        .from("packages")
-        .select("*", { count: "exact", head: true });
+      const tenant = await getCurrentTenant();
+      const packagesQuery = tenant
+        ? (supabase as any).from("packages").select("*", { count: "exact", head: true }).eq("tenant_id", tenant.id)
+        : (supabase as any).from("packages").select("*", { count: "exact", head: true });
+      const { count: packagesCount } = await packagesQuery;
 
       setStats(prev => ({
         ...prev,
