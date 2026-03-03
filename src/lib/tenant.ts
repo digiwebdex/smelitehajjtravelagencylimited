@@ -28,6 +28,7 @@ export async function getCurrentTenant(): Promise<Tenant | null> {
 
   cachePromise = (async () => {
     const hostname = getDomain();
+    console.log("Detected domain:", hostname);
     if (!hostname) {
       cachePromise = null;
       return null;
