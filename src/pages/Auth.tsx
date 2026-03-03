@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, KeyRound } from "lucide-react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { getCurrentTenant } from "@/utils/tenant";
 
 type AuthView = "auth" | "forgot-password";
 
@@ -137,6 +138,20 @@ const Auth = () => {
         title: "Account Created!",
         description: "You have successfully signed up. Welcome aboard!",
       });
+
+      // Insert profile record with tenant
+      if (data?.user) {
+        try {
+          const tenant = await getCurrentTenant();
+          await (supabase as any).from("profiles").insert({
+            id: data.user.id,
+            tenant_id: tenant?.id,
+            role: "admin",
+          });
+        } catch (err) {
+          console.error("Profile insert error:", err);
+        }
+      }
 
       // Send welcome notification (email and/or WhatsApp)
       if (data?.user) {
