@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -186,11 +187,11 @@ const AdminReportsAnalytics = () => {
       }
 
       // Fetch all packages
-      const { data: packageData } = await supabase
-        .from("packages")
-        .select("id, title, type")
-        .eq("is_active", true)
-        .order("title");
+      const { data: packageData } = await getTenantPackages({
+        select: "id, title, type",
+        activeOnly: true,
+        orderBy: { column: "title", ascending: true },
+      });
 
       if (packageData) {
         setPackages(packageData);

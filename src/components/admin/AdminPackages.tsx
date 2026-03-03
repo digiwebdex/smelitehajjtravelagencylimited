@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getTenantPackages } from "@/lib/tenant";
 import { useToast } from "@/hooks/use-toast";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useViewerMode } from "@/contexts/ViewerModeContext";
@@ -106,10 +107,10 @@ const AdminPackages = ({ onUpdate }: AdminPackagesProps) => {
   }, []);
 
   const fetchPackages = async () => {
-    const { data, error } = await supabase
-      .from("packages")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await getTenantPackages({
+      activeOnly: false,
+      orderBy: { column: "created_at", ascending: false },
+    });
 
     if (!error && data) {
       setPackages(data);
