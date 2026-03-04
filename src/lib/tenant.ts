@@ -34,11 +34,26 @@ export async function getCurrentTenant(): Promise<Tenant | null> {
       return null;
     }
 
-    const { data, error } = await (supabase as any)
+    // Try exact domain match first
+    let { data, error } = await (supabase as any)
       .from("tenants")
       .select("*")
       .eq("domain", hostname)
       .maybeSingle();
+
+    // Fallback: if no exact match (e.g. preview/staging domain), use the first tenant
+    if (!error && !data) {
+      const fallback = await (supabase as any)
+        .from("tenants")
+        .select("*")
+        .limit(1)
+        .maybeSingle();
+      data = fallback.data;
+      error = fallback.error;
+      if (data) {
+        console.log("Using fallback tenant:", data.name);
+      }
+    }
 
     if (error) {
       console.error("Tenant lookup failed:", error);
