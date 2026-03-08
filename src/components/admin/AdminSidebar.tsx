@@ -107,8 +107,10 @@ const menuGroups = [
       { value: "leads", label: "Leads CRM", icon: UserPlus },
       { value: "crm-automation", label: "Follow-up Sequences", icon: MessageSquare },
       { value: "marketing-analytics", label: "Marketing Analytics", icon: TrendingUp },
+      { value: "retargeting", label: "Retargeting Segments", icon: Target },
       { value: "offer-popup", label: "Offer Popup", icon: Megaphone },
       { value: "lead-magnets", label: "Lead Magnets", icon: FileText },
+      { value: "webinars", label: "Webinars", icon: Video },
       { value: "referrals", label: "Referrals", icon: Share2 },
       { value: "agents", label: "Agents", icon: UserCog },
     ]
