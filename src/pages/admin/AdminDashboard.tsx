@@ -75,6 +75,7 @@ import AdminDemoAccount from "@/components/admin/AdminDemoAccount";
 import AdminWebinars from "@/components/admin/AdminWebinars";
 import AdminRetargetingSegments from "@/components/admin/AdminRetargetingSegments";
 import AdminInstallmentReminders from "@/components/admin/AdminInstallmentReminders";
+import AdminSEO from "@/components/admin/AdminSEO";
 import AdminCustomers from "@/components/admin/AdminCustomers";
 import AccountingDashboard from "@/components/admin/accounting/AccountingDashboard";
 import ChartOfAccounts from "@/components/admin/accounting/ChartOfAccounts";
