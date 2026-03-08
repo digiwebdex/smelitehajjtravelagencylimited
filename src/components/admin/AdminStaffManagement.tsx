@@ -189,19 +189,35 @@ const AdminStaffManagement = () => {
 
   const fetchActivityLogs = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: logsData, error: logsError } = await supabase
         .from("staff_activity_log")
-        .select(`
-          *,
-          staff_member:staff_members(
-            profile:profiles!staff_members_user_id_fkey(full_name)
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(100);
 
-      if (error) throw error;
-      setActivityLogs((data as unknown as ActivityLog[]) || []);
+      if (logsError) throw logsError;
+
+      // Fetch profiles separately for user_ids
+      const userIds = [...new Set((logsData || []).map((l: any) => l.user_id).filter(Boolean))];
+      let profilesMap: Record<string, { full_name: string | null }> = {};
+      
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", userIds);
+        
+        profilesData?.forEach(p => {
+          profilesMap[p.id] = { full_name: p.full_name };
+        });
+      }
+
+      const enrichedLogs = (logsData || []).map((log: any) => ({
+        ...log,
+        staff_member: log.user_id ? { profile: profilesMap[log.user_id] || null } : null
+      }));
+
+      setActivityLogs(enrichedLogs as unknown as ActivityLog[]);
     } catch (error) {
       console.error("Error fetching activity logs:", error);
     }

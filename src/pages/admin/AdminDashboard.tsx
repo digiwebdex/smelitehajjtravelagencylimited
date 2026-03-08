@@ -72,6 +72,9 @@ import AdminHotelBookings from "@/components/admin/AdminHotelBookings";
 import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
 import AdminOfferPopup from "@/components/admin/AdminOfferPopup";
 import AdminDemoAccount from "@/components/admin/AdminDemoAccount";
+import AdminWebinars from "@/components/admin/AdminWebinars";
+import AdminRetargetingSegments from "@/components/admin/AdminRetargetingSegments";
+import AdminInstallmentReminders from "@/components/admin/AdminInstallmentReminders";
 import AdminCustomers from "@/components/admin/AdminCustomers";
 import AccountingDashboard from "@/components/admin/accounting/AccountingDashboard";
 import ChartOfAccounts from "@/components/admin/accounting/ChartOfAccounts";
@@ -176,22 +179,22 @@ const AdminDashboard = () => {
       title: "Total Bookings",
       value: stats.totalBookings,
       icon: Package,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       title: "Pending",
       value: stats.pendingBookings,
       icon: Users,
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10",
+      color: "text-secondary",
+      bgColor: "bg-secondary/10",
     },
     {
       title: "Confirmed",
       value: stats.confirmedBookings,
       icon: TrendingUp,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
+      color: "text-accent-foreground",
+      bgColor: "bg-accent/50",
     },
     {
       title: "Total Revenue",
@@ -231,6 +234,9 @@ const AdminDashboard = () => {
       case "emi-report": return <AdminEMIReport />;
       case "payments": return <AdminPaymentMethods />;
       case "transaction-logs": return <AdminTransactionLogs />;
+      case "webinars": return <AdminWebinars />;
+      case "retargeting": return <AdminRetargetingSegments />;
+      case "installment-reminders": return <AdminInstallmentReminders />;
       case "staff": return <AdminStaffManagement />;
       case "audit-log": return <AdminAuditLog />;
       case "notifications": return <AdminNotifications />;
@@ -316,7 +322,7 @@ const AdminDashboard = () => {
 
           <main className="flex-1 p-4 lg:p-6 min-w-0">
             {isViewer && (
-              <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center gap-2 text-amber-800 dark:text-amber-200">
+              <div className="mb-4 p-3 bg-secondary/10 border border-secondary/30 rounded-lg flex items-center gap-2 text-secondary-foreground">
                 <Eye className="w-4 h-4" />
                 <span className="text-sm font-medium">Demo Mode: You are viewing as a read-only demo account. Editing is disabled.</span>
               </div>

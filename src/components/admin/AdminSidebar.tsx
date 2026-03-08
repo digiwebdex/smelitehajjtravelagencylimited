@@ -36,6 +36,8 @@ import {
   Landmark,
   CreditCard,
   ClipboardList,
+  Video,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -105,8 +107,10 @@ const menuGroups = [
       { value: "leads", label: "Leads CRM", icon: UserPlus },
       { value: "crm-automation", label: "Follow-up Sequences", icon: MessageSquare },
       { value: "marketing-analytics", label: "Marketing Analytics", icon: TrendingUp },
+      { value: "retargeting", label: "Retargeting Segments", icon: Target },
       { value: "offer-popup", label: "Offer Popup", icon: Megaphone },
       { value: "lead-magnets", label: "Lead Magnets", icon: FileText },
+      { value: "webinars", label: "Webinars", icon: Video },
       { value: "referrals", label: "Referrals", icon: Share2 },
       { value: "agents", label: "Agents", icon: UserCog },
     ]
@@ -152,6 +156,7 @@ const menuGroups = [
       { value: "notifications", label: "Notifications", icon: Bell },
       { value: "notification-retry", label: "Retry Queue", icon: MessageSquare },
       { value: "notification-templates", label: "Templates", icon: Mail },
+      { value: "installment-reminders", label: "EMI Reminders", icon: Bell },
       { value: "booking-settings", label: "Booking Settings", icon: Settings },
     ]
   },
