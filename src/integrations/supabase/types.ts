@@ -480,6 +480,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          bank_name: string
+          branch: string | null
+          created_at: string
+          current_balance: number
+          id: string
+          is_active: boolean
+          opening_balance: number
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type?: string
+          bank_name: string
+          branch?: string | null
+          created_at?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          opening_balance?: number
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          bank_name?: string
+          branch?: string | null
+          created_at?: string
+          current_balance?: number
+          id?: string
+          is_active?: boolean
+          opening_balance?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           created_at: string
@@ -761,6 +803,56 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: false
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_type: string
+          created_at: string
+          current_balance: number
+          description: string | null
+          id: string
+          is_active: boolean
+          opening_balance: number
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_type: string
+          created_at?: string
+          current_balance?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          opening_balance?: number
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_type?: string
+          created_at?: string
+          current_balance?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          opening_balance?: number
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1180,6 +1272,72 @@ export type Database = {
           },
         ]
       }
+      expense_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          expense_category: string
+          id: string
+          notes: string | null
+          payment_method: string
+          reference_number: string | null
+          transaction_date: string
+          updated_at: string
+          vendor_supplier: string | null
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          expense_category: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference_number?: string | null
+          transaction_date?: string
+          updated_at?: string
+          vendor_supplier?: string | null
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          expense_category?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference_number?: string | null
+          transaction_date?: string
+          updated_at?: string
+          vendor_supplier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_bank_fk"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faq_items: {
         Row: {
           answer: string
@@ -1449,6 +1607,59 @@ export type Database = {
           video_url?: string
         }
         Relationships: []
+      }
+      general_ledger: {
+        Row: {
+          account_id: string
+          created_at: string
+          created_by: string | null
+          credit: number
+          debit: number
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          running_balance: number
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          created_by?: string | null
+          credit?: number
+          debit?: number
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          running_balance?: number
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          created_by?: string | null
+          credit?: number
+          debit?: number
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          running_balance?: number
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "general_ledger_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       group_inquiries: {
         Row: {
@@ -1765,6 +1976,79 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      income_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          bank_account_id: string | null
+          booking_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_name: string | null
+          description: string
+          id: string
+          notes: string | null
+          payment_method: string
+          reference_number: string | null
+          transaction_date: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          bank_account_id?: string | null
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          description: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference_number?: string | null
+          transaction_date?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          bank_account_id?: string | null
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_name?: string | null
+          description?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference_number?: string | null
+          transaction_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "income_bank_fk"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "income_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "income_transactions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leads: {
         Row: {
