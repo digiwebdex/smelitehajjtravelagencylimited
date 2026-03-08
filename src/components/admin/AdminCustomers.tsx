@@ -15,11 +15,16 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Users, Search, Edit, Trash2, FileUp, Eye, Download, X,
-  Plus, Loader2, FileText, Upload, UserPlus
+  Plus, Loader2, FileText, Upload, UserPlus, Phone, Mail,
+  MapPin, Calendar, Shield, User, AlertCircle, Printer
 } from "lucide-react";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Customer {
   id: string;
