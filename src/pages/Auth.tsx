@@ -139,17 +139,17 @@ const Auth = () => {
         description: "You have successfully signed up. Welcome aboard!",
       });
 
-      // Insert profile record with tenant
+      // Update profile with tenant (profile auto-created by trigger)
       if (data?.user) {
         try {
           const tenant = await getCurrentTenant();
-          await (supabase as any).from("profiles").insert({
-            id: data.user.id,
-            tenant_id: tenant?.id,
-            role: "admin",
-          });
+          if (tenant?.id) {
+            await (supabase as any).from("profiles")
+              .update({ tenant_id: tenant.id })
+              .eq("id", data.user.id);
+          }
         } catch (err) {
-          console.error("Profile insert error:", err);
+          console.error("Profile tenant update error:", err);
         }
       }
 
