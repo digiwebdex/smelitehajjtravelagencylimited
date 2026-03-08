@@ -75,6 +75,9 @@ const AdminCustomers = () => {
   const [uploadDocType, setUploadDocType] = useState("Passport");
   const [uploadNotes, setUploadNotes] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+  const [editDocuments, setEditDocuments] = useState<CustomerDocument[]>([]);
+  const [editDocsLoading, setEditDocsLoading] = useState(false);
 
   const [newCustomer, setNewCustomer] = useState({
     full_name: "", email: "", phone: "", passport_number: "",
