@@ -26,6 +26,12 @@ import {
   Shield,
   Receipt,
   Eye,
+  BookOpen,
+  PiggyBank,
+  Landmark,
+  CreditCard,
+  ClipboardList,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -86,6 +92,18 @@ const menuGroups = [
       { value: "hotels", label: "Hotels", icon: Building2 },
       { value: "hotel-bookings", label: "Hotel Bookings", icon: Building2 },
       { value: "hotel-settings", label: "Hotel Settings", icon: Settings },
+    ]
+  },
+  {
+    label: "Accounting",
+    items: [
+      { value: "acc-dashboard", label: "Accounting Dashboard", icon: BookOpen },
+      { value: "chart-of-accounts", label: "Chart of Accounts", icon: ClipboardList },
+      { value: "acc-income", label: "Income", icon: TrendingUp },
+      { value: "acc-expense", label: "Expenses", icon: CreditCard },
+      { value: "general-ledger", label: "General Ledger", icon: Landmark },
+      { value: "bank-accounts", label: "Cash & Bank", icon: PiggyBank },
+      { value: "acc-reports", label: "Financial Reports", icon: BarChart3 },
     ]
   },
   {

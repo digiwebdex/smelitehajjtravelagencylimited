@@ -75,6 +75,13 @@ import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
 import AdminOfferPopup from "@/components/admin/AdminOfferPopup";
 import AdminDemoAccount from "@/components/admin/AdminDemoAccount";
 import AdminCustomers from "@/components/admin/AdminCustomers";
+import AccountingDashboard from "@/components/admin/accounting/AccountingDashboard";
+import ChartOfAccounts from "@/components/admin/accounting/ChartOfAccounts";
+import IncomeManagement from "@/components/admin/accounting/IncomeManagement";
+import ExpenseManagement from "@/components/admin/accounting/ExpenseManagement";
+import GeneralLedger from "@/components/admin/accounting/GeneralLedger";
+import BankAccounts from "@/components/admin/accounting/BankAccounts";
+import FinancialReports from "@/components/admin/accounting/FinancialReports";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -307,6 +314,20 @@ const AdminDashboard = () => {
         return <AdminBackupRestore />;
       case "demo-account":
         return <AdminDemoAccount />;
+      case "acc-dashboard":
+        return <AccountingDashboard />;
+      case "chart-of-accounts":
+        return <ChartOfAccounts />;
+      case "acc-income":
+        return <IncomeManagement />;
+      case "acc-expense":
+        return <ExpenseManagement />;
+      case "general-ledger":
+        return <GeneralLedger />;
+      case "bank-accounts":
+        return <BankAccounts />;
+      case "acc-reports":
+        return <FinancialReports />;
       case "settings":
         return <AdminSettings />;
       default:
