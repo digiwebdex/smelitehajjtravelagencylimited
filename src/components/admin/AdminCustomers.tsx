@@ -168,9 +168,66 @@ const AdminCustomers = () => {
     }
   };
 
+  const fetchEditDocuments = async (customerId: string) => {
+    setEditDocsLoading(true);
+    const { data, error } = await (supabase as any)
+      .from("customer_documents").select("*")
+      .eq("customer_id", customerId).order("uploaded_at", { ascending: false });
+    if (!error) setEditDocuments(data || []);
+    setEditDocsLoading(false);
+  };
+
+  const handleEditUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editCustomer) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Max 10MB allowed", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `${editCustomer.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("customer-documents").upload(path, file, { cacheControl: "31536000" });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("customer-documents").getPublicUrl(path);
+      const { error: dbErr } = await (supabase as any).from("customer_documents").insert({
+        customer_id: editCustomer.id,
+        document_type: uploadDocType,
+        file_name: file.name,
+        file_url: urlData.publicUrl,
+        file_size: file.size,
+        notes: uploadNotes || null,
+        uploaded_by: (await supabase.auth.getUser()).data.user?.id
+      });
+      if (dbErr) throw dbErr;
+      toast({ title: "Document uploaded successfully" });
+      fetchEditDocuments(editCustomer.id);
+      setUploadNotes("");
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (editFileInputRef.current) editFileInputRef.current.value = "";
+    }
+  };
+
+  const handleDeleteDocumentInEdit = async (doc: CustomerDocument) => {
+    if (!confirm("Delete this document?")) return;
+    const { error } = await (supabase as any).from("customer_documents").delete().eq("id", doc.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Document deleted" });
+      if (editCustomer) fetchEditDocuments(editCustomer.id);
+    }
+  };
+
   const handleEditCustomer = (customer: Customer) => {
     setEditCustomer({ ...customer });
     setShowEditDialog(true);
+    fetchEditDocuments(customer.id);
   };
 
   const handleSaveCustomer = async () => {
