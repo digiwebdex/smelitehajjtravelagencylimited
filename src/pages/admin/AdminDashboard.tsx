@@ -74,6 +74,7 @@ import AdminHotelBookings from "@/components/admin/AdminHotelBookings";
 import AdminHotelSettings from "@/components/admin/AdminHotelSettings";
 import AdminOfferPopup from "@/components/admin/AdminOfferPopup";
 import AdminDemoAccount from "@/components/admin/AdminDemoAccount";
+import AdminCustomers from "@/components/admin/AdminCustomers";
 import { formatCurrency } from "@/lib/currency";
 
 interface Stats {
@@ -200,6 +201,8 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case "overview":
         return <AdminOverview />;
+      case "customers":
+        return <AdminCustomers />;
       case "bookings":
         return <AdminBookings onUpdate={fetchStats} />;
       case "air-ticket-bookings":

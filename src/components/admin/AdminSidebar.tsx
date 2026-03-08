@@ -60,6 +60,7 @@ const menuGroups = [
   {
     label: "Orders & Bookings",
     items: [
+      { value: "customers", label: "Customer Management", icon: Users },
       { value: "bookings", label: "Package Bookings", icon: Package },
       { value: "air-ticket-bookings", label: "Air Ticket Bookings", icon: Plane },
       { value: "air-ticket-settings", label: "Air Ticket Settings", icon: Settings },
