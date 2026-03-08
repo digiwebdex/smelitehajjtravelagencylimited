@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-const db = supabase as any;
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +12,8 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
 import { useViewerMode } from "@/contexts/ViewerModeContext";
+
+const db = supabase as any;
 
 interface Account {
   id: string;
@@ -45,7 +46,7 @@ const ChartOfAccounts = () => {
   useEffect(() => { fetchAccounts(); }, []);
 
   const fetchAccounts = async () => {
-    const { data, error } = await supabase.from("chart_of_accounts").select("*").order("account_code");
+    const { data, error } = await db.from("chart_of_accounts").select("*").order("account_code");
     if (!error && data) setAccounts(data as Account[]);
     setLoading(false);
   };
@@ -53,47 +54,35 @@ const ChartOfAccounts = () => {
   const handleSave = async () => {
     if (!form.account_code || !form.account_name) { toast.error("Code and name are required"); return; }
     const payload = {
-      account_code: form.account_code,
-      account_name: form.account_name,
-      account_type: form.account_type,
-      description: form.description || null,
-      opening_balance: Number(form.opening_balance) || 0,
+      account_code: form.account_code, account_name: form.account_name, account_type: form.account_type,
+      description: form.description || null, opening_balance: Number(form.opening_balance) || 0,
       current_balance: editingAccount ? editingAccount.current_balance : Number(form.opening_balance) || 0,
     };
-
     if (editingAccount) {
-      const { error } = await supabase.from("chart_of_accounts").update(payload).eq("id", editingAccount.id);
+      const { error } = await db.from("chart_of_accounts").update(payload).eq("id", editingAccount.id);
       if (error) { toast.error(error.message); return; }
       toast.success("Account updated");
     } else {
-      const { error } = await supabase.from("chart_of_accounts").insert([payload]);
+      const { error } = await db.from("chart_of_accounts").insert([payload]);
       if (error) { toast.error(error.message); return; }
       toast.success("Account created");
     }
-    setDialogOpen(false);
-    setEditingAccount(null);
+    setDialogOpen(false); setEditingAccount(null);
     setForm({ account_code: "", account_name: "", account_type: "asset", description: "", opening_balance: "0" });
     fetchAccounts();
   };
 
   const handleEdit = (account: Account) => {
     setEditingAccount(account);
-    setForm({
-      account_code: account.account_code,
-      account_name: account.account_name,
-      account_type: account.account_type,
-      description: account.description || "",
-      opening_balance: String(account.opening_balance),
-    });
+    setForm({ account_code: account.account_code, account_name: account.account_name, account_type: account.account_type, description: account.description || "", opening_balance: String(account.opening_balance) });
     setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this account?")) return;
-    const { error } = await supabase.from("chart_of_accounts").delete().eq("id", id);
+    const { error } = await db.from("chart_of_accounts").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Account deleted");
-    fetchAccounts();
+    toast.success("Account deleted"); fetchAccounts();
   };
 
   const filtered = filterType === "all" ? accounts : accounts.filter(a => a.account_type === filterType);
@@ -136,15 +125,12 @@ const ChartOfAccounts = () => {
           )}
         </div>
       </div>
-
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Account Name</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead>Code</TableHead><TableHead>Account Name</TableHead><TableHead>Type</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
                 {!isViewerMode && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>

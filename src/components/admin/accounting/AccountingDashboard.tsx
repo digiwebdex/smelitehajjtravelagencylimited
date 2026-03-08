@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-// Cast to any for new accounting tables not yet in generated types
-const db = supabase as any;
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
 import { 
@@ -11,71 +8,62 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
+const db = supabase as any;
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(142 76% 36%)", "hsl(38 92% 50%)", "hsl(262 83% 58%)"];
 
 const AccountingDashboard = () => {
   const [stats, setStats] = useState({
-    totalIncome: 0,
-    totalExpense: 0,
-    receivable: 0,
-    payable: 0,
-    cashBalance: 0,
-    bankBalance: 0,
+    totalIncome: 0, totalExpense: 0, receivable: 0, payable: 0, cashBalance: 0, bankBalance: 0,
   });
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [expenseByCategory, setExpenseByCategory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
     try {
       const [incomeRes, expenseRes, accountsRes, bankRes] = await Promise.all([
-        supabase.from("income_transactions").select("amount, transaction_date, customer_name, description"),
-        supabase.from("expense_transactions").select("amount, transaction_date, expense_category, description"),
-        supabase.from("chart_of_accounts").select("account_type, current_balance, account_name"),
-        supabase.from("bank_accounts").select("current_balance, account_name"),
+        db.from("income_transactions").select("amount, transaction_date, customer_name, description"),
+        db.from("expense_transactions").select("amount, transaction_date, expense_category, description"),
+        db.from("chart_of_accounts").select("account_type, current_balance, account_name"),
+        db.from("bank_accounts").select("current_balance, account_name"),
       ]);
 
-      const totalIncome = (incomeRes.data || []).reduce((s, t) => s + Number(t.amount), 0);
-      const totalExpense = (expenseRes.data || []).reduce((s, t) => s + Number(t.amount), 0);
+      const totalIncome = (incomeRes.data || []).reduce((s: number, t: any) => s + Number(t.amount), 0);
+      const totalExpense = (expenseRes.data || []).reduce((s: number, t: any) => s + Number(t.amount), 0);
       
       const accounts = accountsRes.data || [];
-      const receivable = accounts.filter(a => a.account_name === 'Accounts Receivable').reduce((s, a) => s + Number(a.current_balance), 0);
-      const payable = accounts.filter(a => a.account_name === 'Accounts Payable').reduce((s, a) => s + Number(a.current_balance), 0);
-      const cashBalance = accounts.filter(a => a.account_name === 'Cash').reduce((s, a) => s + Number(a.current_balance), 0);
-      const bankBalance = (bankRes.data || []).reduce((s, b) => s + Number(b.current_balance), 0);
+      const receivable = accounts.filter((a: any) => a.account_name === 'Accounts Receivable').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
+      const payable = accounts.filter((a: any) => a.account_name === 'Accounts Payable').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
+      const cashBalance = accounts.filter((a: any) => a.account_name === 'Cash').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
+      const bankBalance = (bankRes.data || []).reduce((s: number, b: any) => s + Number(b.current_balance), 0);
 
       setStats({ totalIncome, totalExpense, receivable, payable, cashBalance, bankBalance });
 
-      // Monthly data for chart
       const monthMap: Record<string, { income: number; expense: number }> = {};
-      (incomeRes.data || []).forEach(t => {
+      (incomeRes.data || []).forEach((t: any) => {
         const month = t.transaction_date?.substring(0, 7) || "";
         if (!monthMap[month]) monthMap[month] = { income: 0, expense: 0 };
         monthMap[month].income += Number(t.amount);
       });
-      (expenseRes.data || []).forEach(t => {
+      (expenseRes.data || []).forEach((t: any) => {
         const month = t.transaction_date?.substring(0, 7) || "";
         if (!monthMap[month]) monthMap[month] = { income: 0, expense: 0 };
         monthMap[month].expense += Number(t.amount);
       });
       setMonthlyData(Object.entries(monthMap).sort().slice(-6).map(([month, data]) => ({ month, ...data })));
 
-      // Expense by category
       const catMap: Record<string, number> = {};
-      (expenseRes.data || []).forEach(t => {
+      (expenseRes.data || []).forEach((t: any) => {
         catMap[t.expense_category] = (catMap[t.expense_category] || 0) + Number(t.amount);
       });
       setExpenseByCategory(Object.entries(catMap).map(([name, value]) => ({ name, value })));
 
-      // Recent transactions (combine and sort)
       const recent = [
-        ...(incomeRes.data || []).map(t => ({ ...t, type: "income" as const })),
-        ...(expenseRes.data || []).map(t => ({ ...t, type: "expense" as const })),
+        ...(incomeRes.data || []).map((t: any) => ({ ...t, type: "income" as const })),
+        ...(expenseRes.data || []).map((t: any) => ({ ...t, type: "expense" as const })),
       ].sort((a, b) => (b.transaction_date || "").localeCompare(a.transaction_date || "")).slice(0, 10);
       setRecentTransactions(recent);
     } catch (err) {
@@ -102,8 +90,6 @@ const AccountingDashboard = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Accounting Dashboard</h2>
-
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {summaryCards.map((card) => (
           <Card key={card.title}>
@@ -119,9 +105,7 @@ const AccountingDashboard = () => {
           </Card>
         ))}
       </div>
-
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Monthly Chart */}
         <Card>
           <CardHeader><CardTitle className="text-base">Monthly Income vs Expense</CardTitle></CardHeader>
           <CardContent>
@@ -141,16 +125,14 @@ const AccountingDashboard = () => {
             )}
           </CardContent>
         </Card>
-
-        {/* Expense by Category */}
         <Card>
           <CardHeader><CardTitle className="text-base">Expense by Category</CardTitle></CardHeader>
           <CardContent>
             {expenseByCategory.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={expenseByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {expenseByCategory.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  <Pie data={expenseByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                    {expenseByCategory.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip formatter={(v: number) => formatCurrency(v)} />
                 </PieChart>
@@ -161,8 +143,6 @@ const AccountingDashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent Transactions */}
       <Card>
         <CardHeader><CardTitle className="text-base">Recent Transactions</CardTitle></CardHeader>
         <CardContent>
@@ -170,7 +150,7 @@ const AccountingDashboard = () => {
             <p className="text-sm text-muted-foreground text-center py-6">No transactions yet.</p>
           ) : (
             <div className="space-y-2">
-              {recentTransactions.map((t, i) => (
+              {recentTransactions.map((t: any, i: number) => (
                 <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-3">
                     <div className={`p-1.5 rounded-full ${t.type === "income" ? "bg-green-500/10" : "bg-red-500/10"}`}>

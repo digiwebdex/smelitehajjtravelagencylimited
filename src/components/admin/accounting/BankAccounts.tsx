@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-const db = supabase as any;
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/currency";
 import { useViewerMode } from "@/contexts/ViewerModeContext";
 
+const db = supabase as any;
+
 interface BankAccount {
-  id: string;
-  account_name: string;
-  bank_name: string;
-  account_number: string;
-  branch: string | null;
-  account_type: string;
-  opening_balance: number;
-  current_balance: number;
-  is_active: boolean;
+  id: string; account_name: string; bank_name: string; account_number: string;
+  branch: string | null; account_type: string; opening_balance: number;
+  current_balance: number; is_active: boolean;
 }
 
 const BankAccounts = () => {
@@ -40,55 +35,45 @@ const BankAccounts = () => {
   useEffect(() => { fetchAccounts(); }, []);
 
   const fetchAccounts = async () => {
-    const { data } = await supabase.from("bank_accounts").select("*").order("bank_name");
+    const { data } = await db.from("bank_accounts").select("*").order("bank_name");
     if (data) setAccounts(data as BankAccount[]);
     setLoading(false);
   };
 
   const handleSave = async () => {
     if (!form.account_name || !form.bank_name || !form.account_number) {
-      toast.error("Name, bank, and account number are required");
-      return;
+      toast.error("Name, bank, and account number are required"); return;
     }
     const payload = {
-      account_name: form.account_name,
-      bank_name: form.bank_name,
-      account_number: form.account_number,
-      branch: form.branch || null,
-      account_type: form.account_type,
-      opening_balance: Number(form.opening_balance) || 0,
+      account_name: form.account_name, bank_name: form.bank_name,
+      account_number: form.account_number, branch: form.branch || null,
+      account_type: form.account_type, opening_balance: Number(form.opening_balance) || 0,
       current_balance: editing ? editing.current_balance : Number(form.opening_balance) || 0,
     };
-
     if (editing) {
-      const { error } = await supabase.from("bank_accounts").update(payload).eq("id", editing.id);
+      const { error } = await db.from("bank_accounts").update(payload).eq("id", editing.id);
       if (error) { toast.error(error.message); return; }
       toast.success("Updated");
     } else {
-      const { error } = await supabase.from("bank_accounts").insert([payload]);
+      const { error } = await db.from("bank_accounts").insert([payload]);
       if (error) { toast.error(error.message); return; }
       toast.success("Bank account added");
     }
-    setDialogOpen(false);
-    setEditing(null);
+    setDialogOpen(false); setEditing(null);
     setForm({ account_name: "", bank_name: "", account_number: "", branch: "", account_type: "current", opening_balance: "0" });
     fetchAccounts();
   };
 
   const handleEdit = (acc: BankAccount) => {
     setEditing(acc);
-    setForm({
-      account_name: acc.account_name, bank_name: acc.bank_name, account_number: acc.account_number,
-      branch: acc.branch || "", account_type: acc.account_type, opening_balance: String(acc.opening_balance),
-    });
+    setForm({ account_name: acc.account_name, bank_name: acc.bank_name, account_number: acc.account_number, branch: acc.branch || "", account_type: acc.account_type, opening_balance: String(acc.opening_balance) });
     setDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this bank account?")) return;
-    await supabase.from("bank_accounts").delete().eq("id", id);
-    toast.success("Deleted");
-    fetchAccounts();
+    await db.from("bank_accounts").delete().eq("id", id);
+    toast.success("Deleted"); fetchAccounts();
   };
 
   const totalBalance = accounts.filter(a => a.is_active).reduce((s, a) => s + Number(a.current_balance), 0);
@@ -117,8 +102,7 @@ const BankAccounts = () => {
                     <Select value={form.account_type} onValueChange={v => setForm(f => ({ ...f, account_type: v }))}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="current">Current</SelectItem>
-                        <SelectItem value="savings">Savings</SelectItem>
+                        <SelectItem value="current">Current</SelectItem><SelectItem value="savings">Savings</SelectItem>
                         <SelectItem value="mobile_banking">Mobile Banking</SelectItem>
                       </SelectContent>
                     </Select>
@@ -131,17 +115,13 @@ const BankAccounts = () => {
           </Dialog>
         )}
       </div>
-
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Account Name</TableHead>
-                <TableHead>Bank</TableHead>
-                <TableHead>Account #</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>Account Name</TableHead><TableHead>Bank</TableHead><TableHead>Account #</TableHead>
+                <TableHead>Type</TableHead><TableHead className="text-right">Balance</TableHead>
                 {!isViewerMode && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>

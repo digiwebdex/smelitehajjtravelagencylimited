@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-const db = supabase as any;
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,25 +15,14 @@ import { formatCurrency } from "@/lib/currency";
 import { useViewerMode } from "@/contexts/ViewerModeContext";
 import { format } from "date-fns";
 
-interface IncomeTransaction {
-  id: string;
-  transaction_date: string;
-  account_id: string;
-  customer_name: string | null;
-  description: string;
-  payment_method: string;
-  amount: number;
-  reference_number: string | null;
-  booking_id: string | null;
-  notes: string | null;
-  created_at: string;
-}
+const db = supabase as any;
 
-interface Account {
-  id: string;
-  account_code: string;
-  account_name: string;
+interface IncomeTransaction {
+  id: string; transaction_date: string; account_id: string; customer_name: string | null;
+  description: string; payment_method: string; amount: number; reference_number: string | null;
+  booking_id: string | null; notes: string | null; created_at: string;
 }
+interface Account { id: string; account_code: string; account_name: string; }
 
 const IncomeManagement = () => {
   const { isViewerMode } = useViewerMode();
@@ -44,24 +32,16 @@ const IncomeManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dateFilter, setDateFilter] = useState({ from: "", to: "" });
   const [form, setForm] = useState({
-    transaction_date: format(new Date(), "yyyy-MM-dd"),
-    account_id: "",
-    customer_name: "",
-    description: "",
-    payment_method: "cash",
-    amount: "",
-    reference_number: "",
-    notes: "",
+    transaction_date: format(new Date(), "yyyy-MM-dd"), account_id: "", customer_name: "",
+    description: "", payment_method: "cash", amount: "", reference_number: "", notes: "",
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     const [txRes, accRes] = await Promise.all([
-      supabase.from("income_transactions").select("*").order("transaction_date", { ascending: false }),
-      supabase.from("chart_of_accounts").select("id, account_code, account_name").eq("account_type", "income").eq("is_active", true).order("account_code"),
+      db.from("income_transactions").select("*").order("transaction_date", { ascending: false }),
+      db.from("chart_of_accounts").select("id, account_code, account_name").eq("account_type", "income").eq("is_active", true).order("account_code"),
     ]);
     if (txRes.data) setTransactions(txRes.data as IncomeTransaction[]);
     if (accRes.data) setIncomeAccounts(accRes.data as Account[]);
@@ -70,47 +50,31 @@ const IncomeManagement = () => {
 
   const handleSave = async () => {
     if (!form.account_id || !form.description || !form.amount) { toast.error("Account, description, and amount are required"); return; }
-    
     const { data: userData } = await supabase.auth.getUser();
     const payload = {
-      transaction_date: form.transaction_date,
-      account_id: form.account_id,
-      customer_name: form.customer_name || null,
-      description: form.description,
-      payment_method: form.payment_method,
-      amount: Number(form.amount),
-      reference_number: form.reference_number || null,
-      notes: form.notes || null,
+      transaction_date: form.transaction_date, account_id: form.account_id,
+      customer_name: form.customer_name || null, description: form.description,
+      payment_method: form.payment_method, amount: Number(form.amount),
+      reference_number: form.reference_number || null, notes: form.notes || null,
       created_by: userData?.user?.id || null,
     };
-
-    const { error } = await supabase.from("income_transactions").insert([payload]);
+    const { error } = await db.from("income_transactions").insert([payload]);
     if (error) { toast.error(error.message); return; }
-
-    // Add to general ledger
-    await supabase.from("general_ledger").insert([{
-      transaction_date: form.transaction_date,
-      account_id: form.account_id,
-      transaction_type: "income",
-      description: form.description,
-      debit: 0,
-      credit: Number(form.amount),
-      reference_type: "income",
-      created_by: userData?.user?.id || null,
+    await db.from("general_ledger").insert([{
+      transaction_date: form.transaction_date, account_id: form.account_id,
+      transaction_type: "income", description: form.description, debit: 0,
+      credit: Number(form.amount), reference_type: "income", created_by: userData?.user?.id || null,
     }]);
-
-    toast.success("Income recorded");
-    setDialogOpen(false);
+    toast.success("Income recorded"); setDialogOpen(false);
     setForm({ transaction_date: format(new Date(), "yyyy-MM-dd"), account_id: "", customer_name: "", description: "", payment_method: "cash", amount: "", reference_number: "", notes: "" });
     fetchData();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this income entry?")) return;
-    const { error } = await supabase.from("income_transactions").delete().eq("id", id);
+    const { error } = await db.from("income_transactions").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Deleted");
-    fetchData();
+    toast.success("Deleted"); fetchData();
   };
 
   const exportCSV = () => {
@@ -126,7 +90,6 @@ const IncomeManagement = () => {
     if (dateFilter.to && t.transaction_date > dateFilter.to) return false;
     return true;
   });
-
   const totalFiltered = filtered.reduce((s, t) => s + Number(t.amount), 0);
   const getAccountName = (id: string) => incomeAccounts.find(a => a.id === id)?.account_name || "—";
 
@@ -159,10 +122,8 @@ const IncomeManagement = () => {
                       <Select value={form.payment_method} onValueChange={v => setForm(f => ({ ...f, payment_method: v }))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="bank">Bank</SelectItem>
-                          <SelectItem value="mobile">Mobile Banking</SelectItem>
-                          <SelectItem value="check">Check</SelectItem>
+                          <SelectItem value="cash">Cash</SelectItem><SelectItem value="bank">Bank</SelectItem>
+                          <SelectItem value="mobile">Mobile Banking</SelectItem><SelectItem value="check">Check</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -176,25 +137,18 @@ const IncomeManagement = () => {
           )}
         </div>
       </div>
-
-      {/* Filters */}
       <div className="flex gap-2 items-end flex-wrap">
         <div><Label className="text-xs">From</Label><Input type="date" value={dateFilter.from} onChange={e => setDateFilter(f => ({ ...f, from: e.target.value }))} className="w-[160px]" /></div>
         <div><Label className="text-xs">To</Label><Input type="date" value={dateFilter.to} onChange={e => setDateFilter(f => ({ ...f, to: e.target.value }))} className="w-[160px]" /></div>
         <Badge variant="secondary" className="h-9 px-3">Total: {formatCurrency(totalFiltered)}</Badge>
       </div>
-
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>Date</TableHead><TableHead>Customer</TableHead><TableHead>Description</TableHead>
+                <TableHead>Account</TableHead><TableHead>Method</TableHead><TableHead className="text-right">Amount</TableHead>
                 {!isViewerMode && <TableHead className="text-right">Action</TableHead>}
               </TableRow>
             </TableHeader>

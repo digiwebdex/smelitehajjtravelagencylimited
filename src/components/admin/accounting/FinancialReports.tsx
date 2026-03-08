@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-const db = supabase as any;
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Download } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+const db = supabase as any;
 
 const FinancialReports = () => {
   const [incomeData, setIncomeData] = useState<any[]>([]);
@@ -28,9 +29,9 @@ const FinancialReports = () => {
 
   const fetchData = async () => {
     const [incRes, expRes, accRes] = await Promise.all([
-      supabase.from("income_transactions").select("*"),
-      supabase.from("expense_transactions").select("*"),
-      supabase.from("chart_of_accounts").select("*").eq("is_active", true).order("account_code"),
+      db.from("income_transactions").select("*"),
+      db.from("expense_transactions").select("*"),
+      db.from("chart_of_accounts").select("*").eq("is_active", true).order("account_code"),
     ]);
     if (incRes.data) setIncomeData(incRes.data);
     if (expRes.data) setExpenseData(expRes.data);
@@ -38,9 +39,8 @@ const FinancialReports = () => {
     setLoading(false);
   };
 
-  // Filter by selected period
   const filterByPeriod = (data: any[], dateField = "transaction_date") => {
-    return data.filter(d => {
+    return data.filter((d: any) => {
       const date = d[dateField] || "";
       if (reportPeriod === "daily") return date === `${selectedYear}-${selectedMonth}-${format(new Date(), "dd")}`;
       if (reportPeriod === "monthly") return date.startsWith(`${selectedYear}-${selectedMonth}`);
@@ -54,49 +54,34 @@ const FinancialReports = () => {
   const totalExpense = filteredExpense.reduce((s: number, t: any) => s + Number(t.amount), 0);
   const netProfit = totalIncome - totalExpense;
 
-  // Monthly P&L data for chart
   const monthlyPL = Array.from({ length: 12 }, (_, i) => {
     const month = String(i + 1).padStart(2, "0");
     const prefix = `${selectedYear}-${month}`;
-    const inc = incomeData.filter(d => (d.transaction_date || "").startsWith(prefix)).reduce((s: number, t: any) => s + Number(t.amount), 0);
-    const exp = expenseData.filter(d => (d.transaction_date || "").startsWith(prefix)).reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const inc = incomeData.filter((d: any) => (d.transaction_date || "").startsWith(prefix)).reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const exp = expenseData.filter((d: any) => (d.transaction_date || "").startsWith(prefix)).reduce((s: number, t: any) => s + Number(t.amount), 0);
     return { month: `${month}/${selectedYear.slice(2)}`, income: inc, expense: exp, profit: inc - exp };
   });
 
-  // Trial Balance
-  const trialBalance = accounts.map(acc => {
+  const trialBalance = accounts.map((acc: any) => {
     const debit = acc.account_type === "asset" || acc.account_type === "expense" ? Number(acc.current_balance) : 0;
     const credit = acc.account_type === "liability" || acc.account_type === "income" || acc.account_type === "equity" ? Number(acc.current_balance) : 0;
     return { ...acc, debit, credit };
-  }).filter(a => a.debit !== 0 || a.credit !== 0);
+  }).filter((a: any) => a.debit !== 0 || a.credit !== 0);
 
-  const totalTrialDebit = trialBalance.reduce((s, a) => s + a.debit, 0);
-  const totalTrialCredit = trialBalance.reduce((s, a) => s + a.credit, 0);
+  const totalTrialDebit = trialBalance.reduce((s: number, a: any) => s + a.debit, 0);
+  const totalTrialCredit = trialBalance.reduce((s: number, a: any) => s + a.credit, 0);
 
-  // Cash flow (simplified)
-  const cashInflows = filteredIncome.filter(t => t.payment_method === "cash").reduce((s: number, t: any) => s + Number(t.amount), 0);
-  const cashOutflows = filteredExpense.filter(t => t.payment_method === "cash").reduce((s: number, t: any) => s + Number(t.amount), 0);
-  const bankInflows = filteredIncome.filter(t => t.payment_method === "bank").reduce((s: number, t: any) => s + Number(t.amount), 0);
-  const bankOutflows = filteredExpense.filter(t => t.payment_method === "bank").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const cashInflows = filteredIncome.filter((t: any) => t.payment_method === "cash").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const cashOutflows = filteredExpense.filter((t: any) => t.payment_method === "cash").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const bankInflows = filteredIncome.filter((t: any) => t.payment_method === "bank").reduce((s: number, t: any) => s + Number(t.amount), 0);
+  const bankOutflows = filteredExpense.filter((t: any) => t.payment_method === "bank").reduce((s: number, t: any) => s + Number(t.amount), 0);
 
   const exportPDF = (reportName: string, headers: string[], rows: string[][]) => {
     const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("S. M. Elite Hajj Limited", 14, 15);
-    doc.setFontSize(12);
-    doc.text(reportName, 14, 25);
-    doc.setFontSize(9);
-    doc.text(`Period: ${reportPeriod === "monthly" ? `${selectedMonth}/${selectedYear}` : selectedYear}`, 14, 32);
-
-    autoTable(doc, {
-      startY: 38,
-      head: [headers],
-      body: rows,
-      theme: "striped",
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [30, 58, 95] },
-    });
-
+    doc.setFontSize(16); doc.text("S. M. Elite Hajj Limited", 14, 15);
+    doc.setFontSize(12); doc.text(reportName, 14, 25);
+    doc.setFontSize(9); doc.text(`Period: ${reportPeriod === "monthly" ? `${selectedMonth}/${selectedYear}` : selectedYear}`, 14, 32);
+    autoTable(doc, { startY: 38, head: [headers], body: rows, theme: "striped", styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 95] } });
     doc.save(`${reportName.replace(/\s+/g, "_")}_${format(new Date(), "yyyyMMdd")}.pdf`);
   };
 
@@ -110,11 +95,7 @@ const FinancialReports = () => {
           <div><Label className="text-xs">Period</Label>
             <Select value={reportPeriod} onValueChange={setReportPeriod}>
               <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
-              </SelectContent>
+              <SelectContent><SelectItem value="daily">Daily</SelectItem><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="yearly">Yearly</SelectItem></SelectContent>
             </Select>
           </div>
           <div><Label className="text-xs">Year</Label><Input value={selectedYear} onChange={e => setSelectedYear(e.target.value)} className="w-[90px]" /></div>
@@ -137,7 +118,6 @@ const FinancialReports = () => {
           <TabsTrigger value="income-expense">Income & Expense</TabsTrigger>
         </TabsList>
 
-        {/* Profit & Loss */}
         <TabsContent value="profit-loss" className="space-y-4">
           <div className="grid sm:grid-cols-3 gap-4">
             <Card><CardContent className="pt-4"><p className="text-xs text-muted-foreground">Total Income</p><p className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</p></CardContent></Card>
@@ -168,30 +148,21 @@ const FinancialReports = () => {
           </Card>
         </TabsContent>
 
-        {/* Trial Balance */}
         <TabsContent value="trial-balance" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Trial Balance</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => exportPDF("Trial Balance", ["Code", "Account", "Type", "Debit", "Credit"], trialBalance.map(a => [a.account_code, a.account_name, a.account_type, String(a.debit), String(a.credit)]))}>
+              <Button variant="outline" size="sm" onClick={() => exportPDF("Trial Balance", ["Code", "Account", "Type", "Debit", "Credit"], trialBalance.map((a: any) => [a.account_code, a.account_name, a.account_type, String(a.debit), String(a.credit)]))}>
                 <Download className="w-4 h-4 mr-1" /> PDF
               </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Account</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Debit</TableHead>
-                    <TableHead className="text-right">Credit</TableHead>
-                  </TableRow>
-                </TableHeader>
+                <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Account</TableHead><TableHead>Type</TableHead><TableHead className="text-right">Debit</TableHead><TableHead className="text-right">Credit</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {trialBalance.length === 0 ? (
                     <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No data</TableCell></TableRow>
-                  ) : trialBalance.map(a => (
+                  ) : trialBalance.map((a: any) => (
                     <TableRow key={a.id}>
                       <TableCell className="font-mono text-sm">{a.account_code}</TableCell>
                       <TableCell>{a.account_name}</TableCell>
@@ -211,7 +182,6 @@ const FinancialReports = () => {
           </Card>
         </TabsContent>
 
-        {/* Cash Flow */}
         <TabsContent value="cash-flow" className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <Card>
@@ -238,7 +208,6 @@ const FinancialReports = () => {
           </Button>
         </TabsContent>
 
-        {/* Income & Expense Detail */}
         <TabsContent value="income-expense" className="space-y-4">
           <Card>
             <CardHeader><CardTitle className="text-base">Income Breakdown</CardTitle></CardHeader>
@@ -249,12 +218,7 @@ const FinancialReports = () => {
                   {filteredIncome.length === 0 ? (
                     <TableRow><TableCell colSpan={4} className="text-center py-4 text-muted-foreground">No income</TableCell></TableRow>
                   ) : filteredIncome.map((t: any) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="text-sm">{t.transaction_date}</TableCell>
-                      <TableCell className="text-sm">{t.description}</TableCell>
-                      <TableCell className="text-sm">{t.customer_name || "—"}</TableCell>
-                      <TableCell className="text-right text-green-600 font-medium">{formatCurrency(Number(t.amount))}</TableCell>
-                    </TableRow>
+                    <TableRow key={t.id}><TableCell className="text-sm">{t.transaction_date}</TableCell><TableCell className="text-sm">{t.description}</TableCell><TableCell className="text-sm">{t.customer_name || "—"}</TableCell><TableCell className="text-right text-green-600 font-medium">{formatCurrency(Number(t.amount))}</TableCell></TableRow>
                   ))}
                 </TableBody>
               </Table>
@@ -269,12 +233,7 @@ const FinancialReports = () => {
                   {filteredExpense.length === 0 ? (
                     <TableRow><TableCell colSpan={4} className="text-center py-4 text-muted-foreground">No expenses</TableCell></TableRow>
                   ) : filteredExpense.map((t: any) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="text-sm">{t.transaction_date}</TableCell>
-                      <TableCell className="text-sm">{t.expense_category}</TableCell>
-                      <TableCell className="text-sm">{t.description}</TableCell>
-                      <TableCell className="text-right text-red-600 font-medium">{formatCurrency(Number(t.amount))}</TableCell>
-                    </TableRow>
+                    <TableRow key={t.id}><TableCell className="text-sm">{t.transaction_date}</TableCell><TableCell className="text-sm">{t.expense_category}</TableCell><TableCell className="text-sm">{t.description}</TableCell><TableCell className="text-right text-red-600 font-medium">{formatCurrency(Number(t.amount))}</TableCell></TableRow>
                   ))}
                 </TableBody>
               </Table>

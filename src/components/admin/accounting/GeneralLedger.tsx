@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-const db = supabase as any;
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,25 +11,14 @@ import { Download } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { format } from "date-fns";
 
-interface LedgerEntry {
-  id: string;
-  transaction_date: string;
-  account_id: string;
-  transaction_type: string;
-  description: string;
-  debit: number;
-  credit: number;
-  running_balance: number;
-  reference_type: string | null;
-  created_at: string;
-}
+const db = supabase as any;
 
-interface Account {
-  id: string;
-  account_code: string;
-  account_name: string;
-  account_type: string;
+interface LedgerEntry {
+  id: string; transaction_date: string; account_id: string; transaction_type: string;
+  description: string; debit: number; credit: number; running_balance: number;
+  reference_type: string | null; created_at: string;
 }
+interface Account { id: string; account_code: string; account_name: string; account_type: string; }
 
 const GeneralLedger = () => {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
@@ -42,17 +30,13 @@ const GeneralLedger = () => {
 
   const fetchData = async () => {
     const [ledgerRes, accRes] = await Promise.all([
-      supabase.from("general_ledger").select("*").order("transaction_date", { ascending: false }).order("created_at", { ascending: false }),
-      supabase.from("chart_of_accounts").select("id, account_code, account_name, account_type").eq("is_active", true).order("account_code"),
+      db.from("general_ledger").select("*").order("transaction_date", { ascending: false }).order("created_at", { ascending: false }),
+      db.from("chart_of_accounts").select("id, account_code, account_name, account_type").eq("is_active", true).order("account_code"),
     ]);
     if (ledgerRes.data) {
-      // Compute running balance
       const sorted = [...(ledgerRes.data as LedgerEntry[])].reverse();
       let balance = 0;
-      sorted.forEach(e => {
-        balance += Number(e.debit) - Number(e.credit);
-        e.running_balance = balance;
-      });
+      sorted.forEach(e => { balance += Number(e.debit) - Number(e.credit); e.running_balance = balance; });
       setEntries(sorted.reverse());
     }
     if (accRes.data) setAccounts(accRes.data as Account[]);
@@ -96,7 +80,6 @@ const GeneralLedger = () => {
         <h2 className="text-2xl font-bold">General Ledger</h2>
         <Button variant="outline" size="sm" onClick={exportCSV}><Download className="w-4 h-4 mr-1" /> Export</Button>
       </div>
-
       <div className="flex gap-2 items-end flex-wrap">
         <div><Label className="text-xs">From</Label><Input type="date" value={filters.from} onChange={e => setFilters(f => ({ ...f, from: e.target.value }))} className="w-[160px]" /></div>
         <div><Label className="text-xs">To</Label><Input type="date" value={filters.to} onChange={e => setFilters(f => ({ ...f, to: e.target.value }))} className="w-[160px]" /></div>
@@ -113,17 +96,13 @@ const GeneralLedger = () => {
           <Select value={filters.type} onValueChange={v => setFilters(f => ({ ...f, type: v }))}>
             <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-              <SelectItem value="adjustment">Adjustment</SelectItem>
+              <SelectItem value="all">All Types</SelectItem><SelectItem value="income">Income</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem><SelectItem value="adjustment">Adjustment</SelectItem>
               <SelectItem value="transfer">Transfer</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
-
-      {/* Summary */}
       <div className="flex gap-4 flex-wrap">
         <Badge variant="secondary" className="h-9 px-3 text-sm">Total Debit: {formatCurrency(totalDebit)}</Badge>
         <Badge variant="secondary" className="h-9 px-3 text-sm">Total Credit: {formatCurrency(totalCredit)}</Badge>
@@ -131,19 +110,14 @@ const GeneralLedger = () => {
           Net: {formatCurrency(totalCredit - totalDebit)}
         </Badge>
       </div>
-
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Account</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Debit</TableHead>
-                <TableHead className="text-right">Credit</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Account</TableHead>
+                <TableHead>Description</TableHead><TableHead className="text-right">Debit</TableHead>
+                <TableHead className="text-right">Credit</TableHead><TableHead className="text-right">Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
