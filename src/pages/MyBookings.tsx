@@ -321,62 +321,62 @@ const MyBookings = () => {
 
         {/* Summary Cards */}
         {!hasNoData && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6 sm:mb-8">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
-              <Card>
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Total Spent</p>
-                      <p className="text-xl font-bold mt-1">{formatCurrency(summary.totalSpent)}</p>
+              <Card className="overflow-hidden">
+                <CardContent className="pt-4 sm:pt-5 pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Total Spent</p>
+                      <p className="text-base sm:text-xl font-bold mt-1 truncate">{formatCurrency(summary.totalSpent)}</p>
                     </div>
-                    <div className="p-2.5 bg-primary/10 rounded-xl">
-                      <Wallet className="w-5 h-5 text-primary" />
+                    <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl flex-shrink-0">
+                      <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card>
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Active Bookings</p>
-                      <p className="text-xl font-bold mt-1">{summary.activeBookings}</p>
+              <Card className="overflow-hidden">
+                <CardContent className="pt-4 sm:pt-5 pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Active Bookings</p>
+                      <p className="text-base sm:text-xl font-bold mt-1 truncate">{summary.activeBookings}</p>
                     </div>
-                    <div className="p-2.5 bg-green-500/10 rounded-xl">
-                      <Package className="w-5 h-5 text-green-500" />
+                    <div className="p-2 sm:p-2.5 bg-primary/10 rounded-xl flex-shrink-0">
+                      <Package className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card>
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Pending Payments</p>
-                      <p className="text-xl font-bold mt-1">{summary.pendingPayments}</p>
+              <Card className="overflow-hidden">
+                <CardContent className="pt-4 sm:pt-5 pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Pending Payments</p>
+                      <p className="text-base sm:text-xl font-bold mt-1 truncate">{summary.pendingPayments}</p>
                     </div>
-                    <div className="p-2.5 bg-yellow-500/10 rounded-xl">
-                      <Clock className="w-5 h-5 text-yellow-500" />
+                    <div className="p-2 sm:p-2.5 bg-secondary/10 rounded-xl flex-shrink-0">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-secondary" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <Card>
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Completed</p>
-                      <p className="text-xl font-bold mt-1">{summary.completedBookings}</p>
+              <Card className="overflow-hidden">
+                <CardContent className="pt-4 sm:pt-5 pb-3 sm:pb-4 px-3 sm:px-6">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">Completed</p>
+                      <p className="text-base sm:text-xl font-bold mt-1 truncate">{summary.completedBookings}</p>
                     </div>
-                    <div className="p-2.5 bg-blue-500/10 rounded-xl">
-                      <CheckCircle className="w-5 h-5 text-blue-500" />
+                    <div className="p-2 sm:p-2.5 bg-accent/50 rounded-xl flex-shrink-0">
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-accent-foreground" />
                     </div>
                   </div>
                 </CardContent>
