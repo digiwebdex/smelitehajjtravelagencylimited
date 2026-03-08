@@ -485,8 +485,8 @@ const AdminCustomers = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map(customer => (
-                    <TableRow key={customer.id}>
+                 {filtered.map(customer => (
+                    <TableRow key={customer.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleViewCustomer(customer)}>
                       <TableCell className="font-medium">{customer.full_name}</TableCell>
                       <TableCell>{customer.phone || "—"}</TableCell>
                       <TableCell className="max-w-[180px] truncate">{customer.email || "—"}</TableCell>
@@ -500,13 +500,14 @@ const AdminCustomers = () => {
                         {format(new Date(customer.created_at), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => handleOpenDocs(customer)}
-                            title="Documents">
+                        <div className="flex justify-end gap-1" onClick={e => e.stopPropagation()}>
+                          <Button size="icon" variant="ghost" onClick={() => handleViewCustomer(customer)} title="View">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleOpenDocs(customer)} title="Documents">
                             <FileText className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => handleEditCustomer(customer)}
-                            title="Edit">
+                          <Button size="icon" variant="ghost" onClick={() => handleEditCustomer(customer)} title="Edit">
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => handleDeleteCustomer(customer.id)}
