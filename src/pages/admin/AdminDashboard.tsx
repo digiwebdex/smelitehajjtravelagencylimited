@@ -278,33 +278,33 @@ const AdminDashboard = () => {
     <ViewerModeProvider>
       <div className="min-h-screen bg-muted/30">
         <header className="bg-card border-b border-border sticky top-0 z-50">
-          <div className="px-4 lg:px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="w-5 h-5" />
+                <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-                  <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                  <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h1 className="font-heading font-bold text-lg">Admin Dashboard</h1>
+                    <h1 className="font-heading font-bold text-sm sm:text-lg truncate">Admin Dashboard</h1>
                     {isViewer && (
-                      <Badge variant="secondary" className="gap-1 text-xs">
+                      <Badge variant="secondary" className="gap-1 text-[10px] sm:text-xs flex-shrink-0">
                         <Eye className="w-3 h-3" />
-                        View Only
+                        <span className="hidden sm:inline">View Only</span>
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground hidden sm:block">SM Elite Hajj Management</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block truncate">SM Elite Hajj Management</p>
                 </div>
               </div>
             </div>
-            <Button variant="outline" onClick={handleSignOut} className="gap-2">
-              <LogOut className="w-4 h-4" />
+            <Button variant="outline" onClick={handleSignOut} className="gap-1.5 sm:gap-2 flex-shrink-0 h-8 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm">
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
