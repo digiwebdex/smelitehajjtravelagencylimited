@@ -15,11 +15,16 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Users, Search, Edit, Trash2, FileUp, Eye, Download, X,
-  Plus, Loader2, FileText, Upload, UserPlus
+  Plus, Loader2, FileText, Upload, UserPlus, Phone, Mail,
+  MapPin, Calendar, Shield, User, AlertCircle, Printer
 } from "lucide-react";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Customer {
   id: string;
@@ -66,6 +71,10 @@ const AdminCustomers = () => {
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDocsDialog, setShowDocsDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [viewCustomer, setViewCustomer] = useState<Customer | null>(null);
+  const [viewDocuments, setViewDocuments] = useState<CustomerDocument[]>([]);
+  const [viewDocsLoading, setViewDocsLoading] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [documents, setDocuments] = useState<CustomerDocument[]>([]);
@@ -301,11 +310,133 @@ const AdminCustomers = () => {
   );
 
   const getDocSignedUrl = async (filePath: string) => {
-    // Extract path from public URL
     const parts = filePath.split("/customer-documents/");
     const path = parts[parts.length - 1];
     const { data } = await supabase.storage.from("customer-documents").createSignedUrl(path, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  };
+
+  const handleViewCustomer = async (customer: Customer) => {
+    setViewCustomer(customer);
+    setShowViewDialog(true);
+    setViewDocsLoading(true);
+    const { data } = await (supabase as any)
+      .from("customer_documents").select("*")
+      .eq("customer_id", customer.id).order("uploaded_at", { ascending: false });
+    setViewDocuments(data || []);
+    setViewDocsLoading(false);
+  };
+
+  const generateCustomerPDF = (customer: Customer, docs: CustomerDocument[]) => {
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();
+    const green: [number, number, number] = [34, 97, 51];
+    const gray: [number, number, number] = [100, 100, 100];
+
+    // Header
+    doc.setFillColor(...green);
+    doc.rect(0, 0, pw, 40, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("S. M. Elite Hajj Limited", pw / 2, 18, { align: "center" });
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Customer Profile", pw / 2, 30, { align: "center" });
+
+    let y = 50;
+
+    // Personal Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Personal Information", 14, y);
+    y += 6;
+
+    const personalData: [string, string][] = [
+      ["Full Name", customer.full_name],
+      ["Email", customer.email || "—"],
+      ["Phone", customer.phone || "—"],
+      ["Passport No.", customer.passport_number || "—"],
+      ["Nationality", customer.nationality || "—"],
+      ["Date of Birth", customer.date_of_birth ? format(new Date(customer.date_of_birth), "dd MMM yyyy") : "—"],
+      ["Gender", customer.gender ? customer.gender.charAt(0).toUpperCase() + customer.gender.slice(1) : "—"],
+      ["Address", customer.address || "—"],
+      ["Status", customer.status || "—"],
+    ];
+
+    autoTable(doc, {
+      startY: y, head: [], body: personalData, theme: "striped",
+      styles: { fontSize: 9, cellPadding: 3 },
+      columnStyles: { 0: { fontStyle: "bold", cellWidth: 50, textColor: gray }, 1: { cellWidth: "auto" } },
+      margin: { left: 14, right: 14 },
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+
+    // Emergency Contact
+    if (customer.emergency_contact_name || customer.emergency_contact_phone) {
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Emergency Contact", 14, y);
+      y += 6;
+      const emData: [string, string][] = [];
+      if (customer.emergency_contact_name) emData.push(["Name", customer.emergency_contact_name]);
+      if (customer.emergency_contact_phone) emData.push(["Phone", customer.emergency_contact_phone]);
+      autoTable(doc, {
+        startY: y, head: [], body: emData, theme: "plain",
+        styles: { fontSize: 9, cellPadding: 2 },
+        columnStyles: { 0: { fontStyle: "bold", cellWidth: 50, textColor: gray } },
+        margin: { left: 14, right: 14 },
+      });
+      y = (doc as any).lastAutoTable.finalY + 8;
+    }
+
+    // Notes
+    if (customer.notes) {
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.text("Notes", 14, y);
+      y += 6;
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(customer.notes, 14, y, { maxWidth: pw - 28 });
+      y += 12;
+    }
+
+    // Documents
+    if (docs.length > 0) {
+      if (y > 240) { doc.addPage(); y = 20; }
+      doc.setFontSize(13);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0, 0, 0);
+      doc.text("Uploaded Documents", 14, y);
+      y += 6;
+      const docData = docs.map(d => [
+        d.document_type,
+        d.file_name,
+        format(new Date(d.uploaded_at), "dd MMM yyyy"),
+        d.file_size ? `${(d.file_size / 1024).toFixed(0)} KB` : "—"
+      ]);
+      autoTable(doc, {
+        startY: y,
+        head: [["Type", "File Name", "Date", "Size"]],
+        body: docData, theme: "grid",
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: green, textColor: [255, 255, 255] },
+        margin: { left: 14, right: 14 },
+      });
+    }
+
+    // Footer
+    const fY = doc.internal.pageSize.getHeight() - 20;
+    doc.setFillColor(...green);
+    doc.rect(0, fY, pw, 20, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.text("S. M. Elite Hajj Limited | Phone: +8801867666888 | Email: info@smelitehajj.com", pw / 2, fY + 12, { align: "center" });
+
+    doc.save(`Customer_${customer.full_name.replace(/\s+/g, "_")}_${customer.id.slice(0, 8)}.pdf`);
   };
 
   return (
@@ -354,8 +485,8 @@ const AdminCustomers = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map(customer => (
-                    <TableRow key={customer.id}>
+                 {filtered.map(customer => (
+                    <TableRow key={customer.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleViewCustomer(customer)}>
                       <TableCell className="font-medium">{customer.full_name}</TableCell>
                       <TableCell>{customer.phone || "—"}</TableCell>
                       <TableCell className="max-w-[180px] truncate">{customer.email || "—"}</TableCell>
@@ -369,13 +500,14 @@ const AdminCustomers = () => {
                         {format(new Date(customer.created_at), "dd MMM yyyy")}
                       </TableCell>
                       <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => handleOpenDocs(customer)}
-                            title="Documents">
+                        <div className="flex justify-end gap-1" onClick={e => e.stopPropagation()}>
+                          <Button size="icon" variant="ghost" onClick={() => handleViewCustomer(customer)} title="View">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleOpenDocs(customer)} title="Documents">
                             <FileText className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => handleEditCustomer(customer)}
-                            title="Edit">
+                          <Button size="icon" variant="ghost" onClick={() => handleEditCustomer(customer)} title="Edit">
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => handleDeleteCustomer(customer.id)}
@@ -718,6 +850,177 @@ const AdminCustomers = () => {
                 </div>
               ))}
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* View Customer Full Profile Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <User className="h-5 w-5 text-primary" />
+                Customer Profile
+              </DialogTitle>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="gap-1"
+                  onClick={() => viewCustomer && generateCustomerPDF(viewCustomer, viewDocuments)}>
+                  <Printer className="h-4 w-4" /> Download PDF
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1"
+                  onClick={() => { setShowViewDialog(false); if (viewCustomer) handleEditCustomer(viewCustomer); }}>
+                  <Edit className="h-4 w-4" /> Edit
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {viewCustomer && (
+            <ScrollArea className="max-h-[75vh] px-6 pb-6">
+              <div className="space-y-6 pt-4">
+                {/* Header Card */}
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-7 w-7 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">{viewCustomer.full_name}</h3>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <Badge variant={viewCustomer.status === "active" ? "default" : "secondary"}>
+                        {viewCustomer.status}
+                      </Badge>
+                      <span>ID: {viewCustomer.id.slice(0, 8).toUpperCase()}</span>
+                      <span>Since {format(new Date(viewCustomer.created_at), "dd MMM yyyy")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Contact Information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border">
+                      <Phone className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="font-medium text-sm">{viewCustomer.phone || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg border">
+                      <Mail className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="font-medium text-sm truncate">{viewCustomer.email || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg border sm:col-span-2">
+                      <MapPin className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Address</p>
+                        <p className="font-medium text-sm">{viewCustomer.address || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Personal Details */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Personal Details</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "Passport No.", value: viewCustomer.passport_number },
+                      { label: "Nationality", value: viewCustomer.nationality },
+                      { label: "Date of Birth", value: viewCustomer.date_of_birth ? format(new Date(viewCustomer.date_of_birth), "dd MMM yyyy") : null },
+                      { label: "Gender", value: viewCustomer.gender ? viewCustomer.gender.charAt(0).toUpperCase() + viewCustomer.gender.slice(1) : null },
+                    ].map((item, i) => (
+                      <div key={i} className="p-3 rounded-lg border">
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                        <p className="font-medium text-sm mt-0.5">{item.value || "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                {(viewCustomer.emergency_contact_name || viewCustomer.emergency_contact_phone) && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Emergency Contact
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Name</p>
+                          <p className="font-medium text-sm">{viewCustomer.emergency_contact_name || "—"}</p>
+                        </div>
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Phone</p>
+                          <p className="font-medium text-sm">{viewCustomer.emergency_contact_phone || "—"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Notes */}
+                {viewCustomer.notes && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</h4>
+                      <p className="text-sm bg-muted/50 p-3 rounded-lg border">{viewCustomer.notes}</p>
+                    </div>
+                  </>
+                )}
+
+                <Separator />
+
+                {/* Documents */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" /> Documents
+                    {viewDocuments.length > 0 && <Badge variant="secondary">{viewDocuments.length}</Badge>}
+                  </h4>
+                  {viewDocsLoading ? (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : viewDocuments.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">No documents uploaded yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {viewDocuments.map(d => (
+                        <div key={d.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{d.file_name}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Badge variant="outline" className="text-xs">{d.document_type}</Badge>
+                                <span>{format(new Date(d.uploaded_at), "dd MMM yyyy")}</span>
+                                {d.file_size && <span>{(d.file_size / 1024).toFixed(0)} KB</span>}
+                              </div>
+                              {d.notes && <p className="text-xs text-muted-foreground mt-0.5">{d.notes}</p>}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" className="gap-1 shrink-0" onClick={() => getDocSignedUrl(d.file_url)}>
+                            <Eye className="h-3.5 w-3.5" /> View
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
           )}
         </DialogContent>
       </Dialog>
