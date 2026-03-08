@@ -853,6 +853,177 @@ const AdminCustomers = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* View Customer Full Profile Dialog */}
+      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <User className="h-5 w-5 text-primary" />
+                Customer Profile
+              </DialogTitle>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" className="gap-1"
+                  onClick={() => viewCustomer && generateCustomerPDF(viewCustomer, viewDocuments)}>
+                  <Printer className="h-4 w-4" /> Download PDF
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1"
+                  onClick={() => { setShowViewDialog(false); if (viewCustomer) handleEditCustomer(viewCustomer); }}>
+                  <Edit className="h-4 w-4" /> Edit
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+
+          {viewCustomer && (
+            <ScrollArea className="max-h-[75vh] px-6 pb-6">
+              <div className="space-y-6 pt-4">
+                {/* Header Card */}
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50 border">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-7 w-7 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">{viewCustomer.full_name}</h3>
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <Badge variant={viewCustomer.status === "active" ? "default" : "secondary"}>
+                        {viewCustomer.status}
+                      </Badge>
+                      <span>ID: {viewCustomer.id.slice(0, 8).toUpperCase()}</span>
+                      <span>Since {format(new Date(viewCustomer.created_at), "dd MMM yyyy")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Contact Information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-3 p-3 rounded-lg border">
+                      <Phone className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="font-medium text-sm">{viewCustomer.phone || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg border">
+                      <Mail className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="font-medium text-sm truncate">{viewCustomer.email || "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg border sm:col-span-2">
+                      <MapPin className="h-4 w-4 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Address</p>
+                        <p className="font-medium text-sm">{viewCustomer.address || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Personal Details */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Personal Details</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "Passport No.", value: viewCustomer.passport_number },
+                      { label: "Nationality", value: viewCustomer.nationality },
+                      { label: "Date of Birth", value: viewCustomer.date_of_birth ? format(new Date(viewCustomer.date_of_birth), "dd MMM yyyy") : null },
+                      { label: "Gender", value: viewCustomer.gender ? viewCustomer.gender.charAt(0).toUpperCase() + viewCustomer.gender.slice(1) : null },
+                    ].map((item, i) => (
+                      <div key={i} className="p-3 rounded-lg border">
+                        <p className="text-xs text-muted-foreground">{item.label}</p>
+                        <p className="font-medium text-sm mt-0.5">{item.value || "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                {(viewCustomer.emergency_contact_name || viewCustomer.emergency_contact_phone) && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <Shield className="h-4 w-4" /> Emergency Contact
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Name</p>
+                          <p className="font-medium text-sm">{viewCustomer.emergency_contact_name || "—"}</p>
+                        </div>
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Phone</p>
+                          <p className="font-medium text-sm">{viewCustomer.emergency_contact_phone || "—"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Notes */}
+                {viewCustomer.notes && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Notes</h4>
+                      <p className="text-sm bg-muted/50 p-3 rounded-lg border">{viewCustomer.notes}</p>
+                    </div>
+                  </>
+                )}
+
+                <Separator />
+
+                {/* Documents */}
+                <div>
+                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
+                    <FileText className="h-4 w-4" /> Documents
+                    {viewDocuments.length > 0 && <Badge variant="secondary">{viewDocuments.length}</Badge>}
+                  </h4>
+                  {viewDocsLoading ? (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  ) : viewDocuments.length === 0 ? (
+                    <div className="text-center py-6 text-muted-foreground bg-muted/30 rounded-lg border">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">No documents uploaded yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {viewDocuments.map(d => (
+                        <div key={d.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm truncate">{d.file_name}</p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Badge variant="outline" className="text-xs">{d.document_type}</Badge>
+                                <span>{format(new Date(d.uploaded_at), "dd MMM yyyy")}</span>
+                                {d.file_size && <span>{(d.file_size / 1024).toFixed(0)} KB</span>}
+                              </div>
+                              {d.notes && <p className="text-xs text-muted-foreground mt-0.5">{d.notes}</p>}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" className="gap-1 shrink-0" onClick={() => getDocSignedUrl(d.file_url)}>
+                            <Eye className="h-3.5 w-3.5" /> View
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
