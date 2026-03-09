@@ -37,12 +37,19 @@ const iconMap: Record<string, LucideIcon> = {
   Clock,
 };
 
+interface PackageOption {
+  id: string;
+  title: string;
+  type: string;
+}
+
 const ContactSection = () => {
   const { toast } = useToast();
   const { contactDetails } = useSiteSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
   const [officeLocations, setOfficeLocations] = useState<OfficeLocation[]>([]);
+  const [packages, setPackages] = useState<PackageOption[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -54,7 +61,18 @@ const ContactSection = () => {
   useEffect(() => {
     fetchContactInfo();
     fetchOfficeLocations();
+    fetchPackages();
   }, []);
+
+  const fetchPackages = async () => {
+    const { data } = await supabase
+      .from("packages")
+      .select("id, title, type")
+      .eq("is_active", true)
+      .order("type")
+      .order("order_index");
+    if (data) setPackages(data);
+  };
 
   const fetchContactInfo = async () => {
     const { data } = await supabase
