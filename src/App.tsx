@@ -58,6 +58,8 @@ const App = () => (
                 <Route path="/track-visa" element={<TrackVisa />} />
                 <Route path="/hotels" element={<Hotels />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmation />} />
                 <Route path="/legal/:pageKey" element={<LegalPage />} />
                 <Route path="/payment/success" element={<PaymentResult />} />
