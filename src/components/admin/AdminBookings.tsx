@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -27,14 +29,32 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
-import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText, Lock } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock, AlertCircle, Download, CalendarIcon, X, CreditCard, Banknote, Wallet, MapPin, Calculator, Building, ShieldCheck, FileSpreadsheet, FileText, Lock, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/lib/currency";
@@ -126,6 +146,22 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const [emiPayments, setEmiPayments] = useState<Record<string, { advance_amount: number; remaining_amount: number; paid_emis: number; number_of_emis: number }>>({});
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  
+  // Edit state
+  const [editBooking, setEditBooking] = useState<Booking | null>(null);
+  const [editForm, setEditForm] = useState({
+    status: "" as string,
+    payment_status: "",
+    passenger_count: 1,
+    travel_date: "",
+    admin_notes: "",
+    total_price: 0,
+  });
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Delete state
+  const [deleteBooking, setDeleteBooking] = useState<Booking | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -164,7 +200,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      // Fetch profiles separately for registered users
       const userIds = [...new Set(data.filter(b => b.user_id).map(b => b.user_id))];
       const { data: profiles } = userIds.length > 0 
         ? await supabase
@@ -218,7 +253,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
     }
   };
 
-  // Helper to get customer display info (profile or guest)
   const getCustomerInfo = (booking: Booking) => {
     if (booking.profiles) {
       return {
@@ -243,16 +277,9 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
       .eq("id", bookingId);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update booking status",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update booking status", variant: "destructive" });
     } else {
-      toast({
-        title: "Success",
-        description: `Booking status updated to ${newStatus}`,
-      });
+      toast({ title: "Success", description: `Booking status updated to ${newStatus}` });
       fetchBookings();
       onUpdate();
     }
@@ -265,16 +292,9 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
       .eq("id", bookingId);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update payment status",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to update payment status", variant: "destructive" });
     } else {
-      toast({
-        title: "Success",
-        description: `Payment status updated to ${newStatus}`,
-      });
+      toast({ title: "Success", description: `Payment status updated to ${newStatus}` });
       fetchBookings();
       onUpdate();
     }
@@ -283,24 +303,85 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const markCashAsPaid = async (bookingId: string) => {
     const { error } = await supabase
       .from("bookings")
-      .update({ 
-        payment_status: "paid",
-        transaction_id: `CASH-${Date.now()}`
-      })
+      .update({ payment_status: "paid", transaction_id: `CASH-${Date.now()}` })
       .eq("id", bookingId);
 
     if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to mark payment as received",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to mark payment as received", variant: "destructive" });
     } else {
-      toast({
-        title: "Payment Received",
-        description: "Cash payment has been marked as received",
-      });
+      toast({ title: "Payment Received", description: "Cash payment has been marked as received" });
       fetchBookings();
+      onUpdate();
+    }
+  };
+
+  // Edit booking
+  const openEditDialog = (booking: Booking) => {
+    setEditBooking(booking);
+    setEditForm({
+      status: booking.status,
+      payment_status: booking.payment_status,
+      passenger_count: booking.passenger_count,
+      travel_date: booking.travel_date || "",
+      admin_notes: booking.admin_notes || "",
+      total_price: Number(booking.total_price),
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editBooking) return;
+    setEditSaving(true);
+    const { error } = await supabase
+      .from("bookings")
+      .update({
+        status: editForm.status as any,
+        payment_status: editForm.payment_status,
+        passenger_count: editForm.passenger_count,
+        travel_date: editForm.travel_date || null,
+        admin_notes: editForm.admin_notes || null,
+        total_price: editForm.total_price,
+      })
+      .eq("id", editBooking.id);
+
+    setEditSaving(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Success", description: "Booking updated successfully" });
+      setEditBooking(null);
+      fetchBookings();
+      onUpdate();
+    }
+  };
+
+  // Delete booking
+  const handleDelete = async () => {
+    if (!deleteBooking) return;
+    setDeleteLoading(true);
+
+    // Delete related records first
+    await supabase.from("booking_status_history").delete().eq("booking_id", deleteBooking.id);
+    await supabase.from("booking_documents").delete().eq("booking_id", deleteBooking.id);
+    await supabase.from("emi_installments").delete().in(
+      "emi_payment_id",
+      (await supabase.from("emi_payments").select("id").eq("booking_id", deleteBooking.id)).data?.map(e => e.id) || []
+    );
+    await supabase.from("emi_payments").delete().eq("booking_id", deleteBooking.id);
+
+    const { error } = await supabase
+      .from("bookings")
+      .delete()
+      .eq("id", deleteBooking.id);
+
+    setDeleteLoading(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Deleted", description: "Booking deleted successfully" });
+      setDeleteBooking(null);
+      fetchBookings();
+      fetchDocumentCounts();
+      fetchEmiPayments();
       onUpdate();
     }
   };
@@ -346,7 +427,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
 
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
 
-    // Date range filter
     const bookingDate = new Date(booking.created_at);
     bookingDate.setHours(0, 0, 0, 0);
     
@@ -402,7 +482,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
   const exportToCSV = () => {
     const data = getExportData();
     const headers = Object.keys(data[0] || {});
-
     const csvData = data.map((row) => {
       return headers.map(header => {
         const cellStr = String(row[header as keyof typeof row]);
@@ -412,12 +491,10 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
         return `"${cellStr}"`;
       });
     });
-
     const csvContent = [
       headers.map(h => `"${h}"`).join(","),
       ...csvData.map(row => row.join(","))
     ].join("\r\n");
-
     const BOM = "\uFEFF";
     const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
@@ -426,49 +503,22 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    toast({
-      title: "Export Successful",
-      description: `${filteredBookings.length} bookings exported to CSV`,
-    });
+    toast({ title: "Export Successful", description: `${filteredBookings.length} bookings exported to CSV` });
   };
 
   const exportToExcel = () => {
     const data = getExportData();
-    
-    // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-
-    // Set column widths
     const colWidths = [
-      { wch: 12 }, // Booking Date
-      { wch: 10 }, // Booking ID
-      { wch: 20 }, // Customer Name
-      { wch: 25 }, // Email
-      { wch: 15 }, // Phone
-      { wch: 12 }, // Customer Type
-      { wch: 25 }, // Package
-      { wch: 10 }, // Package Type
-      { wch: 10 }, // Passengers
-      { wch: 12 }, // Travel Date
-      { wch: 12 }, // Total Amount
-      { wch: 15 }, // Payment Status
-      { wch: 18 }, // Tracking Status
-      { wch: 12 }, // Booking Status
-      { wch: 30 }, // Notes
+      { wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 25 }, { wch: 15 },
+      { wch: 12 }, { wch: 25 }, { wch: 10 }, { wch: 10 }, { wch: 12 },
+      { wch: 12 }, { wch: 15 }, { wch: 18 }, { wch: 12 }, { wch: 30 },
     ];
     ws["!cols"] = colWidths;
-
     XLSX.utils.book_append_sheet(wb, ws, "Bookings");
-
-    // Write the file
     XLSX.writeFile(wb, `bookings-${new Date().toISOString().split("T")[0]}.xlsx`);
-
-    toast({
-      title: "Export Successful",
-      description: `${filteredBookings.length} bookings exported to Excel`,
-    });
+    toast({ title: "Export Successful", description: `${filteredBookings.length} bookings exported to Excel` });
   };
 
   if (loading) {
@@ -488,23 +538,11 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           <CardTitle className="flex items-center justify-between">
             <span>All Bookings ({bookings.length})</span>
             <div className="flex gap-2">
-              <Button 
-                onClick={exportToCSV} 
-                variant="outline" 
-                size="sm"
-                disabled={filteredBookings.length === 0}
-                className="gap-2"
-              >
+              <Button onClick={exportToCSV} variant="outline" size="sm" disabled={filteredBookings.length === 0} className="gap-2">
                 <FileText className="w-4 h-4" />
                 CSV
               </Button>
-              <Button 
-                onClick={exportToExcel} 
-                variant="outline" 
-                size="sm"
-                disabled={filteredBookings.length === 0}
-                className="gap-2"
-              >
+              <Button onClick={exportToExcel} variant="outline" size="sm" disabled={filteredBookings.length === 0} className="gap-2">
                 <FileSpreadsheet className="w-4 h-4" />
                 Excel
               </Button>
@@ -541,58 +579,29 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
               <div className="flex items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[160px] justify-start text-left font-normal",
-                        !dateFrom && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-[160px] justify-start text-left font-normal", !dateFrom && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateFrom ? format(dateFrom, "MMM dd, yyyy") : "From date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateFrom}
-                      onSelect={setDateFrom}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
                 <span className="text-muted-foreground">to</span>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[160px] justify-start text-left font-normal",
-                        !dateTo && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-[160px] justify-start text-left font-normal", !dateTo && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateTo ? format(dateTo, "MMM dd, yyyy") : "To date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateTo}
-                      onSelect={setDateTo}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
                 {(dateFrom || dateTo) && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={clearDateFilter}
-                    className="h-9 w-9"
-                  >
+                  <Button variant="ghost" size="icon" onClick={clearDateFilter} className="h-9 w-9">
                     <X className="h-4 w-4" />
                   </Button>
                 )}
@@ -610,21 +619,20 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="admin-table-scroll">
-            <Table className="w-full" style={{ minWidth: '1400px' }}>
+          <div className="overflow-x-auto">
+            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap sticky left-0 bg-background z-20 min-w-[100px]">Date</TableHead>
-                  <TableHead className="whitespace-nowrap sticky left-[100px] bg-background z-20 min-w-[100px] border-r">Booking ID</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[180px]">Customer</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[150px]">Package</TableHead>
+                  <TableHead className="whitespace-nowrap">Date</TableHead>
+                  <TableHead className="whitespace-nowrap">Booking ID</TableHead>
+                  <TableHead className="whitespace-nowrap">Customer</TableHead>
+                  <TableHead className="whitespace-nowrap">Package</TableHead>
                   <TableHead className="whitespace-nowrap">Passengers</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[120px]">Amount</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[130px]">Payment</TableHead>
-                  <TableHead className="whitespace-nowrap">Documents</TableHead>
-                  <TableHead className="whitespace-nowrap min-w-[140px]">Tracking</TableHead>
+                  <TableHead className="whitespace-nowrap">Amount</TableHead>
+                  <TableHead className="whitespace-nowrap">Payment</TableHead>
                   <TableHead className="whitespace-nowrap">Status</TableHead>
-                  <TableHead className="whitespace-nowrap sticky right-0 bg-background z-20 border-l">Actions</TableHead>
+                  <TableHead className="whitespace-nowrap">Tracking</TableHead>
+                  <TableHead className="whitespace-nowrap text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -632,10 +640,10 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                   const customerInfo = getCustomerInfo(booking);
                   return (
                   <TableRow key={booking.id}>
-                    <TableCell className="text-xs whitespace-nowrap sticky left-0 bg-background z-10 min-w-[100px]">
+                    <TableCell className="text-xs whitespace-nowrap">
                       {format(new Date(booking.created_at), "MMM dd, yyyy")}
                     </TableCell>
-                    <TableCell className="sticky left-[100px] bg-background z-10 min-w-[100px] border-r">
+                    <TableCell>
                       <Button
                         variant="link"
                         className="font-mono text-xs p-0 h-auto text-primary hover:underline"
@@ -660,13 +668,11 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{booking.packages.title}</p>
-                        <p className="text-xs text-muted-foreground capitalize">
-                          {booking.packages.type}
-                        </p>
+                        <p className="font-medium text-sm">{booking.packages.title}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{booking.packages.type}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{booking.passenger_count}</TableCell>
+                    <TableCell className="text-center">{booking.passenger_count}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-bold">{formatCurrency(Number(booking.total_price))}</span>
@@ -677,97 +683,67 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                             <span>{emiPayments[booking.id].paid_emis}/{emiPayments[booking.id].number_of_emis} Paid</span>
                           </div>
                         )}
-                        {booking.payment_method === "installment" && !emiPayments[booking.id] && (
-                          <Badge variant="outline" className="text-xs w-fit mt-1 text-orange-600 border-orange-300">
-                            Installment Pending
-                          </Badge>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-col gap-1">
-                        {getPaymentStatusBadge(booking.payment_status, booking.payment_method)}
-                        {booking.payment_status === "pending_cash" && (
-                          <AdminActionButton
-                            size="sm"
-                            variant="outline"
-                            className="h-6 text-xs gap-1 mt-1"
-                            onClick={() => markCashAsPaid(booking.id)}
-                          >
-                            <Banknote className="w-3 h-3" />
-                            Mark Paid
-                          </AdminActionButton>
-                        )}
-                        {/* Bank Transfer Verification Button */}
-                        {booking.payment_status === "pending_verification" && booking.payment_method === "bank_transfer" && (
-                          <AdminActionButton
-                            size="sm"
-                            variant="default"
-                            className="h-6 text-xs gap-1 mt-1"
-                            onClick={() => setVerifyBankTransferBooking(booking)}
-                          >
-                            <ShieldCheck className="w-3 h-3" />
-                            Verify Payment
-                          </AdminActionButton>
-                        )}
-                        {/* Installment Button */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-6 text-xs gap-1 mt-1"
-                          onClick={() => setEmiBooking(booking)}
-                        >
-                          <Calculator className="w-3 h-3" />
-                          Installment
-                        </Button>
-                        {booking.transaction_id && (
-                          <span className="text-xs text-muted-foreground font-mono">
-                            {booking.transaction_id.slice(0, 12)}...
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={cn(
-                          "gap-1 h-7 text-xs",
-                          documentCounts[booking.id] > 0 && "border-green-500/50 text-green-700"
-                        )}
-                        onClick={() => setDocumentReviewBooking(booking)}
-                      >
-                        <FileText className="w-3 h-3" />
-                        {documentCounts[booking.id] || 0} Files
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1 h-7 text-xs"
-                        onClick={() => setTrackingBooking(booking)}
-                      >
-                        <MapPin className="w-3 h-3" />
-                        {trackingStatusLabels[booking.tracking_status]}
-                      </Button>
+                      {getPaymentStatusBadge(booking.payment_status, booking.payment_method)}
                     </TableCell>
                     <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                    <TableCell className="sticky right-0 bg-background z-10 border-l">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setSelectedBooking(booking)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs whitespace-nowrap">
+                        {trackingStatusLabels[booking.tracking_status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52">
+                          <DropdownMenuItem onClick={() => setSelectedBooking(booking)}>
+                            <Eye className="w-4 h-4 mr-2" /> View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEditDialog(booking)} disabled={isViewerMode}>
+                            <Edit className="w-4 h-4 mr-2" /> Edit Booking
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => setTrackingBooking(booking)}>
+                            <MapPin className="w-4 h-4 mr-2" /> Update Tracking
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setEmiBooking(booking)}>
+                            <Calculator className="w-4 h-4 mr-2" /> Installments
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setDocumentReviewBooking(booking)}>
+                            <FileText className="w-4 h-4 mr-2" /> Documents ({documentCounts[booking.id] || 0})
+                          </DropdownMenuItem>
+                          {booking.payment_status === "pending_verification" && booking.payment_method === "bank_transfer" && (
+                            <DropdownMenuItem onClick={() => setVerifyBankTransferBooking(booking)} disabled={isViewerMode}>
+                              <ShieldCheck className="w-4 h-4 mr-2" /> Verify Payment
+                            </DropdownMenuItem>
+                          )}
+                          {booking.payment_status === "pending_cash" && (
+                            <DropdownMenuItem onClick={() => markCashAsPaid(booking.id)} disabled={isViewerMode}>
+                              <Banknote className="w-4 h-4 mr-2" /> Mark Cash Paid
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => setDeleteBooking(booking)}
+                            disabled={isViewerMode}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" /> Delete Booking
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                   );
                 })}
               </TableBody>
             </Table>
-            <div className="h-4" /> {/* Spacer for scrollbar visibility */}
           </div>
 
           {filteredBookings.length === 0 && (
@@ -778,7 +754,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
         </CardContent>
       </Card>
 
-      {/* Booking Details Dialog */}
+      {/* View Booking Details Dialog */}
       <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -794,19 +770,12 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
             const customerInfo = getCustomerInfo(selectedBooking);
             const emiInfo = emiPayments[selectedBooking.id];
             return (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-4"
-            >
-              {/* Customer & Package Info */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-muted/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <p className="text-sm font-medium text-muted-foreground">Customer Information</p>
-                    {customerInfo.isGuest && (
-                      <Badge variant="outline" className="text-xs">Guest</Badge>
-                    )}
+                    {customerInfo.isGuest && <Badge variant="outline" className="text-xs">Guest</Badge>}
                   </div>
                   <p className="font-semibold text-lg">{customerInfo.name}</p>
                   {customerInfo.email && <p className="text-sm text-muted-foreground">{customerInfo.email}</p>}
@@ -819,7 +788,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
               </div>
 
-              {/* Booking Info Grid */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-muted/30 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground">Passengers</p>
@@ -828,9 +796,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 <div className="bg-muted/30 rounded-lg p-3 text-center">
                   <p className="text-xs text-muted-foreground">Travel Date</p>
                   <p className="text-sm font-medium">
-                    {selectedBooking.travel_date
-                      ? format(new Date(selectedBooking.travel_date), "MMM dd, yyyy")
-                      : "Not set"}
+                    {selectedBooking.travel_date ? format(new Date(selectedBooking.travel_date), "MMM dd, yyyy") : "Not set"}
                   </p>
                 </div>
                 <div className="bg-muted/30 rounded-lg p-3 text-center">
@@ -839,7 +805,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
               </div>
 
-              {/* Passenger Details */}
               {selectedBooking.passenger_details && Object.keys(selectedBooking.passenger_details).length > 0 && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">Passenger Details</p>
@@ -856,7 +821,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
               )}
 
-              {/* Notes */}
               {selectedBooking.notes && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2">Customer Notes</p>
@@ -864,31 +828,31 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
               )}
 
-              {/* Payment Information */}
+              {selectedBooking.admin_notes && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Admin Notes</p>
+                  <p className="text-sm bg-muted/30 rounded-lg p-3">{selectedBooking.admin_notes}</p>
+                </div>
+              )}
+
               <div className="border-t pt-4">
                 <p className="text-sm font-medium text-muted-foreground mb-3">Payment Information</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <div>
                       <p className="text-xs text-muted-foreground">Payment Status</p>
-                      <div className="mt-1">
-                        {getPaymentStatusBadge(selectedBooking.payment_status, selectedBooking.payment_method)}
-                      </div>
+                      <div className="mt-1">{getPaymentStatusBadge(selectedBooking.payment_status, selectedBooking.payment_method)}</div>
                     </div>
                     {selectedBooking.transaction_id && (
                       <div>
                         <p className="text-xs text-muted-foreground">Transaction ID</p>
-                        <p className="text-sm font-mono bg-muted/50 rounded px-2 py-1 mt-1">
-                          {selectedBooking.transaction_id}
-                        </p>
+                        <p className="text-sm font-mono bg-muted/50 rounded px-2 py-1 mt-1">{selectedBooking.transaction_id}</p>
                       </div>
                     )}
                     {selectedBooking.bank_transaction_number && (
                       <div>
                         <p className="text-xs text-muted-foreground">Bank Transaction #</p>
-                        <p className="text-sm font-mono bg-muted/50 rounded px-2 py-1 mt-1">
-                          {selectedBooking.bank_transaction_number}
-                        </p>
+                        <p className="text-sm font-mono bg-muted/50 rounded px-2 py-1 mt-1">{selectedBooking.bank_transaction_number}</p>
                       </div>
                     )}
                   </div>
@@ -899,7 +863,6 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                 </div>
               </div>
 
-              {/* EMI/Installment Information */}
               {(emiInfo || selectedBooking.payment_method === "installment") && (
                 <div className="border-t pt-4">
                   <p className="text-sm font-medium text-muted-foreground mb-3">Installment Plan</p>
@@ -929,44 +892,23 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
                   ) : (
                     <Badge variant="outline" className="text-orange-600 border-orange-300">
                       <AlertCircle className="w-3 h-3 mr-1" />
-                      Installment plan not set up - use Installment button to configure
+                      Installment plan not set up
                     </Badge>
                   )}
                 </div>
               )}
 
-              {/* Total Amount */}
               <div className="border-t pt-4 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Package Amount</p>
-                  <p className="text-3xl font-bold text-primary">
-                    {formatCurrency(Number(selectedBooking.total_price))}
-                  </p>
+                  <p className="text-3xl font-bold text-primary">{formatCurrency(Number(selectedBooking.total_price))}</p>
                 </div>
                 <div className="flex gap-2">
-                  {selectedBooking.payment_status === "pending_cash" && (
-                    <AdminActionButton
-                      size="sm"
-                      className="gap-1"
-                      onClick={() => {
-                        markCashAsPaid(selectedBooking.id);
-                        setSelectedBooking(null);
-                      }}
-                    >
-                      <Banknote className="w-4 h-4" />
-                      Mark as Paid
-                    </AdminActionButton>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEmiBooking(selectedBooking);
-                      setSelectedBooking(null);
-                    }}
-                  >
-                    <Calculator className="w-4 h-4 mr-1" />
-                    View Installments
+                  <Button size="sm" variant="outline" onClick={() => { openEditDialog(selectedBooking); setSelectedBooking(null); }} disabled={isViewerMode}>
+                    <Edit className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => { setEmiBooking(selectedBooking); setSelectedBooking(null); }}>
+                    <Calculator className="w-4 h-4 mr-1" /> Installments
                   </Button>
                 </div>
               </div>
@@ -976,6 +918,113 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Booking Dialog */}
+      <Dialog open={!!editBooking} onOpenChange={() => setEditBooking(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Edit Booking
+            </DialogTitle>
+            <DialogDescription>
+              ID: {editBooking?.id.slice(0, 8).toUpperCase()} — {editBooking?.packages.title}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Booking Status</Label>
+                <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Status</Label>
+                <Select value={editForm.payment_status} onValueChange={(v) => setEditForm({ ...editForm, payment_status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {paymentStatusOptions.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Passengers</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={editForm.passenger_count}
+                  onChange={(e) => setEditForm({ ...editForm, passenger_count: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Total Price</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={editForm.total_price}
+                  onChange={(e) => setEditForm({ ...editForm, total_price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Travel Date</Label>
+              <Input
+                type="date"
+                value={editForm.travel_date}
+                onChange={(e) => setEditForm({ ...editForm, travel_date: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Admin Notes</Label>
+              <Textarea
+                value={editForm.admin_notes}
+                onChange={(e) => setEditForm({ ...editForm, admin_notes: e.target.value })}
+                placeholder="Internal notes about this booking..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditBooking(null)}>Cancel</Button>
+            <AdminActionButton onClick={handleEditSave} disabled={editSaving}>
+              {editSaving ? "Saving..." : "Save Changes"}
+            </AdminActionButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteBooking} onOpenChange={() => setDeleteBooking(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete booking <span className="font-mono font-bold">{deleteBooking?.id.slice(0, 8).toUpperCase()}</span>? 
+              This will permanently remove the booking, all related documents, installments, and status history. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteLoading ? "Deleting..." : "Delete Permanently"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Tracking Status Update Modal */}
       {trackingBooking && (
         <AdminTrackingStatus
@@ -983,10 +1032,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           onClose={() => setTrackingBooking(null)}
           bookingId={trackingBooking.id}
           currentStatus={trackingBooking.tracking_status}
-          onUpdate={() => {
-            fetchBookings();
-            onUpdate();
-          }}
+          onUpdate={() => { fetchBookings(); onUpdate(); }}
         />
       )}
 
@@ -997,10 +1043,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
           onClose={() => setEmiBooking(null)}
           bookingId={emiBooking.id}
           totalAmount={Number(emiBooking.total_price)}
-          onUpdate={() => {
-            fetchBookings();
-            onUpdate();
-          }}
+          onUpdate={() => { fetchBookings(); onUpdate(); }}
         />
       )}
 
@@ -1009,10 +1052,7 @@ const AdminBookings = ({ onUpdate }: AdminBookingsProps) => {
         isOpen={!!verifyBankTransferBooking}
         onClose={() => setVerifyBankTransferBooking(null)}
         booking={verifyBankTransferBooking}
-        onVerified={() => {
-          fetchBookings();
-          onUpdate();
-        }}
+        onVerified={() => { fetchBookings(); onUpdate(); }}
       />
 
       {/* Document Review Modal */}
