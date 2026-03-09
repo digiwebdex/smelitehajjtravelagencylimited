@@ -414,19 +414,24 @@ const ContactSection = () => {
                   onChange={(e) => setFormData({ ...formData, package: e.target.value })}
                 >
                   <option value="">Select a package</option>
-                  <optgroup label="Hajj Packages">
-                    <option value="hajj-economy">Hajj - Super Economy</option>
-                    <option value="hajj-classic">Hajj - Classic</option>
-                    <option value="hajj-premium">Hajj - Premium</option>
-                    <option value="hajj-vip">Hajj - VIP</option>
-                  </optgroup>
-                  <optgroup label="Umrah Packages">
-                    <option value="umrah-economy">Umrah - Economy</option>
-                    <option value="umrah-etekaf">Umrah - Etekaf</option>
-                    <option value="umrah-vip">Umrah - VIP</option>
-                  </optgroup>
+                  {packages.filter(p => p.type === "hajj").length > 0 && (
+                    <optgroup label="Hajj Packages">
+                      {packages.filter(p => p.type === "hajj").map(p => (
+                        <option key={p.id} value={p.title}>{p.title}</option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {packages.filter(p => p.type === "umrah").length > 0 && (
+                    <optgroup label="Umrah Packages">
+                      {packages.filter(p => p.type === "umrah").map(p => (
+                        <option key={p.id} value={p.title}>{p.title}</option>
+                      ))}
+                    </optgroup>
+                  )}
                   <optgroup label="Other Services">
-                    <option value="visa">Visa Processing</option>
+                    <option value="Visa Processing">Visa Processing</option>
+                    <option value="Air Ticket">Air Ticket</option>
+                    <option value="Hotel Booking">Hotel Booking</option>
                   </optgroup>
                 </select>
               </div>

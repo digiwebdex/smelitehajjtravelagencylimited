@@ -168,7 +168,7 @@ const GallerySection = () => {
       const { data: settingsData } = await supabase
         .from("gallery_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (settingsData) {
         setSettings(settingsData);
