@@ -21,6 +21,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import LegalPage from "./pages/LegalPage";
 import PaymentResult from "./pages/PaymentResult";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import Blog from "./pages/Blog";
+import BlogPostPage from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -56,6 +58,8 @@ const App = () => (
                 <Route path="/track-visa" element={<TrackVisa />} />
                 <Route path="/hotels" element={<Hotels />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/booking/confirmation/:bookingId" element={<BookingConfirmation />} />
                 <Route path="/legal/:pageKey" element={<LegalPage />} />
                 <Route path="/payment/success" element={<PaymentResult />} />
