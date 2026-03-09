@@ -50,35 +50,63 @@ const ExpenseManagement = () => {
     setLoading(false);
   };
 
+  const getAssetAccountId = (paymentMethod: string): string => {
+    const map: Record<string, string> = {
+      cash: "874f7315-8619-4eef-9f6b-7dac33e7c416",
+      bank: "b954bcb8-72bc-497d-adef-9cf5749e4289",
+      check: "b954bcb8-72bc-497d-adef-9cf5749e4289",
+      mobile: "3cb7442b-8c85-4fc5-9bcb-5c80814d913c",
+    };
+    return map[paymentMethod] || map.cash;
+  };
+
   const handleSave = async () => {
     if (!form.account_id || !form.description || !form.amount || !form.expense_category) {
       toast.error("Category, account, description, and amount are required"); return;
     }
     const { data: userData } = await supabase.auth.getUser();
+    const amount = Number(form.amount);
+    const assetAccountId = getAssetAccountId(form.payment_method);
+
     const payload = {
       transaction_date: form.transaction_date, account_id: form.account_id,
       expense_category: form.expense_category, description: form.description,
-      amount: Number(form.amount), payment_method: form.payment_method,
+      amount, payment_method: form.payment_method,
       vendor_supplier: form.vendor_supplier || null, reference_number: form.reference_number || null,
       notes: form.notes || null, created_by: userData?.user?.id || null,
+      bank_account_id: form.payment_method === "bank" || form.payment_method === "check" ? assetAccountId : null,
     };
-    const { error } = await db.from("expense_transactions").insert([payload]);
+    const { data: expenseData, error } = await db.from("expense_transactions").insert([payload]).select("id").single();
     if (error) { toast.error(error.message); return; }
-    await db.from("general_ledger").insert([{
-      transaction_date: form.transaction_date, account_id: form.account_id,
-      transaction_type: "expense", description: form.description, debit: Number(form.amount),
-      credit: 0, reference_type: "expense", created_by: userData?.user?.id || null,
-    }]);
-    toast.success("Expense recorded"); setDialogOpen(false);
+
+    // Double-entry: Debit expense account, Credit asset account (Cash/Bank)
+    const referenceId = expenseData?.id || null;
+    await db.from("general_ledger").insert([
+      {
+        transaction_date: form.transaction_date, account_id: form.account_id,
+        transaction_type: "expense", description: `Expense: ${form.description}`,
+        debit: amount, credit: 0, reference_type: "expense", reference_id: referenceId,
+        created_by: userData?.user?.id || null,
+      },
+      {
+        transaction_date: form.transaction_date, account_id: assetAccountId,
+        transaction_type: "expense", description: `Expense: ${form.description}`,
+        debit: 0, credit: amount, reference_type: "expense", reference_id: referenceId,
+        created_by: userData?.user?.id || null,
+      },
+    ]);
+
+    toast.success("Expense recorded with double-entry"); setDialogOpen(false);
     setForm({ transaction_date: format(new Date(), "yyyy-MM-dd"), account_id: "", expense_category: "", description: "", amount: "", payment_method: "cash", vendor_supplier: "", reference_number: "", notes: "" });
     fetchData();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this expense entry?")) return;
+    if (!confirm("Delete this expense entry? This will also remove the ledger entries.")) return;
+    await db.from("general_ledger").delete().eq("reference_id", id).eq("reference_type", "expense");
     const { error } = await db.from("expense_transactions").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Deleted"); fetchData();
+    toast.success("Deleted with ledger cleanup"); fetchData();
   };
 
   const exportCSV = () => {

@@ -48,33 +48,62 @@ const IncomeManagement = () => {
     setLoading(false);
   };
 
+  const getAssetAccountId = (paymentMethod: string): string => {
+    // Map payment methods to asset account IDs
+    const map: Record<string, string> = {
+      cash: "874f7315-8619-4eef-9f6b-7dac33e7c416",
+      bank: "b954bcb8-72bc-497d-adef-9cf5749e4289",
+      check: "b954bcb8-72bc-497d-adef-9cf5749e4289",
+      mobile: "3cb7442b-8c85-4fc5-9bcb-5c80814d913c",
+    };
+    return map[paymentMethod] || map.cash;
+  };
+
   const handleSave = async () => {
     if (!form.account_id || !form.description || !form.amount) { toast.error("Account, description, and amount are required"); return; }
     const { data: userData } = await supabase.auth.getUser();
+    const amount = Number(form.amount);
+    const assetAccountId = getAssetAccountId(form.payment_method);
+
     const payload = {
       transaction_date: form.transaction_date, account_id: form.account_id,
       customer_name: form.customer_name || null, description: form.description,
-      payment_method: form.payment_method, amount: Number(form.amount),
+      payment_method: form.payment_method, amount,
       reference_number: form.reference_number || null, notes: form.notes || null,
       created_by: userData?.user?.id || null,
     };
-    const { error } = await db.from("income_transactions").insert([payload]);
+    const { data: incomeData, error } = await db.from("income_transactions").insert([payload]).select("id").single();
     if (error) { toast.error(error.message); return; }
-    await db.from("general_ledger").insert([{
-      transaction_date: form.transaction_date, account_id: form.account_id,
-      transaction_type: "income", description: form.description, debit: 0,
-      credit: Number(form.amount), reference_type: "income", created_by: userData?.user?.id || null,
-    }]);
-    toast.success("Income recorded"); setDialogOpen(false);
+
+    // Double-entry: Debit asset account (Cash/Bank), Credit income account
+    const referenceId = incomeData?.id || null;
+    await db.from("general_ledger").insert([
+      {
+        transaction_date: form.transaction_date, account_id: assetAccountId,
+        transaction_type: "income", description: `Income: ${form.description}`,
+        debit: amount, credit: 0, reference_type: "income", reference_id: referenceId,
+        created_by: userData?.user?.id || null,
+      },
+      {
+        transaction_date: form.transaction_date, account_id: form.account_id,
+        transaction_type: "income", description: `Income: ${form.description}`,
+        debit: 0, credit: amount, reference_type: "income", reference_id: referenceId,
+        created_by: userData?.user?.id || null,
+      },
+    ]);
+
+    toast.success("Income recorded with double-entry"); setDialogOpen(false);
     setForm({ transaction_date: format(new Date(), "yyyy-MM-dd"), account_id: "", customer_name: "", description: "", payment_method: "cash", amount: "", reference_number: "", notes: "" });
     fetchData();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this income entry?")) return;
+    if (!confirm("Delete this income entry? This will also remove the ledger entries.")) return;
+    // Delete matching ledger entries first
+    await db.from("general_ledger").delete().eq("reference_id", id).eq("reference_type", "income");
     const { error } = await db.from("income_transactions").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Deleted"); fetchData();
+    toast.success("Deleted with ledger cleanup"); fetchData();
   };
 
   const exportCSV = () => {

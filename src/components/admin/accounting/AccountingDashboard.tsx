@@ -4,17 +4,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
 import { 
   TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, 
-  DollarSign, CreditCard, PiggyBank 
+  DollarSign, CreditCard, PiggyBank, Users, ShieldCheck, RefreshCw
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Button } from "@/components/ui/button";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const db = supabase as any;
 const COLORS = ["hsl(var(--primary))", "hsl(var(--destructive))", "hsl(142 76% 36%)", "hsl(38 92% 50%)", "hsl(262 83% 58%)"];
 
+interface FinancialSummary {
+  total_sales: number;
+  income_received: number;
+  total_expense: number;
+  net_profit: number;
+  customer_due: number;
+  commission: number;
+  cash_balance: number;
+  bank_balance: number;
+  mobile_balance: number;
+  receivable: number;
+  payable: number;
+  total_liquid: number;
+}
+
 const AccountingDashboard = () => {
-  const [stats, setStats] = useState({
-    totalIncome: 0, totalExpense: 0, receivable: 0, payable: 0, cashBalance: 0, bankBalance: 0,
-  });
+  const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [expenseByCategory, setExpenseByCategory] = useState<any[]>([]);
@@ -23,25 +37,20 @@ const AccountingDashboard = () => {
   useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      const [incomeRes, expenseRes, accountsRes, bankRes] = await Promise.all([
-        db.from("income_transactions").select("amount, transaction_date, customer_name, description"),
-        db.from("expense_transactions").select("amount, transaction_date, expense_category, description"),
-        db.from("chart_of_accounts").select("account_type, current_balance, account_name"),
-        db.from("bank_accounts").select("current_balance, account_name"),
+      const [summaryRes, incomeRes, expenseRes, ledgerRes] = await Promise.all([
+        db.rpc("get_financial_summary"),
+        db.from("income_transactions").select("amount, transaction_date, customer_name, description").order("transaction_date", { ascending: false }).limit(20),
+        db.from("expense_transactions").select("amount, transaction_date, expense_category, description").order("transaction_date", { ascending: false }).limit(20),
+        db.from("general_ledger").select("debit, credit, transaction_type, transaction_date, description").order("transaction_date", { ascending: false }).limit(10),
       ]);
 
-      const totalIncome = (incomeRes.data || []).reduce((s: number, t: any) => s + Number(t.amount), 0);
-      const totalExpense = (expenseRes.data || []).reduce((s: number, t: any) => s + Number(t.amount), 0);
-      
-      const accounts = accountsRes.data || [];
-      const receivable = accounts.filter((a: any) => a.account_name === 'Accounts Receivable').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
-      const payable = accounts.filter((a: any) => a.account_name === 'Accounts Payable').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
-      const cashBalance = accounts.filter((a: any) => a.account_name === 'Cash').reduce((s: number, a: any) => s + Number(a.current_balance), 0);
-      const bankBalance = (bankRes.data || []).reduce((s: number, b: any) => s + Number(b.current_balance), 0);
+      if (summaryRes.data) {
+        setSummary(summaryRes.data as FinancialSummary);
+      }
 
-      setStats({ totalIncome, totalExpense, receivable, payable, cashBalance, bankBalance });
-
+      // Monthly income vs expense from actual transactions
       const monthMap: Record<string, { income: number; expense: number }> = {};
       (incomeRes.data || []).forEach((t: any) => {
         const month = t.transaction_date?.substring(0, 7) || "";
@@ -55,15 +64,17 @@ const AccountingDashboard = () => {
       });
       setMonthlyData(Object.entries(monthMap).sort().slice(-6).map(([month, data]) => ({ month, ...data })));
 
+      // Expense by category
       const catMap: Record<string, number> = {};
       (expenseRes.data || []).forEach((t: any) => {
         catMap[t.expense_category] = (catMap[t.expense_category] || 0) + Number(t.amount);
       });
       setExpenseByCategory(Object.entries(catMap).map(([name, value]) => ({ name, value })));
 
+      // Recent combined transactions
       const recent = [
-        ...(incomeRes.data || []).map((t: any) => ({ ...t, type: "income" as const })),
-        ...(expenseRes.data || []).map((t: any) => ({ ...t, type: "expense" as const })),
+        ...(incomeRes.data || []).slice(0, 5).map((t: any) => ({ ...t, type: "income" as const })),
+        ...(expenseRes.data || []).slice(0, 5).map((t: any) => ({ ...t, type: "expense" as const })),
       ].sort((a, b) => (b.transaction_date || "").localeCompare(a.transaction_date || "")).slice(0, 10);
       setRecentTransactions(recent);
     } catch (err) {
@@ -73,24 +84,36 @@ const AccountingDashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !summary) {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
 
-  const netBalance = stats.totalIncome - stats.totalExpense;
   const summaryCards = [
-    { title: "Total Income", value: formatCurrency(stats.totalIncome), icon: TrendingUp, color: "text-green-600", bg: "bg-green-500/10", arrow: ArrowUpRight },
-    { title: "Total Expense", value: formatCurrency(stats.totalExpense), icon: TrendingDown, color: "text-red-600", bg: "bg-red-500/10", arrow: ArrowDownRight },
-    { title: "Net Balance", value: formatCurrency(netBalance), icon: Wallet, color: netBalance >= 0 ? "text-green-600" : "text-red-600", bg: "bg-primary/10", arrow: netBalance >= 0 ? ArrowUpRight : ArrowDownRight },
-    { title: "Receivable", value: formatCurrency(stats.receivable), icon: DollarSign, color: "text-blue-600", bg: "bg-blue-500/10", arrow: ArrowUpRight },
-    { title: "Payable", value: formatCurrency(stats.payable), icon: CreditCard, color: "text-orange-600", bg: "bg-orange-500/10", arrow: ArrowDownRight },
-    { title: "Cash + Bank", value: formatCurrency(stats.cashBalance + stats.bankBalance), icon: PiggyBank, color: "text-purple-600", bg: "bg-purple-500/10", arrow: ArrowUpRight },
+    { title: "Total Sales", value: formatCurrency(summary.total_sales), icon: DollarSign, color: "text-blue-600", bg: "bg-blue-500/10", desc: "Confirmed bookings" },
+    { title: "Income Received", value: formatCurrency(summary.income_received), icon: TrendingUp, color: "text-green-600", bg: "bg-green-500/10", desc: "Recorded income" },
+    { title: "Total Expense", value: formatCurrency(summary.total_expense), icon: TrendingDown, color: "text-red-600", bg: "bg-red-500/10", desc: "Recorded expenses" },
+    { title: "Net Profit", value: formatCurrency(summary.net_profit), icon: Wallet, color: summary.net_profit >= 0 ? "text-green-600" : "text-red-600", bg: "bg-primary/10", desc: "Income - Expense" },
+    { title: "Customer Due", value: formatCurrency(summary.customer_due), icon: Users, color: "text-orange-600", bg: "bg-orange-500/10", desc: "Unpaid booking amounts" },
+    { title: "Commission Due", value: formatCurrency(summary.commission), icon: CreditCard, color: "text-purple-600", bg: "bg-purple-500/10", desc: "Agent pending commission" },
+    { title: "Receivable", value: formatCurrency(summary.receivable), icon: ArrowUpRight, color: "text-blue-600", bg: "bg-blue-500/10", desc: "Accounts Receivable" },
+    { title: "Payable", value: formatCurrency(summary.payable), icon: ArrowDownRight, color: "text-orange-600", bg: "bg-orange-500/10", desc: "Accounts Payable" },
+    { title: "Cash + Bank + Mobile", value: formatCurrency(summary.total_liquid), icon: PiggyBank, color: "text-emerald-600", bg: "bg-emerald-500/10", desc: `Cash: ${formatCurrency(summary.cash_balance)} | Bank: ${formatCurrency(summary.bank_balance)}` },
   ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Accounting Dashboard</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <ShieldCheck className="h-6 w-6" />
+          Accounting Dashboard
+        </h2>
+        <Button variant="outline" size="sm" onClick={fetchDashboardData} className="gap-2">
+          <RefreshCw className="w-4 h-4" /> Refresh
+        </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
         {summaryCards.map((card) => (
           <Card key={card.title}>
             <CardContent className="pt-4">
@@ -101,10 +124,26 @@ const AccountingDashboard = () => {
                 </div>
               </div>
               <p className="text-lg font-bold">{card.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">{card.desc}</p>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Debit/Credit Balance Check */}
+      <Card className="border-l-4 border-l-primary">
+        <CardContent className="pt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Double-Entry Balance Check</p>
+              <p className="text-xs text-muted-foreground">All debits must equal all credits in the general ledger</p>
+            </div>
+            <BalanceChecker />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader><CardTitle className="text-base">Monthly Income vs Expense</CardTitle></CardHeader>
@@ -112,16 +151,17 @@ const AccountingDashboard = () => {
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                  <Bar dataKey="income" fill="hsl(142 76% 36%)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expense" fill="hsl(0 84% 60%)" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
+                  <Legend />
+                  <Bar dataKey="income" name="Income" fill="hsl(142 76% 36%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expense" name="Expense" fill="hsl(0 84% 60%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-10">No data yet. Add income and expense entries to see charts.</p>
+              <p className="text-sm text-muted-foreground text-center py-10">No data yet.</p>
             )}
           </CardContent>
         </Card>
@@ -134,7 +174,7 @@ const AccountingDashboard = () => {
                   <Pie data={expenseByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}>
                     {expenseByCategory.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -143,6 +183,8 @@ const AccountingDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Transactions */}
       <Card>
         <CardHeader><CardTitle className="text-base">Recent Transactions</CardTitle></CardHeader>
         <CardContent>
@@ -170,6 +212,41 @@ const AccountingDashboard = () => {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+// Sub-component to check debit/credit balance
+const BalanceChecker = () => {
+  const [balance, setBalance] = useState<{ debit: number; credit: number } | null>(null);
+
+  useEffect(() => {
+    const check = async () => {
+      const { data } = await (supabase as any)
+        .from("general_ledger")
+        .select("debit, credit");
+      if (data) {
+        const debit = data.reduce((s: number, e: any) => s + Number(e.debit), 0);
+        const credit = data.reduce((s: number, e: any) => s + Number(e.credit), 0);
+        setBalance({ debit, credit });
+      }
+    };
+    check();
+  }, []);
+
+  if (!balance) return <div className="animate-pulse w-20 h-6 bg-muted rounded" />;
+
+  const isBalanced = Math.abs(balance.debit - balance.credit) < 0.01;
+
+  return (
+    <div className="text-right">
+      <div className="flex items-center gap-4 text-sm">
+        <span>Debit: <strong>{formatCurrency(balance.debit)}</strong></span>
+        <span>Credit: <strong>{formatCurrency(balance.credit)}</strong></span>
+      </div>
+      <p className={`text-xs font-medium mt-1 ${isBalanced ? "text-green-600" : "text-red-600"}`}>
+        {isBalanced ? "✓ Balanced" : `✗ Imbalance: ${formatCurrency(Math.abs(balance.debit - balance.credit))}`}
+      </p>
     </div>
   );
 };
