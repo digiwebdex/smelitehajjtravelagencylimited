@@ -2460,6 +2460,7 @@ export type Database = {
           email: string | null
           id: string
           is_active: boolean
+          map_embed_url: string | null
           map_query: string | null
           name: string
           order_index: number
@@ -2472,6 +2473,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          map_embed_url?: string | null
           map_query?: string | null
           name: string
           order_index?: number
@@ -2484,6 +2486,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          map_embed_url?: string | null
           map_query?: string | null
           name?: string
           order_index?: number
