@@ -15,6 +15,7 @@ interface OfficeLocation {
   phones: string[];
   email: string | null;
   map_query: string | null;
+  map_embed_url: string | null;
   order_index: number;
   is_active: boolean;
 }
@@ -52,6 +53,7 @@ const AdminOfficeLocations = () => {
         phones: office.phones,
         email: office.email,
         map_query: office.map_query,
+        map_embed_url: office.map_embed_url,
         order_index: office.order_index,
         is_active: office.is_active,
       })
@@ -72,6 +74,7 @@ const AdminOfficeLocations = () => {
       phones: ["+880"],
       email: "info@smelitehajj.com",
       map_query: "",
+      map_embed_url: "",
       order_index: offices.length,
       is_active: true,
     };
@@ -239,6 +242,22 @@ const AdminOfficeLocations = () => {
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Paste a full Google Maps URL (https://maps.app.goo.gl/...) or use a search query with + instead of spaces.
+              </p>
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Google Maps Embed URL (for website map display)
+              </Label>
+              <Input
+                value={office.map_embed_url || ""}
+                onChange={(e) => updateOffice(office.id, "map_embed_url", e.target.value)}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Go to Google Maps → Search your location → Click "Share" → "Embed a map" → Copy the src URL from the iframe code.
               </p>
             </div>
 

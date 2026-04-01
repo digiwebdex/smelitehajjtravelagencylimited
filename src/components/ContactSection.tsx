@@ -26,6 +26,7 @@ interface OfficeLocation {
   phones: string[];
   email: string | null;
   map_query: string | null;
+  map_embed_url: string | null;
   order_index: number;
   is_active: boolean;
 }
@@ -487,9 +488,16 @@ const ContactSection = () => {
           <div className={`grid ${officeLocations.length > 1 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-4`}>
             {officeLocations.length > 0 ? (
               officeLocations.map((office) => {
-                const mapSrc = office.map_query?.includes('/maps/embed') 
-                  ? office.map_query 
-                  : `https://www.google.com/maps?q=${encodeURIComponent(office.map_query || office.address)}&output=embed`;
+                const getMapEmbedSrc = (office: OfficeLocation) => {
+                  // Priority 1: Use the dedicated embed URL if available
+                  if (office.map_embed_url && office.map_embed_url.trim()) return office.map_embed_url.trim();
+                  // Priority 2: If map_query is already an embed URL
+                  if (office.map_query?.includes('/maps/embed')) return office.map_query;
+                  // Priority 3: Fallback to search query embed
+                  const query = office.map_query || office.address;
+                  return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed&z=15`;
+                };
+                const mapSrc = getMapEmbedSrc(office);
                 return (
                   <div key={office.id} className="bg-card rounded-xl overflow-hidden shadow-elegant">
                     <div className="bg-secondary/10 px-4 py-2 border-b border-border">

@@ -1,0 +1,1 @@
+ALTER TABLE public.office_locations ADD COLUMN IF NOT EXISTS map_embed_url TEXT;
