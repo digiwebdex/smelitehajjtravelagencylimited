@@ -74,6 +74,7 @@ const AdminOfficeLocations = () => {
       phones: ["+880"],
       email: "info@smelitehajj.com",
       map_query: "",
+      map_embed_url: "",
       order_index: offices.length,
       is_active: true,
     };

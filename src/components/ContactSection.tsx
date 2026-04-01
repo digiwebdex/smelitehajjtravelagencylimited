@@ -26,6 +26,7 @@ interface OfficeLocation {
   phones: string[];
   email: string | null;
   map_query: string | null;
+  map_embed_url: string | null;
   order_index: number;
   is_active: boolean;
 }
