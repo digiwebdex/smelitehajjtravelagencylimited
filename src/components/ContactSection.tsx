@@ -490,11 +490,18 @@ const ContactSection = () => {
               officeLocations.map((office) => {
                 const getMapEmbedSrc = (office: OfficeLocation) => {
                   // Priority 1: Use the dedicated embed URL if available
-                  if (office.map_embed_url && office.map_embed_url.trim()) return office.map_embed_url.trim();
+                  if (office.map_embed_url && office.map_embed_url.trim()) {
+                    let url = office.map_embed_url.trim();
+                    // Extract src from full iframe HTML if pasted
+                    const srcMatch = url.match(/src=["']([^"']+)["']/);
+                    if (srcMatch) url = srcMatch[1];
+                    return url;
+                  }
                   // Priority 2: If map_query is a proper embed URL
                   if (office.map_query?.includes('/maps/embed')) return office.map_query;
-                  // Priority 3: Always use address for embed (short links like maps.app.goo.gl don't work in iframes)
-                  return `https://www.google.com/maps?q=${encodeURIComponent(office.address)}&output=embed&z=15`;
+                  // Priority 3: Use address - replace # with space for better Google Maps search
+                  const cleanAddress = office.address.replace(/#/g, ' ').replace(/\s+/g, ' ').trim();
+                  return `https://maps.google.com/maps?q=${encodeURIComponent(cleanAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
                 };
                 const mapSrc = getMapEmbedSrc(office);
                 return (
