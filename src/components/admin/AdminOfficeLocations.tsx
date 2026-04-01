@@ -246,6 +246,22 @@ const AdminOfficeLocations = () => {
             </div>
 
             <div>
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Google Maps Embed URL (for website map display)
+              </Label>
+              <Input
+                value={office.map_embed_url || ""}
+                onChange={(e) => updateOffice(office.id, "map_embed_url", e.target.value)}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Go to Google Maps → Search your location → Click "Share" → "Embed a map" → Copy the src URL from the iframe code.
+              </p>
+            </div>
+
+            <div>
               <Label className="flex items-center gap-2 mb-2">
                 <Phone className="w-4 h-4" />
                 Phone Numbers
