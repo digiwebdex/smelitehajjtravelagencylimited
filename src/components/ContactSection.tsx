@@ -487,9 +487,9 @@ const ContactSection = () => {
           <div className={`grid ${officeLocations.length > 1 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-4`}>
             {officeLocations.length > 0 ? (
               officeLocations.map((office) => {
-                const mapSrc = office.map_query?.startsWith('http') 
+                const mapSrc = office.map_query?.includes('/maps/embed') 
                   ? office.map_query 
-                  : `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(office.map_query || office.address)}`;
+                  : `https://www.google.com/maps?q=${encodeURIComponent(office.map_query || office.address)}&output=embed`;
                 return (
                   <div key={office.id} className="bg-card rounded-xl overflow-hidden shadow-elegant">
                     <div className="bg-secondary/10 px-4 py-2 border-b border-border">
