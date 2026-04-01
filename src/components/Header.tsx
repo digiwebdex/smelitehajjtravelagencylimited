@@ -382,14 +382,7 @@ const Header = () => {
                         Sign Out
                       </Button>
                     </>
-                  ) : (
-                    <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full gap-2 bg-gradient-primary">
-                        <LogIn className="w-4 h-4" />
-                        Sign In
-                      </Button>
-                    </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
