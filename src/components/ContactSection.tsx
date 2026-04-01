@@ -488,18 +488,16 @@ const ContactSection = () => {
           <div className={`grid ${officeLocations.length > 1 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-4`}>
             {officeLocations.length > 0 ? (
               officeLocations.map((office) => {
-                const getMapEmbedSrc = (query: string | null, address: string) => {
-                  if (!query) return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(address)}`;
-                  // Already a proper embed URL
-                  if (query.includes('/maps/embed')) return query;
-                  // Google Maps short link or regular link - convert to embed search
-                  if (query.includes('google.com/maps') || query.includes('maps.app.goo.gl') || query.includes('goo.gl/maps')) {
-                    return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.73722708738!2d90.40006317353787!3d23.79236988716717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1769162756109!5m2!1sen!2sbd`;
-                  }
-                  // GPS coordinates (e.g., 23°50'49.2"N 90°15'30.8"E) or plain text
+                const getMapEmbedSrc = (office: OfficeLocation) => {
+                  // Priority 1: Use the dedicated embed URL if available
+                  if (office.map_embed_url && office.map_embed_url.trim()) return office.map_embed_url.trim();
+                  // Priority 2: If map_query is already an embed URL
+                  if (office.map_query?.includes('/maps/embed')) return office.map_query;
+                  // Priority 3: Fallback to search query embed
+                  const query = office.map_query || office.address;
                   return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed&z=15`;
                 };
-                const mapSrc = getMapEmbedSrc(office.map_query, office.address);
+                const mapSrc = getMapEmbedSrc(office);
                 return (
                   <div key={office.id} className="bg-card rounded-xl overflow-hidden shadow-elegant">
                     <div className="bg-secondary/10 px-4 py-2 border-b border-border">
