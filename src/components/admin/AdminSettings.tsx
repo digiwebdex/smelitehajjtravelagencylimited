@@ -92,6 +92,37 @@ interface FacebookPixelSettings {
   is_enabled: boolean;
 }
 
+interface OfficeLocationMapRecord {
+  id: string;
+  name: string;
+  order_index: number;
+  map_embed_url: string | null;
+}
+
+const sanitizeGoogleMapsEmbedUrl = (value: string | null | undefined) => {
+  if (!value) return "";
+
+  let cleanedValue = value.trim();
+  const srcMatch = cleanedValue.match(/src=["']([^"']+)["']/i);
+
+  if (srcMatch) {
+    cleanedValue = srcMatch[1];
+  }
+
+  return cleanedValue
+    .replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, "")
+    .replace(/["']\s*$/, "")
+    .trim();
+};
+
+const getOfficeMapTargets = (offices: OfficeLocationMapRecord[]) => {
+  const orderedOffices = [...offices].sort((a, b) => a.order_index - b.order_index);
+  const bananiOffice = orderedOffices.find((office) => /banani/i.test(office.name)) ?? orderedOffices[0] ?? null;
+  const savarOffice = orderedOffices.find((office) => /savar/i.test(office.name)) ?? orderedOffices.find((office) => office.id !== bananiOffice?.id) ?? null;
+
+  return { bananiOffice, savarOffice };
+};
+
 // Theme Toggle Icon Component
 const ThemeToggleIcon = () => {
   const { theme } = useTheme();
@@ -197,6 +228,11 @@ const AdminSettings = () => {
 
   const fetchSettings = async () => {
     try {
+      let nextCompanyInfo = defaultSettings.companyInfo;
+      let nextContactDetails = defaultSettings.contactDetails;
+      let nextSocialLinks = defaultSettings.socialLinks;
+      let nextAppearance = defaultSettings.appearance;
+
       const { data, error } = await supabase
         .from("site_settings")
         .select("*");
@@ -208,16 +244,16 @@ const AdminSettings = () => {
           const value = setting.setting_value as Record<string, unknown>;
           switch (setting.setting_key) {
             case "company_info":
-              setCompanyInfo(value as unknown as CompanyInfo);
+              nextCompanyInfo = value as unknown as CompanyInfo;
               break;
             case "contact_details":
-              setContactDetails(value as unknown as ContactDetails);
+              nextContactDetails = value as unknown as ContactDetails;
               break;
             case "social_links":
-              setSocialLinks(value as unknown as SocialLinks);
+              nextSocialLinks = value as unknown as SocialLinks;
               break;
             case "appearance":
-              setAppearance(value as unknown as Appearance);
+              nextAppearance = value as unknown as Appearance;
               break;
             case "analytics":
               setAnalytics(value as unknown as AnalyticsSettings);
@@ -228,6 +264,28 @@ const AdminSettings = () => {
           }
         });
       }
+
+      const { data: officeLocations, error: officeLocationsError } = await supabase
+        .from("office_locations")
+        .select("id, name, order_index, map_embed_url")
+        .order("order_index");
+
+      if (officeLocationsError) throw officeLocationsError;
+
+      if (officeLocations?.length) {
+        const { bananiOffice, savarOffice } = getOfficeMapTargets(officeLocations as OfficeLocationMapRecord[]);
+
+        nextContactDetails = {
+          ...nextContactDetails,
+          google_map_embed_url: sanitizeGoogleMapsEmbedUrl(bananiOffice?.map_embed_url) || nextContactDetails.google_map_embed_url,
+          savar_google_map_embed_url: sanitizeGoogleMapsEmbedUrl(savarOffice?.map_embed_url) || nextContactDetails.savar_google_map_embed_url,
+        };
+      }
+
+      setCompanyInfo(nextCompanyInfo);
+      setContactDetails(nextContactDetails);
+      setSocialLinks(nextSocialLinks);
+      setAppearance(nextAppearance);
     } catch (error) {
       console.error("Error fetching settings:", error);
       toast.error("Failed to load settings");
@@ -265,15 +323,61 @@ const AdminSettings = () => {
     }
   };
 
+  const syncOfficeLocationMaps = async (details: ContactDetails) => {
+    const { data: officeLocations, error } = await supabase
+      .from("office_locations")
+      .select("id, name, order_index, map_embed_url")
+      .order("order_index");
+
+    if (error) throw error;
+    if (!officeLocations?.length) return;
+
+    const { bananiOffice, savarOffice } = getOfficeMapTargets(officeLocations as OfficeLocationMapRecord[]);
+    const updates = [];
+
+    if (bananiOffice) {
+      updates.push(
+        supabase
+          .from("office_locations")
+          .update({ map_embed_url: sanitizeGoogleMapsEmbedUrl(details.google_map_embed_url) || null })
+          .eq("id", bananiOffice.id)
+      );
+    }
+
+    if (savarOffice && savarOffice.id !== bananiOffice?.id) {
+      updates.push(
+        supabase
+          .from("office_locations")
+          .update({ map_embed_url: sanitizeGoogleMapsEmbedUrl(details.savar_google_map_embed_url) || null })
+          .eq("id", savarOffice.id)
+      );
+    }
+
+    const results = await Promise.all(updates);
+    const failedResult = results.find((result) => result.error);
+
+    if (failedResult?.error) {
+      throw failedResult.error;
+    }
+  };
+
   const handleSaveAll = async () => {
     setSaving(true);
     try {
+      const normalizedContactDetails: ContactDetails = {
+        ...contactDetails,
+        google_map_embed_url: sanitizeGoogleMapsEmbedUrl(contactDetails.google_map_embed_url),
+        savar_google_map_embed_url: sanitizeGoogleMapsEmbedUrl(contactDetails.savar_google_map_embed_url),
+      };
+
       await Promise.all([
         saveSetting("company_info", companyInfo as unknown as Record<string, unknown>, "general"),
-        saveSetting("contact_details", contactDetails as unknown as Record<string, unknown>, "general"),
+        saveSetting("contact_details", normalizedContactDetails as unknown as Record<string, unknown>, "general"),
         saveSetting("social_links", socialLinks as unknown as Record<string, unknown>, "general"),
         saveSetting("appearance", appearance as unknown as Record<string, unknown>, "appearance"),
+        syncOfficeLocationMaps(normalizedContactDetails),
       ]);
+      setContactDetails(normalizedContactDetails);
       toast.success("All settings saved successfully!");
     } catch (error) {
       console.error("Error saving settings:", error);
@@ -520,15 +624,7 @@ const AdminSettings = () => {
                   <Textarea
                     id="google_map_embed_url"
                     value={contactDetails.google_map_embed_url}
-                    onChange={(e) => {
-                      let val = e.target.value.trim();
-                      // Auto-extract src URL from pasted iframe HTML
-                      const srcMatch = val.match(/src=["']([^"']+)["']/);
-                      if (srcMatch) val = srcMatch[1];
-                      // Remove trailing iframe attributes
-                      val = val.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '').replace(/["']\s*$/, '');
-                      setContactDetails({ ...contactDetails, google_map_embed_url: val });
-                    }}
+                    onChange={(e) => setContactDetails({ ...contactDetails, google_map_embed_url: sanitizeGoogleMapsEmbedUrl(e.target.value) })}
                     placeholder="https://www.google.com/maps/embed?pb=..."
                     rows={3}
                     className={
@@ -596,13 +692,7 @@ const AdminSettings = () => {
                   <Textarea
                     id="savar_google_map_embed_url"
                     value={contactDetails.savar_google_map_embed_url || ""}
-                    onChange={(e) => {
-                      let val = e.target.value.trim();
-                      const srcMatch = val.match(/src=["']([^"']+)["']/);
-                      if (srcMatch) val = srcMatch[1];
-                      val = val.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '').replace(/["']\s*$/, '');
-                      setContactDetails({ ...contactDetails, savar_google_map_embed_url: val });
-                    }}
+                    onChange={(e) => setContactDetails({ ...contactDetails, savar_google_map_embed_url: sanitizeGoogleMapsEmbedUrl(e.target.value) })}
                     placeholder="https://www.google.com/maps/embed?pb=..."
                     rows={3}
                     className={
