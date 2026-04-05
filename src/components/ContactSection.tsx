@@ -489,27 +489,9 @@ const ContactSection = () => {
             {officeLocations.length > 0 ? (
               officeLocations.map((office) => {
                 const getMapEmbedSrc = (office: OfficeLocation) => {
-                  // Priority 1: Use the dedicated embed URL if available
-                  if (office.map_embed_url && office.map_embed_url.trim()) {
-                    let url = office.map_embed_url.trim();
-                    // Extract src from full iframe HTML if pasted
-                    const srcMatch = url.match(/src=["']([^"']+)["']/);
-                    if (srcMatch) {
-                      url = srcMatch[1];
-                    } else {
-                      // Handle case where URL has extra iframe attributes appended (e.g., url" width="600"...)
-                      const quoteIdx = url.indexOf('"');
-                      if (quoteIdx > 0 && url.startsWith('https://')) {
-                        url = url.substring(0, quoteIdx);
-                      }
-                    }
-                    return url;
-                  }
-                  // Priority 2: If map_query is a proper embed URL
-                  if (office.map_query?.includes('/maps/embed')) return office.map_query;
-                  // Priority 3: Use address - replace # with space for better Google Maps search
-                  const cleanAddress = office.address.replace(/#/g, ' ').replace(/\s+/g, ' ').trim();
-                  return `https://maps.google.com/maps?q=${encodeURIComponent(cleanAddress)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                  // Use office name + address for reliable Google Maps embed (no API key needed)
+                  const searchQuery = `${office.name}, ${office.address}`.replace(/#/g, ' ').replace(/\s+/g, ' ').trim();
+                  return `https://maps.google.com/maps?q=${encodeURIComponent(searchQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
                 };
                 const mapSrc = getMapEmbedSrc(office);
                 return (
