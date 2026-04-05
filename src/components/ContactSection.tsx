@@ -494,7 +494,15 @@ const ContactSection = () => {
                     let url = office.map_embed_url.trim();
                     // Extract src from full iframe HTML if pasted
                     const srcMatch = url.match(/src=["']([^"']+)["']/);
-                    if (srcMatch) url = srcMatch[1];
+                    if (srcMatch) {
+                      url = srcMatch[1];
+                    } else {
+                      // Handle case where URL has extra iframe attributes appended (e.g., url" width="600"...)
+                      const quoteIdx = url.indexOf('"');
+                      if (quoteIdx > 0 && url.startsWith('https://')) {
+                        url = url.substring(0, quoteIdx);
+                      }
+                    }
                     return url;
                   }
                   // Priority 2: If map_query is a proper embed URL
