@@ -123,6 +123,37 @@ const getOfficeMapTargets = (offices: OfficeLocationMapRecord[]) => {
   return { bananiOffice, savarOffice };
 };
 
+const defaultCompanyInfo: CompanyInfo = {
+  name: "SM Elite Hajj",
+  tagline: "Your Trusted Partner for Sacred Journeys",
+  description: "Government Approved Hajj & Umrah Agency",
+  logo_url: "",
+};
+
+const defaultContactDetails: ContactDetails = {
+  email: "info@smelitehajj.com",
+  phone: "+880 1234-567890",
+  whatsapp: "+8801712345678",
+  address: "Dhaka, Bangladesh",
+  google_map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.73722708738!2d90.40006317353787!3d23.79236988716717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1769162756109!5m2!1sen!2sbd",
+  savar_google_map_embed_url: "",
+};
+
+const defaultSocialLinks: SocialLinks = {
+  facebook: "",
+  instagram: "",
+  youtube: "",
+  twitter: "",
+};
+
+const defaultAppearance: Appearance = {
+  primary_color: "#10b981",
+  show_announcement_bar: false,
+  announcement_text: "",
+  show_book_now_button: true,
+  show_mobile_cta_bar: true,
+};
+
 // Theme Toggle Icon Component
 const ThemeToggleIcon = () => {
   const { theme } = useTheme();
@@ -170,36 +201,13 @@ const AdminSettings = () => {
     folder: "logos",
   });
   
-  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
-    name: "SM Elite Hajj",
-    tagline: "Your Trusted Partner for Sacred Journeys",
-    description: "Government Approved Hajj & Umrah Agency",
-    logo_url: "",
-  });
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(defaultCompanyInfo);
 
-  const [contactDetails, setContactDetails] = useState<ContactDetails>({
-    email: "info@smelitehajj.com",
-    phone: "+880 1234-567890",
-    whatsapp: "+8801712345678",
-    address: "Dhaka, Bangladesh",
-    google_map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.73722708738!2d90.40006317353787!3d23.79236988716717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sbd!4v1769162756109!5m2!1sen!2sbd",
-    savar_google_map_embed_url: "",
-  });
+  const [contactDetails, setContactDetails] = useState<ContactDetails>(defaultContactDetails);
 
-  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
-    facebook: "",
-    instagram: "",
-    youtube: "",
-    twitter: "",
-  });
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>(defaultSocialLinks);
 
-  const [appearance, setAppearance] = useState<Appearance>({
-    primary_color: "#10b981",
-    show_announcement_bar: false,
-    announcement_text: "",
-    show_book_now_button: true,
-    show_mobile_cta_bar: true,
-  });
+  const [appearance, setAppearance] = useState<Appearance>(defaultAppearance);
 
   const [notifications, setNotifications] = useState({
     emailOnBooking: true,
@@ -228,10 +236,10 @@ const AdminSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      let nextCompanyInfo = defaultSettings.companyInfo;
-      let nextContactDetails = defaultSettings.contactDetails;
-      let nextSocialLinks = defaultSettings.socialLinks;
-      let nextAppearance = defaultSettings.appearance;
+      let nextCompanyInfo = defaultCompanyInfo;
+      let nextContactDetails = defaultContactDetails;
+      let nextSocialLinks = defaultSocialLinks;
+      let nextAppearance = defaultAppearance;
 
       const { data, error } = await supabase
         .from("site_settings")
