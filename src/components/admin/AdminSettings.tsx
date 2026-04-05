@@ -520,7 +520,15 @@ const AdminSettings = () => {
                   <Textarea
                     id="google_map_embed_url"
                     value={contactDetails.google_map_embed_url}
-                    onChange={(e) => setContactDetails({ ...contactDetails, google_map_embed_url: e.target.value })}
+                    onChange={(e) => {
+                      let val = e.target.value.trim();
+                      // Auto-extract src URL from pasted iframe HTML
+                      const srcMatch = val.match(/src=["']([^"']+)["']/);
+                      if (srcMatch) val = srcMatch[1];
+                      // Remove trailing iframe attributes
+                      val = val.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '').replace(/["']\s*$/, '');
+                      setContactDetails({ ...contactDetails, google_map_embed_url: val });
+                    }}
                     placeholder="https://www.google.com/maps/embed?pb=..."
                     rows={3}
                     className={
@@ -588,7 +596,13 @@ const AdminSettings = () => {
                   <Textarea
                     id="savar_google_map_embed_url"
                     value={contactDetails.savar_google_map_embed_url || ""}
-                    onChange={(e) => setContactDetails({ ...contactDetails, savar_google_map_embed_url: e.target.value })}
+                    onChange={(e) => {
+                      let val = e.target.value.trim();
+                      const srcMatch = val.match(/src=["']([^"']+)["']/);
+                      if (srcMatch) val = srcMatch[1];
+                      val = val.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '').replace(/["']\s*$/, '');
+                      setContactDetails({ ...contactDetails, savar_google_map_embed_url: val });
+                    }}
                     placeholder="https://www.google.com/maps/embed?pb=..."
                     rows={3}
                     className={
