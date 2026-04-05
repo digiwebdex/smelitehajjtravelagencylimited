@@ -489,7 +489,22 @@ const ContactSection = () => {
             {officeLocations.length > 0 ? (
               officeLocations.map((office) => {
                 const getMapEmbedSrc = (office: OfficeLocation) => {
-                  // Use office name + address for reliable Google Maps embed (no API key needed)
+                  if (office.map_embed_url) {
+                    let url = office.map_embed_url.trim();
+                    // Extract src from iframe tag if pasted as full iframe HTML
+                    const srcMatch = url.match(/src=["']([^"']+)["']/);
+                    if (srcMatch) {
+                      url = srcMatch[1];
+                    }
+                    // Remove any trailing iframe attributes that may have been pasted
+                    url = url.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '');
+                    url = url.replace(/["']\s*$/, '');
+                    // Validate it looks like a URL
+                    if (url.startsWith('https://')) {
+                      return url;
+                    }
+                  }
+                  // Fallback: address-based search
                   const searchQuery = `${office.name}, ${office.address}`.replace(/#/g, ' ').replace(/\s+/g, ' ').trim();
                   return `https://maps.google.com/maps?q=${encodeURIComponent(searchQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
                 };

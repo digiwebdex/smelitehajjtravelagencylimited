@@ -252,7 +252,13 @@ const AdminOfficeLocations = () => {
               </Label>
               <Input
                 value={office.map_embed_url || ""}
-                onChange={(e) => updateOffice(office.id, "map_embed_url", e.target.value)}
+                onChange={(e) => {
+                  let val = e.target.value.trim();
+                  const srcMatch = val.match(/src=["']([^"']+)["']/);
+                  if (srcMatch) val = srcMatch[1];
+                  val = val.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '').replace(/["']\s*$/, '');
+                  updateOffice(office.id, "map_embed_url", val);
+                }}
                 placeholder="https://www.google.com/maps/embed?pb=..."
                 className="mt-1"
               />
