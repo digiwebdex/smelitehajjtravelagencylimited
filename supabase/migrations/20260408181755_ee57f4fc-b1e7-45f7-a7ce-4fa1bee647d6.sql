@@ -1,0 +1,3 @@
+UPDATE office_locations SET map_embed_url = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3650.737364980507!2d90.40006317456192!3d23.792364978641785!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c790ba691d2d%3A0xd7e95eafc3e303a7!2sS%20M%20Elite%20Hajj%20Limited!5e0!3m2!1sen!2sus!4v1775018288275!5m2!1sen!2sus' WHERE id = '6d947a73-21f6-4369-80d7-e43bf75534c2';
+
+UPDATE office_locations SET map_embed_url = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47091.64578935934!2d90.20378114811312!3d23.846639117662303!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755ebac87241eab%3A0x2d6f2da065b1ddc1!2sSavar%20Bus%20Stand!5e0!3m2!1sen!2sbd!4v1775018786009!5m2!1sen!2sbd' WHERE id = '17bc6d4d-8ddd-4428-b3fe-2cb52473fc6f';
