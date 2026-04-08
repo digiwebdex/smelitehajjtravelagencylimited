@@ -20,6 +20,19 @@ interface OfficeLocation {
   is_active: boolean;
 }
 
+const sanitizeMapEmbedUrl = (input: string | null): string | null => {
+  if (!input) return null;
+  let url = input.trim();
+  // Extract src from full <iframe> tag
+  const srcMatch = url.match(/src=["']([^"']+)["']/i);
+  if (srcMatch) {
+    return srcMatch[1];
+  }
+  // Remove trailing iframe attributes concatenated to URL
+  url = url.split('" ')[0].replace(/["']+$/, '');
+  return url || null;
+};
+
 const AdminOfficeLocations = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
