@@ -53,7 +53,7 @@ const AdminOfficeLocations = () => {
         phones: office.phones,
         email: office.email,
         map_query: office.map_query,
-        map_embed_url: office.map_embed_url,
+        map_embed_url: sanitizeMapEmbedUrl(office.map_embed_url),
         order_index: office.order_index,
         is_active: office.is_active,
       })

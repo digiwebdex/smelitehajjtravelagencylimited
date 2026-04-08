@@ -491,14 +491,17 @@ const ContactSection = () => {
                 const getMapEmbedSrc = (office: OfficeLocation) => {
                   if (office.map_embed_url) {
                     let url = office.map_embed_url.trim();
-                    // Extract src from iframe tag if pasted as full iframe HTML
-                    const srcMatch = url.match(/src=["']([^"']+)["']/);
+                    // Extract src from full <iframe ...> tag if pasted
+                    const srcMatch = url.match(/src=["']([^"']+)["']/i);
                     if (srcMatch) {
                       url = srcMatch[1];
                     }
-                    // Remove any trailing iframe attributes that may have been pasted
-                    url = url.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder)=.*/gi, '');
-                    url = url.replace(/["']\s*$/, '');
+                    // Remove any trailing iframe attributes that got concatenated to the URL
+                    // e.g. ...2sbd" width="600" height="450" style=...
+                    url = url.replace(/["']\s*(width|height|style|allowfullscreen|loading|referrerpolicy|frameborder).*/gi, '');
+                    url = url.replace(/["'\s]+$/, '');
+                    // Also handle case where URL ends with attributes without quotes
+                    url = url.split('" ')[0].replace(/["']+$/, '');
                     // Validate it looks like a URL
                     if (url.startsWith('https://')) {
                       return url;
