@@ -105,9 +105,10 @@ const OptimizedImage = ({
     ].join(", ");
   };
 
-  const srcSet = generateSrcSet(src);
-  const webpSrcSet = generateWebPSrcSet(src);
-  const imageSrc = hasError ? fallbackSrc : getOptimizedUrl(src, undefined, 80);
+  // Don't use transformation params - Supabase image transformations may not be enabled
+  const srcSet = undefined;
+  const webpSrcSet = undefined;
+  const imageSrc = hasError ? fallbackSrc : src;
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
