@@ -23,6 +23,7 @@ const TeamSection = () => {
   const [managementTeam, setManagementTeam] = useState<TeamMember[]>([]);
   const [shariahBoard, setShariahBoard] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchTeamMembers();
