@@ -290,6 +290,41 @@ const TeamSection = () => {
         </div>
       </section>
     </IslamicBorder>
+
+    {/* Lightbox Modal */}
+    <AnimatePresence>
+      {lightboxImage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative max-w-lg max-h-[80vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-3 -right-3 z-10 bg-white/90 rounded-full p-1.5 shadow-lg hover:bg-white transition-colors"
+            >
+              <X className="w-5 h-5 text-black" />
+            </button>
+            <img
+              src={lightboxImage.url}
+              alt={lightboxImage.name}
+              className="w-full h-auto max-h-[75vh] object-contain rounded-xl shadow-2xl"
+            />
+            <p className="text-white text-center mt-3 font-semibold text-lg">{lightboxImage.name}</p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
