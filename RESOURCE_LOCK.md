@@ -63,7 +63,7 @@
 
 | Property | Value |
 |----------|-------|
-| **Repo** | `https://github.com/digiwebdex/smelitehajjtravelagencylimited-ea1f88c7.git` |
+| **Repo** | `https://github.com/digiwebdex/smelitehajjtravelagencylimited-2da956e9.git` |
 | **Branch** | `main` |
 
 ---
