@@ -85,6 +85,7 @@ const TeamSection = () => {
   }
 
   return (
+    <>
     <IslamicBorder>
       <section id="team" className="py-12 sm:py-16 lg:py-24 bg-background relative overflow-hidden">
         {/* Decorative background */}
