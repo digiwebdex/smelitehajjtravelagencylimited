@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import IslamicBorder from "./IslamicBorder";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
@@ -23,6 +23,7 @@ const TeamSection = () => {
   const [managementTeam, setManagementTeam] = useState<TeamMember[]>([]);
   const [shariahBoard, setShariahBoard] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchTeamMembers();
@@ -84,6 +85,7 @@ const TeamSection = () => {
   }
 
   return (
+    <>
     <IslamicBorder>
       <section id="team" className="py-12 sm:py-16 lg:py-24 bg-background relative overflow-hidden">
         {/* Decorative background */}
@@ -136,7 +138,10 @@ const TeamSection = () => {
                     className="bg-card hover:bg-primary/10 rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex"
                   >
                     {/* Square Image Container with inner border */}
-                    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 m-2 rounded-lg">
+                    <div 
+                      className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 m-2 rounded-lg cursor-pointer"
+                      onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
+                    >
                       {member.avatar_url ? (
                         <OptimizedImage 
                           src={member.avatar_url} 
@@ -231,7 +236,10 @@ const TeamSection = () => {
                 className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden border-b-4 border-secondary"
               >
                 {/* Square Image Container */}
-                <div className="relative aspect-square w-full overflow-hidden bg-primary">
+                <div 
+                  className="relative aspect-square w-full overflow-hidden bg-primary cursor-pointer"
+                  onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
+                >
                   {member.avatar_url ? (
                     <OptimizedImage 
                       src={member.avatar_url} 
@@ -289,6 +297,41 @@ const TeamSection = () => {
         </div>
       </section>
     </IslamicBorder>
+
+    {/* Lightbox Modal */}
+    <AnimatePresence>
+      {lightboxImage && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative max-w-lg max-h-[80vh] w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setLightboxImage(null)}
+              className="absolute -top-3 -right-3 z-10 bg-white/90 rounded-full p-1.5 shadow-lg hover:bg-white transition-colors"
+            >
+              <X className="w-5 h-5 text-black" />
+            </button>
+            <img
+              src={lightboxImage.url}
+              alt={lightboxImage.name}
+              className="w-full h-auto max-h-[75vh] object-contain rounded-xl shadow-2xl"
+            />
+            <p className="text-white text-center mt-3 font-semibold text-lg">{lightboxImage.name}</p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 
