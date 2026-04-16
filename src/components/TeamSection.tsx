@@ -138,7 +138,10 @@ const TeamSection = () => {
                     className="bg-card hover:bg-primary/10 rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex"
                   >
                     {/* Square Image Container with inner border */}
-                    <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 m-2 rounded-lg">
+                    <div 
+                      className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 m-2 rounded-lg cursor-pointer"
+                      onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
+                    >
                       {member.avatar_url ? (
                         <OptimizedImage 
                           src={member.avatar_url} 
@@ -233,7 +236,10 @@ const TeamSection = () => {
                 className="bg-card rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden border-b-4 border-secondary"
               >
                 {/* Square Image Container */}
-                <div className="relative aspect-square w-full overflow-hidden bg-primary">
+                <div 
+                  className="relative aspect-square w-full overflow-hidden bg-primary cursor-pointer"
+                  onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
+                >
                   {member.avatar_url ? (
                     <OptimizedImage 
                       src={member.avatar_url} 
