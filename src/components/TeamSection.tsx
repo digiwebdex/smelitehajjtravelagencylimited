@@ -261,9 +261,14 @@ const TeamSection = () => {
                   <h3 className="font-pilgrimage font-bold text-2xl text-secondary mb-1">
                     {member.name}
                   </h3>
-                  <p className="text-foreground font-semibold text-sm tracking-wide mb-3 capitalize">
+                  <p className="text-foreground font-semibold text-sm tracking-wide mb-2 capitalize">
                     {member.role}
                   </p>
+                  {member.qualifications && (
+                    <p className="text-muted-foreground text-xs leading-relaxed mb-3 line-clamp-3">
+                      {member.qualifications}
+                    </p>
+                  )}
                   <div className="flex flex-wrap items-center justify-center gap-4">
                     {member.whatsapp_number && (
                       <a
