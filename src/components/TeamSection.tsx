@@ -164,9 +164,35 @@ const TeamSection = () => {
                       <h3 className="font-pilgrimage font-bold text-2xl sm:text-3xl lg:text-4xl text-secondary mb-2">
                         {member.name}
                       </h3>
-                      <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide">
+                      <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide mb-3">
                         {member.role}
                       </p>
+                      <div className="flex flex-wrap items-center gap-4">
+                        {member.whatsapp_number && (
+                          <a
+                            href={`https://wa.me/${member.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-[#25D366] hover:text-[#128C7E] transition-colors font-medium hover:scale-110"
+                            title="WhatsApp"
+                          >
+                            <WhatsAppIcon size={18} />
+                            <span className="text-xs">{member.whatsapp_number}</span>
+                          </a>
+                        )}
+                        {member.imo_number && (
+                          <a
+                            href={`https://imo.im/${member.imo_number.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#2563EB] transition-colors font-medium hover:scale-110"
+                            title="IMO"
+                          >
+                            <IMOIcon size={18} />
+                            <span className="text-xs">{member.imo_number}</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 ))}
