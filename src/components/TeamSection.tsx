@@ -141,7 +141,7 @@ const TeamSection = () => {
                         <OptimizedImage 
                           src={member.avatar_url} 
                           alt={member.name}
-                          className="w-full h-full transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full transition-transform duration-500 group-hover:scale-110"
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                       ) : (
@@ -151,12 +151,6 @@ const TeamSection = () => {
                           </span>
                         </div>
                       )}
-                      {/* Hover Overlay with Bio */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/70 to-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center p-4">
-                        <p className="text-white/90 text-sm leading-relaxed text-center line-clamp-5">
-                          {member.qualifications || "Shariah expert ensuring Islamic compliance."}
-                        </p>
-                      </div>
                     </div>
                     
                     {/* Content */}
@@ -164,9 +158,14 @@ const TeamSection = () => {
                       <h3 className="font-pilgrimage font-bold text-2xl sm:text-3xl lg:text-4xl text-secondary mb-2">
                         {member.name}
                       </h3>
-                      <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide mb-3">
+                      <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide mb-2">
                         {member.role}
                       </p>
+                      {member.qualifications && (
+                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed mb-3 line-clamp-3">
+                          {member.qualifications}
+                        </p>
+                      )}
                       <div className="flex flex-wrap items-center gap-4">
                         {member.whatsapp_number && (
                           <a
