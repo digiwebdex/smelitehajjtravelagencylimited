@@ -12,9 +12,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import ImageUpload from "./ImageUpload";
-import { Plus, Edit, Trash2, User } from "lucide-react";
+import { Plus, Edit, Trash2, User, GripVertical } from "lucide-react";
 import WhatsAppIcon from "../icons/WhatsAppIcon";
 import IMOIcon from "../icons/IMOIcon";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TeamMember {
   id: string;
@@ -29,6 +46,77 @@ interface TeamMember {
   imo_number: string;
 }
 
+interface SortableRowProps {
+  item: TeamMember;
+  onEdit: (item: TeamMember) => void;
+  onDelete: (id: string) => void;
+  onToggleActive: (item: TeamMember) => void;
+}
+
+const SortableRow = ({ item, onEdit, onDelete, onToggleActive }: SortableRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell>
+        <button
+          className="cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-muted rounded"
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </TableCell>
+      <TableCell>
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={item.avatar_url} alt={item.name} />
+          <AvatarFallback>
+            <User className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+      </TableCell>
+      <TableCell className="font-medium">{item.name}</TableCell>
+      <TableCell>{item.role}</TableCell>
+      <TableCell>
+        {item.whatsapp_number ? (
+          <span className="flex items-center gap-1 text-[#25D366] text-sm">
+            <WhatsAppIcon size={14} />
+            {item.whatsapp_number}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
+      </TableCell>
+      <TableCell>
+        {item.imo_number ? (
+          <span className="flex items-center gap-1 text-[#3B82F6] text-sm">
+            <IMOIcon size={14} />
+            {item.imo_number}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
+      </TableCell>
+      <TableCell className="max-w-[200px]">
+        <p className="text-sm text-muted-foreground line-clamp-2">{item.qualifications || "—"}</p>
+      </TableCell>
+      <TableCell><Switch checked={item.is_active} onCheckedChange={() => onToggleActive(item)} /></TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => onEdit(item)}><Edit className="w-4 h-4" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 const AdminTeam = () => {
   const { toast } = useToast();
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -38,6 +126,11 @@ const AdminTeam = () => {
   const [formData, setFormData] = useState({
     name: "", role: "", qualifications: "", avatar_url: "", board_type: "management", whatsapp_number: "", imo_number: ""
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const { uploadImage, uploading } = useImageUpload({
     bucket: "admin-uploads",
@@ -99,74 +192,78 @@ const AdminTeam = () => {
     fetchMembers();
   };
 
+  const handleDragEnd = async (event: DragEndEvent, boardType: string) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const boardMembers = members.filter(m => m.board_type === boardType);
+    const oldIndex = boardMembers.findIndex(m => m.id === active.id);
+    const newIndex = boardMembers.findIndex(m => m.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(boardMembers, oldIndex, newIndex);
+
+    // Optimistically update local state
+    const otherMembers = members.filter(m => m.board_type !== boardType);
+    const updatedReordered = reordered.map((m, idx) => ({ ...m, order_index: idx + 1 }));
+    setMembers([...otherMembers, ...updatedReordered].sort((a, b) => a.order_index - b.order_index));
+
+    // Persist to DB
+    try {
+      await Promise.all(
+        updatedReordered.map((m) =>
+          supabase.from("team_members").update({ order_index: m.order_index }).eq("id", m.id)
+        )
+      );
+      toast({ title: "Order updated" });
+    } catch (err: any) {
+      toast({ title: "Error", description: "Failed to save new order", variant: "destructive" });
+      fetchMembers();
+    }
+  };
+
   if (loading) return <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
 
   const managementMembers = members.filter(m => m.board_type === "management");
   const shariahMembers = members.filter(m => m.board_type === "shariah");
 
-  const renderMemberTable = (membersList: TeamMember[], title: string) => (
+  const renderMemberTable = (membersList: TeamMember[], title: string, boardType: string) => (
     <div>
       <h4 className="font-medium mb-2">{title} ({membersList.length})</h4>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Avatar</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>WhatsApp</TableHead>
-            <TableHead>IMO</TableHead>
-            <TableHead className="max-w-[200px]">Qualifications</TableHead>
-            <TableHead>Active</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {membersList.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={item.avatar_url} alt={item.name} />
-                  <AvatarFallback>
-                    <User className="h-4 w-4" />
-                  </AvatarFallback>
-                </Avatar>
-              </TableCell>
-              <TableCell className="font-medium">{item.name}</TableCell>
-              <TableCell>{item.role}</TableCell>
-              <TableCell>
-                {item.whatsapp_number ? (
-                  <span className="flex items-center gap-1 text-[#25D366] text-sm">
-                    <WhatsAppIcon size={14} />
-                    {item.whatsapp_number}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground text-sm">—</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {item.imo_number ? (
-                  <span className="flex items-center gap-1 text-[#3B82F6] text-sm">
-                    <IMOIcon size={14} />
-                    {item.imo_number}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground text-sm">—</span>
-                )}
-              </TableCell>
-              <TableCell className="max-w-[200px]">
-                <p className="text-sm text-muted-foreground line-clamp-2">{item.qualifications || "—"}</p>
-              </TableCell>
-              <TableCell><Switch checked={item.is_active} onCheckedChange={() => toggleActive(item)} /></TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Edit className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                </div>
-              </TableCell>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => handleDragEnd(e, boardType)}
+      >
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-10"></TableHead>
+              <TableHead>Avatar</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>WhatsApp</TableHead>
+              <TableHead>IMO</TableHead>
+              <TableHead className="max-w-[200px]">Qualifications</TableHead>
+              <TableHead>Active</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <SortableContext items={membersList.map(m => m.id)} strategy={verticalListSortingStrategy}>
+            <TableBody>
+              {membersList.map((item) => (
+                <SortableRow
+                  key={item.id}
+                  item={item}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onToggleActive={toggleActive}
+                />
+              ))}
+            </TableBody>
+          </SortableContext>
+        </Table>
+      </DndContext>
     </div>
   );
 
@@ -175,7 +272,7 @@ const AdminTeam = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Team Members</CardTitle>
-          <CardDescription>Manage management and shariah board members</CardDescription>
+          <CardDescription>Manage management and shariah board members — drag rows to reorder</CardDescription>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) { setEditingItem(null); resetForm(); } }}>
           <DialogTrigger asChild>
@@ -247,8 +344,8 @@ const AdminTeam = () => {
         </Dialog>
       </CardHeader>
       <CardContent className="space-y-6">
-        {renderMemberTable(managementMembers, "Management Board")}
-        {renderMemberTable(shariahMembers, "Shariah Board")}
+        {renderMemberTable(managementMembers, "Management Board", "management")}
+        {renderMemberTable(shariahMembers, "Shariah Board", "shariah")}
       </CardContent>
     </Card>
   );
