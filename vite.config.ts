@@ -29,36 +29,27 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       // Split large vendor libraries into separate chunks for better caching & parallel download
+      // IMPORTANT: Bundle React + all UI libs that depend on React together to avoid
+      // "Cannot read properties of undefined (reading 'createContext')" errors caused by
+      // chunks loading before React is initialized.
       rollupOptions: {
         output: {
           manualChunks: (id) => {
             if (!id.includes("node_modules")) return;
-            if (id.includes("react-dom") || id.includes("react/") || id.includes("react-router")) {
-              return "react-vendor";
-            }
-            if (id.includes("@radix-ui") || id.includes("lucide-react") || id.includes("cmdk")) {
-              return "ui-vendor";
-            }
-            if (id.includes("@supabase") || id.includes("@tanstack")) {
-              return "data-vendor";
-            }
-            if (id.includes("framer-motion")) {
-              return "motion-vendor";
+            // Heavy isolated libs that are safe to split (loaded on demand by routes)
+            if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("xlsx")) {
+              return "doc-vendor";
             }
             if (id.includes("recharts") || id.includes("d3-")) {
               return "chart-vendor";
             }
-            if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("xlsx")) {
-              return "doc-vendor";
-            }
-            if (id.includes("@dnd-kit")) {
-              return "dnd-vendor";
-            }
+            // Everything else (React, Radix, Supabase, Tanstack, framer-motion, dnd-kit, etc.)
+            // stays in a single vendor chunk so React loads before anything that uses it.
             return "vendor";
           },
         },
       },
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 1500,
     },
   };
 });
