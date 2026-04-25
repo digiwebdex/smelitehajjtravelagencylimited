@@ -26,7 +26,39 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       include: ["react", "react-dom", "@tanstack/react-query"],
-      force: true,
+    },
+    build: {
+      // Split large vendor libraries into separate chunks for better caching & parallel download
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (!id.includes("node_modules")) return;
+            if (id.includes("react-dom") || id.includes("react/") || id.includes("react-router")) {
+              return "react-vendor";
+            }
+            if (id.includes("@radix-ui") || id.includes("lucide-react") || id.includes("cmdk")) {
+              return "ui-vendor";
+            }
+            if (id.includes("@supabase") || id.includes("@tanstack")) {
+              return "data-vendor";
+            }
+            if (id.includes("framer-motion")) {
+              return "motion-vendor";
+            }
+            if (id.includes("recharts") || id.includes("d3-")) {
+              return "chart-vendor";
+            }
+            if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("xlsx")) {
+              return "doc-vendor";
+            }
+            if (id.includes("@dnd-kit")) {
+              return "dnd-vendor";
+            }
+            return "vendor";
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
     },
   };
 });
