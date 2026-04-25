@@ -119,6 +119,7 @@ const menuGroups = [
     label: "Reports",
     items: [
       { value: "reports", label: "Reports & Analytics", icon: BarChart3 },
+      { value: "traffic-status", label: "Traffic Status", icon: Activity },
       { value: "financial-analytics", label: "Financial Analytics", icon: Calculator },
       { value: "hajji-reports", label: "Hajji Reports", icon: Users },
     ]
