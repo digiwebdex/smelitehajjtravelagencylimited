@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ReactGA from "react-ga4";
 import { supabase } from "@/integrations/supabase/client";
+import { useVisitTracker } from "@/hooks/useVisitTracker";
 
 interface AnalyticsSettings {
   measurement_id: string;
@@ -12,6 +13,9 @@ const AnalyticsTracker = () => {
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<AnalyticsSettings | null>(null);
+
+  // Track every public page visit into our own DB for admin Traffic Status
+  useVisitTracker();
 
   // Fetch analytics settings from database
   useEffect(() => {
