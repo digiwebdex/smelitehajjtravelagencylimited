@@ -57,6 +57,7 @@ import AdminNotificationTemplates from "@/components/admin/AdminNotificationTemp
 import AdminBookingSettings from "@/components/admin/AdminBookingSettings";
 import AdminLeadsManagement from "@/components/admin/AdminLeadsManagement";
 import AdminMarketingAnalytics from "@/components/admin/AdminMarketingAnalytics";
+import AdminTrafficStatus from "@/components/admin/AdminTrafficStatus";
 import AdminLeadMagnets from "@/components/admin/AdminLeadMagnets";
 import AdminReferrals from "@/components/admin/AdminReferrals";
 import AdminAgents from "@/components/admin/AdminAgents";
@@ -230,6 +231,7 @@ const AdminDashboard = () => {
       case "revenue": return <AdminRevenue />;
       case "financial-analytics": return <AdminFinancialAnalytics />;
       case "reports": return <AdminReportsAnalytics />;
+      case "traffic-status": return <AdminTrafficStatus />;
       case "hajji-reports": return <AdminHajjiReports />;
       case "reconciliation": return <AdminPaymentReconciliation />;
       case "emi-report": return <AdminEMIReport />;
