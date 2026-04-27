@@ -31,6 +31,21 @@ export default defineConfig(({ mode }) => {
         threshold: 1024,
         deleteOriginFile: false,
       }),
+      // Optimize raster images at build time (PNG/JPG/WebP) — significantly reduces payload
+      mode === "production" && ViteImageOptimizer({
+        png: { quality: 80 },
+        jpeg: { quality: 78, progressive: true, mozjpeg: true },
+        jpg: { quality: 78, progressive: true, mozjpeg: true },
+        webp: { quality: 78, effort: 6 },
+        svg: {
+          multipass: true,
+          plugins: [
+            { name: "preset-default", params: { overrides: { removeViewBox: false } } },
+          ],
+        },
+        cache: true,
+        cacheLocation: "node_modules/.cache/vite-image-optimizer",
+      }),
     ].filter(Boolean),
     resolve: {
       alias: {
