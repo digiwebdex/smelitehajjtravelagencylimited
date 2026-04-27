@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import viteCompression from "vite-plugin-compression";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -13,7 +14,23 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [
+      react(),
+      mode === "development" && componentTagger(),
+      // Pre-compress assets at build time so Nginx can serve .br/.gz directly (much smaller than runtime gzip)
+      mode === "production" && viteCompression({
+        algorithm: "brotliCompress",
+        ext: ".br",
+        threshold: 1024,
+        deleteOriginFile: false,
+      }),
+      mode === "production" && viteCompression({
+        algorithm: "gzip",
+        ext: ".gz",
+        threshold: 1024,
+        deleteOriginFile: false,
+      }),
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
@@ -53,7 +70,41 @@ export default defineConfig(({ mode }) => {
             if (id.includes("framer-motion") || id.includes("motion-dom") || id.includes("motion-utils")) {
               return "motion-vendor";
             }
-            // Core: React, Radix, Supabase, Tanstack — must stay together
+            // Form stack (only used in modals/admin) — lazy
+            if (id.includes("react-hook-form") || id.includes("@hookform") || id.includes("/zod/")) {
+              return "form-vendor";
+            }
+            // Carousel libs (only on Gallery/Testimonials) — lazy
+            if (id.includes("embla-carousel")) {
+              return "carousel-vendor";
+            }
+            // Toast / command / drawer libs — only used after interaction
+            if (id.includes("sonner") || id.includes("cmdk") || id.includes("vaul") || id.includes("input-otp") || id.includes("react-resizable-panels")) {
+              return "ui-extra-vendor";
+            }
+            // Supabase client — heavy but needed for almost every page; keep separate so it can be cached independently
+            if (id.includes("@supabase")) {
+              return "supabase-vendor";
+            }
+            // Radix primitives — split into critical (used in Header/Hero) vs lazy
+            if (id.includes("@radix-ui/react-dialog") || id.includes("@radix-ui/react-alert-dialog") ||
+                id.includes("@radix-ui/react-popover") || id.includes("@radix-ui/react-select") ||
+                id.includes("@radix-ui/react-tabs") || id.includes("@radix-ui/react-accordion") ||
+                id.includes("@radix-ui/react-checkbox") || id.includes("@radix-ui/react-radio-group") ||
+                id.includes("@radix-ui/react-switch") || id.includes("@radix-ui/react-scroll-area") ||
+                id.includes("@radix-ui/react-toast") || id.includes("@radix-ui/react-menubar") ||
+                id.includes("@radix-ui/react-context-menu") || id.includes("@radix-ui/react-hover-card") ||
+                id.includes("@radix-ui/react-collapsible") || id.includes("@radix-ui/react-navigation-menu") ||
+                id.includes("@radix-ui/react-progress") || id.includes("@radix-ui/react-slider") ||
+                id.includes("@radix-ui/react-toggle") || id.includes("@radix-ui/react-aspect-ratio") ||
+                id.includes("@radix-ui/react-avatar")) {
+              return "radix-vendor";
+            }
+            // lucide-react — tree-shakes per icon, but bundle the rest separately
+            if (id.includes("lucide-react")) {
+              return "icons-vendor";
+            }
+            // Core: React, react-router, tanstack — must stay together for first paint
             return "vendor";
           },
         },
@@ -70,6 +121,11 @@ export default defineConfig(({ mode }) => {
               !dep.includes("chart-vendor") &&
               !dep.includes("admin-vendor") &&
               !dep.includes("motion-vendor") &&
+              !dep.includes("form-vendor") &&
+              !dep.includes("carousel-vendor") &&
+              !dep.includes("ui-extra-vendor") &&
+              !dep.includes("date-vendor") &&
+              !dep.includes("icons-vendor") &&
               !dep.includes("AdminDashboard")
           );
         },

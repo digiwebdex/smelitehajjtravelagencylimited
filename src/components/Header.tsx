@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Phone, Mail, User, LogOut, LayoutDashboard, MapPin, MessageCircle, Package, ClipboardList, Globe, Settings, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,9 @@ import {
 import { formatCurrency } from "@/lib/currency";
 import { hasGuestBookings } from "@/utils/guestBookingStorage";
 import companyLogo from "@/assets/company-logo.webp";
-import BookingModal from "./BookingModal";
-import VisaApplicationModal from "./VisaApplicationModal";
+// Heavy modals (react-hook-form + zod + radix dialog) — lazy-load to keep mobile LCP fast
+const BookingModal = lazy(() => import("./BookingModal"));
+const VisaApplicationModal = lazy(() => import("./VisaApplicationModal"));
 
 interface MenuItem {
   id: string;
@@ -391,26 +392,32 @@ const Header = () => {
       </header>
 
       {/* Booking Modal */}
-      {selectedPackage && (
-        <BookingModal
-          isOpen={isBookingModalOpen}
-          onClose={handleBookingModalClose}
-          package_info={{
-            id: selectedPackage.id,
-            title: selectedPackage.title,
-            price: selectedPackage.price,
-            type: selectedPackage.type,
-            duration_days: selectedPackage.duration_days,
-          }}
-        />
+      {isBookingModalOpen && selectedPackage && (
+        <Suspense fallback={null}>
+          <BookingModal
+            isOpen={isBookingModalOpen}
+            onClose={handleBookingModalClose}
+            package_info={{
+              id: selectedPackage.id,
+              title: selectedPackage.title,
+              price: selectedPackage.price,
+              type: selectedPackage.type,
+              duration_days: selectedPackage.duration_days,
+            }}
+          />
+        </Suspense>
       )}
 
       {/* Visa Application Modal */}
-      <VisaApplicationModal
-        isOpen={isVisaModalOpen}
-        onClose={handleVisaModalClose}
-        country={selectedVisaCountry}
-      />
+      {isVisaModalOpen && (
+        <Suspense fallback={null}>
+          <VisaApplicationModal
+            isOpen={isVisaModalOpen}
+            onClose={handleVisaModalClose}
+            country={selectedVisaCountry}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
