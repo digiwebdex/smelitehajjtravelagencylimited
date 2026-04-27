@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, memo } from "react";
+import { useState, useEffect, useRef, lazy, Suspense, memo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Phone, Mail, Facebook, Instagram, Youtube, Twitter, Building2, Building,
@@ -10,6 +10,79 @@ import companyLogo from "@/assets/company-logo.webp";
 
 // Lazy load non-critical decorative component
 const FloatingIslamicPattern = lazy(() => import("./FloatingIslamicPattern"));
+
+// Defer the heavy footer background video until the footer scrolls into view.
+// This avoids downloading several MB of video on initial page load.
+interface LazyFooterVideoProps {
+  videoUrl: string;
+  videoBlur: number;
+  videoOpacity: number;
+  videoScale: number;
+  videoSpeed: number;
+  videoOverlayColor: string;
+  objectPosition: string;
+}
+
+const LazyFooterVideo = memo(({
+  videoUrl,
+  videoBlur,
+  videoOpacity,
+  videoScale,
+  videoSpeed,
+  videoOverlayColor,
+  objectPosition,
+}: LazyFooterVideoProps) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current || shouldLoad) return;
+    const el = containerRef.current;
+    if (typeof IntersectionObserver === "undefined") {
+      setShouldLoad(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shouldLoad]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0 z-0 overflow-hidden">
+      {shouldLoad && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="none"
+          className="w-full h-full object-cover"
+          style={{
+            filter: `blur(${videoBlur}px)`,
+            opacity: videoOpacity / 100,
+            transform: `scale(${videoScale / 100})`,
+            objectPosition,
+          }}
+          ref={(el) => {
+            if (el) el.playbackRate = videoSpeed;
+          }}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+      )}
+      <div className="absolute inset-0" style={{ backgroundColor: videoOverlayColor }} />
+    </div>
+  );
+});
+LazyFooterVideo.displayName = "LazyFooterVideo";
 
 interface FooterLink {
   label: string;
@@ -211,29 +284,17 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
-      {/* Background Video Animation */}
+      {/* Background Video Animation - lazy mounted when footer enters viewport */}
       {videoEnabled && videoUrl && (
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-            style={{ 
-              filter: `blur(${videoBlur}px)`,
-              opacity: videoOpacity / 100,
-              transform: `scale(${videoScale / 100})`,
-              objectPosition: getObjectPosition(),
-            }}
-            ref={(el) => {
-              if (el) el.playbackRate = videoSpeed;
-            }}
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0" style={{ backgroundColor: videoOverlayColor }} />
-        </div>
+        <LazyFooterVideo
+          videoUrl={videoUrl}
+          videoBlur={videoBlur}
+          videoOpacity={videoOpacity}
+          videoScale={videoScale}
+          videoSpeed={videoSpeed}
+          videoOverlayColor={videoOverlayColor}
+          objectPosition={getObjectPosition()}
+        />
       )}
       
       {/* Floating Islamic Pattern Animation - Lazy Loaded */}

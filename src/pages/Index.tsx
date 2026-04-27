@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import { Skeleton } from "@/components/ui/skeleton";
+
 
 // Lazy load non-critical components for faster initial page load
 const OfferPopup = lazy(() => import("@/components/OfferPopup"));
@@ -24,20 +24,10 @@ interface SectionVisibility {
   [key: string]: boolean;
 }
 
-// Loading placeholder for lazy components
-const SectionSkeleton = ({ height = "h-96" }: { height?: string }) => (
-  <div className={`${height} w-full animate-pulse bg-muted/30`}>
-    <div className="container py-12">
-      <Skeleton className="h-8 w-48 mx-auto mb-4" />
-      <Skeleton className="h-4 w-64 mx-auto mb-8" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Skeleton className="h-48 rounded-lg" />
-        <Skeleton className="h-48 rounded-lg" />
-        <Skeleton className="h-48 rounded-lg" />
-      </div>
-    </div>
-  </div>
-);
+// Lightweight placeholder that doesn't reserve a fixed height — prevents
+// large layout shifts when the actual section (which may be much taller)
+// hydrates and replaces the skeleton.
+const SectionSkeleton = () => <div aria-hidden="true" />;
 
 const Index = () => {
   const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({
@@ -91,7 +81,7 @@ const Index = () => {
       <main>
         {sectionVisibility.hero && <HeroSection />}
         
-        <Suspense fallback={<SectionSkeleton height="h-32" />}>
+        <Suspense fallback={<SectionSkeleton />}>
           {sectionVisibility.notices && <NoticeBoard />}
         </Suspense>
         

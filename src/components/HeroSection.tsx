@@ -259,8 +259,16 @@ const HeroSection = () => {
 
   const isYouTubeUrl = (url: string) => url?.includes("youtube.com") || url?.includes("youtu.be");
 
+  // Auto-upgrade local /images/*.jpg to .webp (smaller payload)
+  const toWebp = (url?: string) => {
+    if (!url) return url;
+    if (url.startsWith("/images/") && /\.(jpe?g|png)$/i.test(url)) {
+      return url.replace(/\.(jpe?g|png)$/i, ".webp");
+    }
+    return url;
+  };
   const content = slides[currentSlide] || defaultSlides[0];
-  const backgroundImage = content.background_image_url || heroImage;
+  const backgroundImage = toWebp(content.background_image_url) || heroImage;
   const isLight = heroTheme === "light";
 
   // Simple fade animation for content - no complex exits
@@ -346,7 +354,7 @@ const HeroSection = () => {
               style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
             >
               <img
-                src={slides[prevSlide]?.background_image_url || heroImage}
+                src={toWebp(slides[prevSlide]?.background_image_url) || heroImage}
                 alt="Hero background"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: imageFocalPoint }}
@@ -360,7 +368,7 @@ const HeroSection = () => {
             style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
           >
             <img
-              src={slides[currentSlide]?.background_image_url || heroImage}
+              src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}
               alt="Hero background"
               className="w-full h-full object-cover"
               style={{ objectPosition: imageFocalPoint }}
@@ -585,7 +593,7 @@ const HeroSection = () => {
                       <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isLight ? "shadow-slate-300/50" : "shadow-black/30"}`}>
                         <div className={`absolute inset-0 border-2 rounded-2xl z-10 ${isLight ? "border-slate-200" : "border-secondary/20"}`} />
                         <img
-                          src={slide.background_image_url || heroImage}
+                          src={toWebp(slide.background_image_url) || heroImage}
                           alt="Hero feature"
                           className="w-full h-auto max-h-[500px] object-cover"
                           style={{ objectPosition: imageFocalPoint }}
