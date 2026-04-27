@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import { Skeleton } from "@/components/ui/skeleton";
+
 
 // Lazy load non-critical components for faster initial page load
 const OfferPopup = lazy(() => import("@/components/OfferPopup"));
