@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import DynamicPackages from "./DynamicPackages";
 import IslamicBorder from "./IslamicBorder";
 import OptimizedImage from "./ui/optimized-image";
-import makkahHaram from "@/assets/makkah-haram.jpg";
+import makkahHaram from "@/assets/makkah-haram.webp";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SectionSettings {
