@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/currency";
 import { hasGuestBookings } from "@/utils/guestBookingStorage";
-import companyLogo from "@/assets/company-logo.jpeg";
+import companyLogo from "@/assets/company-logo.webp";
 import BookingModal from "./BookingModal";
 import VisaApplicationModal from "./VisaApplicationModal";
 

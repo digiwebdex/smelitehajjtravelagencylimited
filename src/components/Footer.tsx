@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import companyLogo from "@/assets/company-logo.jpeg";
+import companyLogo from "@/assets/company-logo.webp";
 
 // Lazy load non-critical decorative component
 const FloatingIslamicPattern = lazy(() => import("./FloatingIslamicPattern"));

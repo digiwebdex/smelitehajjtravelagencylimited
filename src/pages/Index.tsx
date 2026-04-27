@@ -53,7 +53,7 @@ const Index = () => {
     gallery: true,
     contact: true,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchSectionVisibility();
@@ -78,18 +78,6 @@ const Index = () => {
       setLoading(false);
     }
   };
-
-  // Show loading skeleton briefly
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main>
-          <div className="h-screen animate-pulse bg-muted/30" />
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
