@@ -84,20 +84,14 @@ const detectReferrerSource = (referrer: string): string => {
   }
 };
 
-let geoCache: { country?: string; city?: string } | null = null;
-const fetchGeo = async (): Promise<{ country?: string; city?: string }> => {
-  if (geoCache) return geoCache;
-  try {
-    const res = await fetch("https://ipapi.co/json/", { cache: "force-cache" });
-    if (!res.ok) return {};
-    const data = await res.json();
-    geoCache = {
-      country: data?.country_name || undefined,
-      city: data?.city || undefined,
-    };
-    return geoCache;
-  } catch {
-    return {};
+// Geo lookup removed — ipapi.co was blocked/slow and hurt performance.
+// Country/city can be derived server-side from request headers if needed.
+
+const idle = (cb: () => void) => {
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(cb, { timeout: 4000 });
+  } else {
+    setTimeout(cb, 2500);
   }
 };
 
@@ -114,20 +108,20 @@ export const useVisitTracker = () => {
     if (lastTracked.current === key) return;
     lastTracked.current = key;
 
-    const track = async () => {
+    const track = () => {
       try {
         const params = new URLSearchParams(location.search);
         const referrer = document.referrer || "";
-        const geo = await fetchGeo();
-        await supabase.from("page_visits").insert({
+        // Fire-and-forget — do not await; runs after main thread is idle
+        supabase.from("page_visits").insert({
           visitor_id: getVisitorId(),
           session_id: getSessionId(),
           page_path: location.pathname,
           page_title: document.title,
           referrer: referrer || null,
           referrer_source: detectReferrerSource(referrer),
-          country: geo.country || null,
-          city: geo.city || null,
+          country: null,
+          city: null,
           device_type: detectDevice(),
           browser: detectBrowser(),
           os: detectOS(),
@@ -136,12 +130,13 @@ export const useVisitTracker = () => {
           utm_source: params.get("utm_source"),
           utm_medium: params.get("utm_medium"),
           utm_campaign: params.get("utm_campaign"),
-        });
-      } catch (err) {
-        console.warn("Visit tracking failed:", err);
+        }).then(() => {}, () => {});
+      } catch {
+        // ignore
       }
     };
 
-    track();
+    // Defer until after first paint + idle so it doesn't compete with LCP
+    idle(track);
   }, [location.pathname, location.search]);
 };

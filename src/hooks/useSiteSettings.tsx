@@ -81,7 +81,14 @@ export function SiteSettingsProvider({ children }: SiteSettingsProviderProps) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
 
   useEffect(() => {
-    fetchSettings();
+    const idle = (cb: () => void) => {
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(cb, { timeout: 2000 });
+      } else {
+        setTimeout(cb, 300);
+      }
+    };
+    idle(() => { fetchSettings(); });
   }, []);
 
   const fetchSettings = async () => {
