@@ -14,6 +14,12 @@ export default defineConfig(({ mode }) => {
       port: 8080,
     },
     plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    experimental: {
+      // Skip module preload polyfill & don't preload heavy admin/doc chunks on every page
+      renderBuiltUrl(filename: string) {
+        return { relative: true };
+      },
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
@@ -57,6 +63,18 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1500,
       cssCodeSplit: true,
       reportCompressedSize: false,
+      modulePreload: {
+        // Don't auto-preload heavy admin/doc chunks - only the core vendor chunk
+        resolveDependencies: (filename, deps) => {
+          return deps.filter(
+            (dep) =>
+              !dep.includes("doc-vendor") &&
+              !dep.includes("chart-vendor") &&
+              !dep.includes("admin-vendor") &&
+              !dep.includes("AdminDashboard")
+          );
+        },
+      },
     },
   };
 });
