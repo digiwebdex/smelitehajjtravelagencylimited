@@ -31,7 +31,6 @@ import {
   Upload
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
-import { generateBookingPDF } from "@/utils/generateBookingPDF";
 import { cn } from "@/lib/utils";
 import BookingDocumentUploadInline from "@/components/BookingDocumentUploadInline";
 import { useAuth } from "@/hooks/useAuth";
@@ -179,8 +178,9 @@ const BookingConfirmation = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (booking) {
+      const { generateBookingPDF } = await import("@/utils/generateBookingPDF");
       generateBookingPDF(booking);
     }
   };
