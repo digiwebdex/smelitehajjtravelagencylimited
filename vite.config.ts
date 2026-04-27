@@ -36,20 +36,27 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (!id.includes("node_modules")) return;
-            // Heavy isolated libs that are safe to split (loaded on demand by routes)
+            // Heavy isolated libs - lazy loaded only when admin/PDF features are used
             if (id.includes("jspdf") || id.includes("html2canvas") || id.includes("xlsx")) {
               return "doc-vendor";
             }
             if (id.includes("recharts") || id.includes("d3-")) {
               return "chart-vendor";
             }
-            // Everything else (React, Radix, Supabase, Tanstack, framer-motion, dnd-kit, etc.)
-            // stays in a single vendor chunk so React loads before anything that uses it.
+            if (id.includes("@dnd-kit") || id.includes("react-day-picker") || id.includes("date-fns")) {
+              return "admin-vendor";
+            }
+            if (id.includes("framer-motion")) {
+              return "motion-vendor";
+            }
+            // Core: React, Radix, Supabase, Tanstack, etc. — must stay together
             return "vendor";
           },
         },
       },
       chunkSizeWarningLimit: 1500,
+      cssCodeSplit: true,
+      reportCompressedSize: false,
     },
   };
 });
