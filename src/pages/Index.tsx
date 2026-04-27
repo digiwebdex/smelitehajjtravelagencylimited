@@ -81,7 +81,7 @@ const Index = () => {
       <main>
         {sectionVisibility.hero && <HeroSection />}
         
-        <Suspense fallback={<SectionSkeleton height="h-32" />}>
+        <Suspense fallback={<SectionSkeleton />}>
           {sectionVisibility.notices && <NoticeBoard />}
         </Suspense>
         
