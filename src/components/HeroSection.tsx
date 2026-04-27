@@ -366,6 +366,8 @@ const HeroSection = () => {
               style={{ objectPosition: imageFocalPoint }}
               draggable={false}
               loading="eager"
+              fetchPriority="high"
+              decoding="async"
             />
           </div>
 
