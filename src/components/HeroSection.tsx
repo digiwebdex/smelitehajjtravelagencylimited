@@ -59,7 +59,7 @@ const HeroSection = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [autoplayInterval, setAutoplayInterval] = useState(3000);
   const [transitionDuration, setTransitionDuration] = useState(0.6);
   const [isHovered, setIsHovered] = useState(false);
@@ -165,7 +165,6 @@ const HeroSection = () => {
   }, [isAutoPlaying, slides.length, autoplayInterval, currentSlide, isHovered]);
 
   const fetchHeroContent = async () => {
-    setIsLoading(true);
     const { data } = await supabase
       .from("hero_content")
       .select("*")
@@ -191,7 +190,6 @@ const HeroSection = () => {
       }));
       setSlides(formattedSlides);
     }
-    setIsLoading(false);
   };
 
   const HeroSkeleton = () => (
