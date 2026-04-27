@@ -1,12 +1,29 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, forwardRef } from "react";
 import { ChevronDown, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 // Hero image is preloaded in index.html via <link rel="preload"> at /hero-kaaba.webp
 const heroImage = "/hero-kaaba.webp";
-// NOTE: framer-motion removed from Hero to cut ~80KB JS off the critical path.
-// Simple CSS fade-in (.hero-fade-in defined in index.css) is used instead.
+
+// Lightweight `motion` shim — strips framer-motion-only props and renders plain
+// elements. This removes ~80KB of JS off the mobile critical path (LCP/TBT win)
+// while keeping existing JSX intact.
+type AnyProps = Record<string, any>;
+const stripMotionProps = ({ variants, initial, animate, exit, transition, whileHover, whileTap, whileInView, viewport, layout, layoutId, ...rest }: AnyProps) => rest;
+const makeMotion = (tag: keyof JSX.IntrinsicElements) =>
+  forwardRef<any, AnyProps>(function MotionShim(props, ref) {
+    const Tag: any = tag;
+    return <Tag ref={ref} {...stripMotionProps(props)} />;
+  });
+const motion = {
+  div: makeMotion("div"),
+  h1: makeMotion("h1"),
+  p: makeMotion("p"),
+  button: makeMotion("button"),
+  span: makeMotion("span"),
+  section: makeMotion("section"),
+} as const;
 
 // Lazy load non-critical components
 const HeroServiceTiles = lazy(() => import("./HeroServiceTiles"));
