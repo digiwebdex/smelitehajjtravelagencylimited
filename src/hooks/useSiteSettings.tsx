@@ -81,14 +81,22 @@ export function SiteSettingsProvider({ children }: SiteSettingsProviderProps) {
   const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
 
   useEffect(() => {
-    const idle = (cb: () => void) => {
-      if (typeof (window as any).requestIdleCallback === "function") {
-        (window as any).requestIdleCallback(cb, { timeout: 2000 });
-      } else {
-        setTimeout(cb, 300);
-      }
+    const schedule = () => {
+      const idle = (cb: () => void) => {
+        if (typeof (window as any).requestIdleCallback === "function") {
+          (window as any).requestIdleCallback(cb, { timeout: 3000 });
+        } else {
+          setTimeout(cb, 1500);
+        }
+      };
+      idle(() => { fetchSettings(); });
     };
-    idle(() => { fetchSettings(); });
+    // Defer until after window load so initial paint is never blocked by this fetch
+    if (document.readyState === "complete") {
+      setTimeout(schedule, 500);
+    } else {
+      window.addEventListener("load", () => setTimeout(schedule, 500), { once: true });
+    }
   }, []);
 
   const fetchSettings = async () => {

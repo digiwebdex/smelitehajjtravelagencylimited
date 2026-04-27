@@ -34,18 +34,37 @@ const DynamicSEOHead = () => {
   const [seo, setSeo] = useState<SEOSettings | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchSEO = async () => {
       const { data } = await supabase
         .from("site_settings")
         .select("setting_value")
         .eq("setting_key", "seo_settings")
         .maybeSingle();
-
+      if (cancelled) return;
       if (data?.setting_value) {
         setSeo(data.setting_value as unknown as SEOSettings);
       }
     };
-    fetchSEO();
+
+    // SEO meta is for crawlers — they wait. Defer to after load + idle so it doesn't
+    // delay the LCP image/text on mobile devices.
+    const schedule = () => {
+      const idle = (cb: () => void) => {
+        if (typeof (window as any).requestIdleCallback === "function") {
+          (window as any).requestIdleCallback(cb, { timeout: 4000 });
+        } else {
+          setTimeout(cb, 2000);
+        }
+      };
+      idle(fetchSEO);
+    };
+    if (document.readyState === "complete") {
+      setTimeout(schedule, 1000);
+    } else {
+      window.addEventListener("load", () => setTimeout(schedule, 1000), { once: true });
+    }
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {

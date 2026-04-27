@@ -46,14 +46,21 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const idle = (cb: () => void) => {
-      if (typeof (window as any).requestIdleCallback === "function") {
-        (window as any).requestIdleCallback(cb, { timeout: 2000 });
-      } else {
-        setTimeout(cb, 400);
-      }
+    const schedule = () => {
+      const idle = (cb: () => void) => {
+        if (typeof (window as any).requestIdleCallback === "function") {
+          (window as any).requestIdleCallback(cb, { timeout: 3000 });
+        } else {
+          setTimeout(cb, 1200);
+        }
+      };
+      idle(() => { fetchSectionVisibility(); });
     };
-    idle(() => { fetchSectionVisibility(); });
+    if (document.readyState === "complete") {
+      setTimeout(schedule, 800);
+    } else {
+      window.addEventListener("load", () => setTimeout(schedule, 800), { once: true });
+    }
   }, []);
 
   const fetchSectionVisibility = async () => {

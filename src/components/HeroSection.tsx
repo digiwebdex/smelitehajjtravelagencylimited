@@ -100,18 +100,26 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    // Defer non-critical DB fetches until after first paint so they don't block LCP/TBT.
-    const idle = (cb: () => void) => {
-      if (typeof (window as any).requestIdleCallback === "function") {
-        (window as any).requestIdleCallback(cb, { timeout: 1500 });
-      } else {
-        setTimeout(cb, 200);
-      }
+    // Defer non-critical DB fetches until AFTER window load + idle. Defaults render
+    // immediately so the hero is visible from the first frame; CMS values fill in later.
+    const schedule = () => {
+      const idle = (cb: () => void) => {
+        if (typeof (window as any).requestIdleCallback === "function") {
+          (window as any).requestIdleCallback(cb, { timeout: 3000 });
+        } else {
+          setTimeout(cb, 1500);
+        }
+      };
+      idle(() => {
+        fetchHeroContent();
+        fetchSliderSettings();
+      });
     };
-    idle(() => {
-      fetchHeroContent();
-      fetchSliderSettings();
-    });
+    if (document.readyState === "complete") {
+      setTimeout(schedule, 600);
+    } else {
+      window.addEventListener("load", () => setTimeout(schedule, 600), { once: true });
+    }
   }, []);
 
   const fetchSliderSettings = async () => {
