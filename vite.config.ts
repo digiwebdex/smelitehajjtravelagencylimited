@@ -49,7 +49,11 @@ export default defineConfig(({ mode }) => {
             if (id.includes("date-fns")) {
               return "date-vendor";
             }
-            // Core: React, Radix, Supabase, Tanstack, framer-motion, etc. — must stay together
+            // Animation library — split out so it doesn't block first paint
+            if (id.includes("framer-motion") || id.includes("motion-dom") || id.includes("motion-utils")) {
+              return "motion-vendor";
+            }
+            // Core: React, Radix, Supabase, Tanstack — must stay together
             return "vendor";
           },
         },
@@ -58,13 +62,14 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       reportCompressedSize: false,
       modulePreload: {
-        // Don't auto-preload heavy admin/doc chunks - only the core vendor chunk
+        // Don't auto-preload heavy chunks - only the core vendor chunk
         resolveDependencies: (filename, deps) => {
           return deps.filter(
             (dep) =>
               !dep.includes("doc-vendor") &&
               !dep.includes("chart-vendor") &&
               !dep.includes("admin-vendor") &&
+              !dep.includes("motion-vendor") &&
               !dep.includes("AdminDashboard")
           );
         },

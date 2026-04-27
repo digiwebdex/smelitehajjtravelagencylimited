@@ -1,11 +1,29 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, lazy, Suspense, forwardRef } from "react";
 import { ChevronDown, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 // Hero image is preloaded in index.html via <link rel="preload"> at /hero-kaaba.webp
 const heroImage = "/hero-kaaba.webp";
-import { motion } from "framer-motion";
+
+// Lightweight `motion` shim — strips framer-motion-only props and renders plain
+// elements. This removes ~80KB of JS off the mobile critical path (LCP/TBT win)
+// while keeping existing JSX intact.
+type AnyProps = Record<string, any>;
+const stripMotionProps = ({ variants, initial, animate, exit, transition, whileHover, whileTap, whileInView, viewport, layout, layoutId, ...rest }: AnyProps) => rest;
+const makeMotion = (tag: keyof JSX.IntrinsicElements) =>
+  forwardRef<any, AnyProps>(function MotionShim(props, ref) {
+    const Tag: any = tag;
+    return <Tag ref={ref} {...stripMotionProps(props)} />;
+  });
+const motion = {
+  div: makeMotion("div"),
+  h1: makeMotion("h1"),
+  p: makeMotion("p"),
+  button: makeMotion("button"),
+  span: makeMotion("span"),
+  section: makeMotion("section"),
+} as const;
 
 // Lazy load non-critical components
 const HeroServiceTiles = lazy(() => import("./HeroServiceTiles"));
@@ -356,26 +374,11 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
           
-          {/* Background images - always slide right to left */}
-          {prevSlide !== null && prevSlide !== currentSlide && (
-            <div
-              key={`prev-${prevSlide}`}
-              className="absolute inset-0 z-[2] animate-slide-out-left"
-              style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
-            >
-              <img
-                src={toWebp(slides[prevSlide]?.background_image_url) || heroImage}
-                alt="Hero background"
-                className="w-full h-full object-cover"
-                style={{ objectPosition: imageFocalPoint }}
-                draggable={false}
-              />
-            </div>
-          )}
+          {/* Background images - always slide right to left.
+              prev-slide image removed to avoid downloading 2 hero images on first paint. */}
           <div
             key={`current-${currentSlide}`}
-            className="absolute inset-0 z-[2] animate-slide-in-from-right"
-            style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
+            className="absolute inset-0 z-[2]"
           >
             <img
               src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}
