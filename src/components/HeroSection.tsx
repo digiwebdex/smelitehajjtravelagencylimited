@@ -82,8 +82,18 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    fetchHeroContent();
-    fetchSliderSettings();
+    // Defer non-critical DB fetches until after first paint so they don't block LCP/TBT.
+    const idle = (cb: () => void) => {
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(cb, { timeout: 1500 });
+      } else {
+        setTimeout(cb, 200);
+      }
+    };
+    idle(() => {
+      fetchHeroContent();
+      fetchSliderSettings();
+    });
   }, []);
 
   const fetchSliderSettings = async () => {
