@@ -109,9 +109,6 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
-          },
-        },
-      },
       chunkSizeWarningLimit: 1500,
       cssCodeSplit: true,
       reportCompressedSize: false,
@@ -124,6 +121,11 @@ export default defineConfig(({ mode }) => {
               !dep.includes("chart-vendor") &&
               !dep.includes("admin-vendor") &&
               !dep.includes("motion-vendor") &&
+              !dep.includes("form-vendor") &&
+              !dep.includes("carousel-vendor") &&
+              !dep.includes("ui-extra-vendor") &&
+              !dep.includes("date-vendor") &&
+              !dep.includes("icons-vendor") &&
               !dep.includes("AdminDashboard")
           );
         },
