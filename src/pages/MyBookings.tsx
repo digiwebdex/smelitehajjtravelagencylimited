@@ -36,7 +36,6 @@ import { formatCurrency } from "@/lib/currency";
 import OrderTrackingModal from "@/components/OrderTrackingModal";
 import BookingDocumentUpload from "@/components/BookingDocumentUpload";
 import InstallmentDetails from "@/components/InstallmentDetails";
-import { generateBookingPDF } from "@/utils/generateBookingPDF";
 import { getGuestBookingInfo } from "@/utils/guestBookingStorage";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -567,7 +566,10 @@ const MyBookings = () => {
                                   variant="outline" 
                                   size="sm"
                                   className="gap-2"
-                                  onClick={() => generateBookingPDF(booking)}
+                                  onClick={async () => {
+                                    const { generateBookingPDF } = await import("@/utils/generateBookingPDF");
+                                    generateBookingPDF(booking);
+                                  }}
                                 >
                                   <Download className="w-4 h-4" />
                                   Receipt
