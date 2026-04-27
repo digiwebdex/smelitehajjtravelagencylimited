@@ -8,17 +8,21 @@
     <!-- Responsive hero LCP preload: mobile gets 37KB, desktop gets 84KB -->
     <link rel="preload" as="image" href="/hero-kaaba-mobile.webp" media="(max-width: 768px)" fetchpriority="high">
     <link rel="preload" as="image" href="/hero-kaaba.webp" media="(min-width: 769px)" fetchpriority="high">
-    <!-- Trimmed font request: only 2 critical families load blocking, rest lazy via JS -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap"></noscript>
-    <!-- Lazy-load decorative fonts after first paint -->
+    <!-- Single critical font: Inter only. Everything else is lazy-loaded after window load. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"></noscript>
+    <!-- Lazy-load display + decorative fonts AFTER full page load so they never block LCP -->
     <script>
-      window.addEventListener('load', function() {
-        var l = document.createElement('link');
-        l.rel = 'stylesheet';
-        l.href = 'https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Raleway:wght@500;700&family=Reem+Kufi:wght@500;700&family=Scheherazade+New:wght@700&display=swap';
-        document.head.appendChild(l);
-      });
+      (function(){
+        function loadFonts(){
+          var l = document.createElement('link');
+          l.rel = 'stylesheet';
+          l.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Aref+Ruqaa:wght@700&family=Raleway:wght@500;700&family=Reem+Kufi:wght@500;700&family=Scheherazade+New:wght@700&display=swap';
+          document.head.appendChild(l);
+        }
+        if (document.readyState === 'complete') setTimeout(loadFonts, 1500);
+        else window.addEventListener('load', function(){ setTimeout(loadFonts, 1500); }, { once: true });
+      })();
     </script>
     <meta name="description" content="Your trusted partner for Hajj & Umrah journeys. Government approved agency providing premium packages with comprehensive services." />
     <meta name="author" content="S.M. Elite Hajj Limited" />
