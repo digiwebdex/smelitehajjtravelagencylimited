@@ -379,6 +379,8 @@ const HeroSection = () => {
           >
             <img
               src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}
+              srcSet={!slides[currentSlide]?.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
+              sizes="100vw"
               alt="Hero background"
               className="w-full h-full object-cover"
               style={{ objectPosition: imageFocalPoint }}
