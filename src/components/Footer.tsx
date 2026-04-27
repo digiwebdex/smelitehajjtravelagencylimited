@@ -211,29 +211,17 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-primary-foreground relative overflow-hidden">
-      {/* Background Video Animation */}
+      {/* Background Video Animation - lazy mounted when footer enters viewport */}
       {videoEnabled && videoUrl && (
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-            style={{ 
-              filter: `blur(${videoBlur}px)`,
-              opacity: videoOpacity / 100,
-              transform: `scale(${videoScale / 100})`,
-              objectPosition: getObjectPosition(),
-            }}
-            ref={(el) => {
-              if (el) el.playbackRate = videoSpeed;
-            }}
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
-          <div className="absolute inset-0" style={{ backgroundColor: videoOverlayColor }} />
-        </div>
+        <LazyFooterVideo
+          videoUrl={videoUrl}
+          videoBlur={videoBlur}
+          videoOpacity={videoOpacity}
+          videoScale={videoScale}
+          videoSpeed={videoSpeed}
+          videoOverlayColor={videoOverlayColor}
+          objectPosition={getObjectPosition()}
+        />
       )}
       
       {/* Floating Islamic Pattern Animation - Lazy Loaded */}
