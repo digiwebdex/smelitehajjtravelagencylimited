@@ -40,7 +40,7 @@ const FacebookPixel = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<FacebookPixelSettings | null>(null);
 
-  // Fetch pixel settings from database
+  // Fetch pixel settings from database — deferred so it doesn't block LCP/TBT
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -59,7 +59,14 @@ const FacebookPixel = () => {
       }
     };
 
-    fetchSettings();
+    const idle = (cb: () => void) => {
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(cb, { timeout: 3000 });
+      } else {
+        setTimeout(cb, 2500);
+      }
+    };
+    idle(fetchSettings);
   }, []);
 
   // Initialize Facebook Pixel when settings are loaded

@@ -17,7 +17,7 @@ const AnalyticsTracker = () => {
   // Track every public page visit into our own DB for admin Traffic Status
   useVisitTracker();
 
-  // Fetch analytics settings from database
+  // Fetch analytics settings from database — deferred to idle time so it doesn't block LCP/TBT
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -36,7 +36,14 @@ const AnalyticsTracker = () => {
       }
     };
 
-    fetchSettings();
+    const idle = (cb: () => void) => {
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(cb, { timeout: 3000 });
+      } else {
+        setTimeout(cb, 2000);
+      }
+    };
+    idle(fetchSettings);
   }, []);
 
   // Initialize GA4 when settings are loaded
