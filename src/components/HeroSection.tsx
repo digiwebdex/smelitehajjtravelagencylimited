@@ -3,7 +3,8 @@ import { ChevronDown, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import heroImage from "@/assets/hero-kaaba.webp";
+// Hero image is preloaded in index.html via <link rel="preload"> at /hero-kaaba.webp
+const heroImage = "/hero-kaaba.webp";
 import { motion } from "framer-motion";
 
 // Lazy load non-critical components
