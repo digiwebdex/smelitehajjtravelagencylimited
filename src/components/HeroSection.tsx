@@ -259,8 +259,16 @@ const HeroSection = () => {
 
   const isYouTubeUrl = (url: string) => url?.includes("youtube.com") || url?.includes("youtu.be");
 
+  // Auto-upgrade local /images/*.jpg to .webp (smaller payload)
+  const toWebp = (url?: string) => {
+    if (!url) return url;
+    if (url.startsWith("/images/") && /\.(jpe?g|png)$/i.test(url)) {
+      return url.replace(/\.(jpe?g|png)$/i, ".webp");
+    }
+    return url;
+  };
   const content = slides[currentSlide] || defaultSlides[0];
-  const backgroundImage = content.background_image_url || heroImage;
+  const backgroundImage = toWebp(content.background_image_url) || heroImage;
   const isLight = heroTheme === "light";
 
   // Simple fade animation for content - no complex exits
