@@ -14,12 +14,6 @@ export default defineConfig(({ mode }) => {
       port: 8080,
     },
     plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-    experimental: {
-      // Skip module preload polyfill & don't preload heavy admin/doc chunks on every page
-      renderBuiltUrl(filename: string) {
-        return { relative: true };
-      },
-    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
