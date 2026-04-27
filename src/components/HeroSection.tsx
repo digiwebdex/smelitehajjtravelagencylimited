@@ -593,7 +593,7 @@ const HeroSection = () => {
                       <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isLight ? "shadow-slate-300/50" : "shadow-black/30"}`}>
                         <div className={`absolute inset-0 border-2 rounded-2xl z-10 ${isLight ? "border-slate-200" : "border-secondary/20"}`} />
                         <img
-                          src={slide.background_image_url || heroImage}
+                          src={toWebp(slide.background_image_url) || heroImage}
                           alt="Hero feature"
                           className="w-full h-auto max-h-[500px] object-cover"
                           style={{ objectPosition: imageFocalPoint }}
