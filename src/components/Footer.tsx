@@ -167,8 +167,18 @@ const Footer = () => {
   });
 
   useEffect(() => {
-    fetchFooterContent();
-    fetchSocialNetworks();
+    // Defer footer DB fetches: footer is below the fold so it never affects LCP/TBT.
+    const idle = (cb: () => void) => {
+      if (typeof (window as any).requestIdleCallback === "function") {
+        (window as any).requestIdleCallback(cb, { timeout: 2000 });
+      } else {
+        setTimeout(cb, 500);
+      }
+    };
+    idle(() => {
+      fetchFooterContent();
+      fetchSocialNetworks();
+    });
   }, []);
 
   const fetchSocialNetworks = async () => {
