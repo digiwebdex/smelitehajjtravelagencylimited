@@ -374,26 +374,11 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
           
-          {/* Background images - always slide right to left */}
-          {prevSlide !== null && prevSlide !== currentSlide && (
-            <div
-              key={`prev-${prevSlide}`}
-              className="absolute inset-0 z-[2] animate-slide-out-left"
-              style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
-            >
-              <img
-                src={toWebp(slides[prevSlide]?.background_image_url) || heroImage}
-                alt="Hero background"
-                className="w-full h-full object-cover"
-                style={{ objectPosition: imageFocalPoint }}
-                draggable={false}
-              />
-            </div>
-          )}
+          {/* Background images - always slide right to left.
+              prev-slide image removed to avoid downloading 2 hero images on first paint. */}
           <div
             key={`current-${currentSlide}`}
-            className="absolute inset-0 z-[2] animate-slide-in-from-right"
-            style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
+            className="absolute inset-0 z-[2]"
           >
             <img
               src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}

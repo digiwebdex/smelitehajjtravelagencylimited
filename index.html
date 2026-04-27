@@ -35,6 +35,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@smelitehajj" />
     <meta name="twitter:image" content="https://smelitehajj.com/favicon.jpeg" />
+    <!-- Critical CSS: instant hero background + correct height before React boots.
+         Eliminates CLS (height swap) and FCP delay caused by waiting for app CSS. -->
+    <style>
+      html,body{margin:0;padding:0;background:#0f3a2e;color:#fff;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+      #root{min-height:100vh}
+      .hero-bootstrap{position:relative;width:100%;height:100vh;background:#0f3a2e center/cover no-repeat;overflow:hidden}
+      @media (max-width:768px){.hero-bootstrap{background-image:url('/hero-kaaba-mobile.webp')}}
+      @media (min-width:769px){.hero-bootstrap{background-image:url('/hero-kaaba.webp')}}
+      .hero-bootstrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(15,58,46,.95),rgba(15,58,46,.5),transparent)}
+    </style>
   </head>
 
   <body>
