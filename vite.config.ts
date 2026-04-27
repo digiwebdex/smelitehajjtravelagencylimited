@@ -43,13 +43,13 @@ export default defineConfig(({ mode }) => {
             if (id.includes("recharts") || id.includes("d3-")) {
               return "chart-vendor";
             }
-            if (id.includes("@dnd-kit") || id.includes("react-day-picker") || id.includes("date-fns")) {
+            if (id.includes("@dnd-kit") || id.includes("react-day-picker")) {
               return "admin-vendor";
             }
-            if (id.includes("framer-motion")) {
-              return "motion-vendor";
+            if (id.includes("date-fns")) {
+              return "date-vendor";
             }
-            // Core: React, Radix, Supabase, Tanstack, etc. — must stay together
+            // Core: React, Radix, Supabase, Tanstack, framer-motion, etc. — must stay together
             return "vendor";
           },
         },
