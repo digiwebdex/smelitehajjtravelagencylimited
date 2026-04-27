@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Aref+Ruqaa:wght@400;700&family=Raleway:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
-@import url('https://fonts.cdnfonts.com/css/yellow-peas');
+/* Fonts are loaded via <link rel="preload"> in index.html for faster FCP */
 
 @font-face {
   font-family: 'MoolBoran';
