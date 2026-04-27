@@ -88,10 +88,18 @@ const detectReferrerSource = (referrer: string): string => {
 // Country/city can be derived server-side from request headers if needed.
 
 const idle = (cb: () => void) => {
-  if (typeof (window as any).requestIdleCallback === "function") {
-    (window as any).requestIdleCallback(cb, { timeout: 4000 });
+  const run = () => {
+    if (typeof (window as any).requestIdleCallback === "function") {
+      (window as any).requestIdleCallback(cb, { timeout: 6000 });
+    } else {
+      setTimeout(cb, 4000);
+    }
+  };
+  // Wait for window load before scheduling — pure analytics, must not interfere with LCP/TBT.
+  if (document.readyState === "complete") {
+    setTimeout(run, 2000);
   } else {
-    setTimeout(cb, 2500);
+    window.addEventListener("load", () => setTimeout(run, 2000), { once: true });
   }
 };
 
