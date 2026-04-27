@@ -5,7 +5,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 // Hero image is preloaded in index.html via <link rel="preload"> at /hero-kaaba.webp
 const heroImage = "/hero-kaaba.webp";
-import { motion } from "framer-motion";
+// NOTE: framer-motion removed from Hero to cut ~80KB JS off the critical path.
+// Simple CSS fade-in (.hero-fade-in defined in index.css) is used instead.
 
 // Lazy load non-critical components
 const HeroServiceTiles = lazy(() => import("./HeroServiceTiles"));
