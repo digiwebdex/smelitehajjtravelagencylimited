@@ -368,7 +368,7 @@ const HeroSection = () => {
             style={{ animationDuration: '700ms', animationFillMode: 'forwards' }}
           >
             <img
-              src={slides[currentSlide]?.background_image_url || heroImage}
+              src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}
               alt="Hero background"
               className="w-full h-full object-cover"
               style={{ objectPosition: imageFocalPoint }}
