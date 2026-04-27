@@ -40,8 +40,9 @@ const FacebookPixel = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [settings, setSettings] = useState<FacebookPixelSettings | null>(null);
 
-  // Fetch pixel settings from database — deferred so it doesn't block LCP/TBT
+  // Fetch pixel settings from database — deferred until window load + idle to keep mobile fast
   useEffect(() => {
+    let cancelled = false;
     const fetchSettings = async () => {
       try {
         const { data, error } = await supabase
@@ -49,24 +50,33 @@ const FacebookPixel = () => {
           .select("setting_value")
           .eq("setting_key", "facebook_pixel")
           .maybeSingle();
-
+        if (cancelled) return;
         if (!error && data?.setting_value) {
-          const pixelSettings = data.setting_value as unknown as FacebookPixelSettings;
-          setSettings(pixelSettings);
+          setSettings(data.setting_value as unknown as FacebookPixelSettings);
         }
       } catch (error) {
         console.error("Error fetching Facebook Pixel settings:", error);
       }
     };
 
-    const idle = (cb: () => void) => {
-      if (typeof (window as any).requestIdleCallback === "function") {
-        (window as any).requestIdleCallback(cb, { timeout: 3000 });
-      } else {
-        setTimeout(cb, 2500);
-      }
+    const schedule = () => {
+      const idle = (cb: () => void) => {
+        if (typeof (window as any).requestIdleCallback === "function") {
+          (window as any).requestIdleCallback(cb, { timeout: 5000 });
+        } else {
+          setTimeout(cb, 3500);
+        }
+      };
+      idle(fetchSettings);
     };
-    idle(fetchSettings);
+
+    if (document.readyState === "complete") {
+      setTimeout(schedule, 2000);
+    } else {
+      window.addEventListener("load", () => setTimeout(schedule, 2000), { once: true });
+    }
+
+    return () => { cancelled = true; };
   }, []);
 
   // Initialize Facebook Pixel when settings are loaded
