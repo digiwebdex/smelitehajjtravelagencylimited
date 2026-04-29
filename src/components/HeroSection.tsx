@@ -287,8 +287,9 @@ const HeroSection = () => {
     }
     return url;
   };
-  const content = slides[currentSlide] || defaultSlides[0];
-  const backgroundImage = toWebp(content.background_image_url) || heroImage;
+  const content = slides[currentSlide];
+  const hasContent = !!content;
+  const backgroundImage = toWebp(content?.background_image_url) || heroImage;
   const isLight = heroTheme === "light";
 
   // Simple fade animation for content - no complex exits
