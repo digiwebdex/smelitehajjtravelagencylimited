@@ -48,27 +48,11 @@ interface HeroSlide {
   order_index?: number;
 }
 
-const defaultSlides: HeroSlide[] = [
-  {
-    id: "default-1",
-    title: "Your Sacred Journey",
-    subtitle: "Begins Here",
-    description: "Experience the spiritual journey of a lifetime with SM Elite Hajj. We provide premium Hajj & Umrah packages with complete care and guidance.",
-    badge_text: "Govt. Approved Hajj & Umrah Agency",
-    primary_button_text: "Explore Hajj Packages",
-    primary_button_link: "#hajj",
-    secondary_button_text: "View Umrah Packages",
-    secondary_button_link: "#umrah",
-    stats: [
-      { number: "10+", label: "Years Experience" },
-      { number: "5000+", label: "Happy Pilgrims" },
-      { number: "100%", label: "Satisfaction Rate" },
-      { number: "24/7", label: "Support Available" },
-    ],
-    slide_type: "general",
-    order_index: 0,
-  },
-];
+// No default placeholder slide — we don't want a "first" hero with placeholder
+// text flashing before the real CMS slide loads. The background image still
+// shows immediately because it's preloaded from index.html and rendered as the
+// section background regardless of whether slides have loaded.
+const defaultSlides: HeroSlide[] = [];
 
 const HeroSection = () => {
   const [slides, setSlides] = useState<HeroSlide[]>(defaultSlides);
