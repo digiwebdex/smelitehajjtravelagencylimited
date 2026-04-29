@@ -363,28 +363,41 @@ const HeroSection = () => {
           </div>
         </div>
       ) : (
-        /* Dark Theme Background - Simple CSS transition for slide */
+        /* Dark Theme Background — smooth right-to-left slide between hero images */
         <div className="absolute inset-0 bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
-          
-          {/* Background images - always slide right to left.
-              prev-slide image removed to avoid downloading 2 hero images on first paint. */}
+
+          {/* Sliding track: all slide images sit side-by-side and translate left
+              when currentSlide changes. Falls back to default hero when no slides. */}
           <div
-            key={`current-${currentSlide}`}
-            className="absolute inset-0 z-[2]"
+            className="absolute inset-0 z-[2] flex h-full ease-out"
+            style={{
+              width: `${Math.max(slides.length, 1) * 100}%`,
+              transform: `translateX(-${currentSlide * (100 / Math.max(slides.length, 1))}%)`,
+              transition: `transform ${transitionDuration}s cubic-bezier(0.45, 0, 0.15, 1)`,
+              willChange: "transform",
+            }}
           >
-            <img
-              src={toWebp(slides[currentSlide]?.background_image_url) || heroImage}
-              srcSet={!slides[currentSlide]?.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
-              sizes="100vw"
-              alt="Hero background"
-              className="w-full h-full object-cover"
-              style={{ objectPosition: imageFocalPoint }}
-              draggable={false}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-            />
+            {(slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide]).map((slide, idx) => (
+              <div
+                key={slide.id}
+                className="relative h-full flex-shrink-0"
+                style={{ width: `${100 / Math.max(slides.length, 1)}%` }}
+              >
+                <img
+                  src={toWebp(slide.background_image_url) || heroImage}
+                  srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
+                  sizes="100vw"
+                  alt="Hero background"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: imageFocalPoint }}
+                  draggable={false}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  fetchPriority={idx === 0 ? "high" : "low"}
+                  decoding="async"
+                />
+              </div>
+            ))}
           </div>
 
           {/* Overlay gradients */}
@@ -392,6 +405,7 @@ const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 via-transparent to-primary/60 z-[3]" />
         </div>
       )}
+
 
       {/* Content - Conditional Layout. Render nothing until CMS slides have loaded
           so we don't flash placeholder text/badges/stats over the hero image. */}
