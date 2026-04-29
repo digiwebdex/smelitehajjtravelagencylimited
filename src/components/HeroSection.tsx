@@ -511,14 +511,14 @@ const HeroSection = () => {
         /* Split-Screen Layout */
         <div className="relative z-10 w-full min-h-screen flex items-center pt-32 md:pt-36 lg:pt-40">
           <div className="container">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-              {/* Left Side - Content */}
+            <div className="grid grid-cols-1 gap-8 items-center">
+              {/* Content - Full width (right-side framed image removed) */}
               <motion.div
                 key={`content-${currentSlide}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className={`text-left order-2 lg:order-1 ${textPrimary}`}
+                className={`text-left ${textPrimary}`}
               >
                   {/* Badge */}
                   {content.badge_text && (
@@ -605,37 +605,6 @@ const HeroSection = () => {
                     </motion.div>
                   )}
               </motion.div>
-
-              {/* Right Side - Image with CSS slide transition */}
-              <div className="relative order-1 lg:order-2 hidden lg:block overflow-hidden rounded-2xl">
-                <div className="relative flex transition-transform duration-700 ease-out"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                >
-                  {slides.map((slide, index) => (
-                    <div key={slide.id} className="flex-shrink-0 w-full">
-                      <div className={`relative rounded-2xl overflow-hidden shadow-2xl ${isLight ? "shadow-slate-300/50" : "shadow-black/30"}`}>
-                        <div className={`absolute inset-0 border-2 rounded-2xl z-10 ${isLight ? "border-slate-200" : "border-secondary/20"}`} />
-                        <img
-                          src={toWebp(slide.background_image_url) || heroImage}
-                          alt="Hero feature"
-                          className="w-full h-auto max-h-[500px] object-cover"
-                          style={{ objectPosition: imageFocalPoint }}
-                          loading={index === 0 ? "eager" : "lazy"}
-                          draggable={false}
-                        />
-                        <div className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-medium z-20
-                          ${isLight 
-                            ? "bg-white/90 text-emerald-700 border border-emerald-200" 
-                            : "bg-secondary/90 text-primary-foreground"
-                          }`}>
-                          <Star className="w-3 h-3 inline mr-1 fill-current" />
-                          Premium Experience
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
