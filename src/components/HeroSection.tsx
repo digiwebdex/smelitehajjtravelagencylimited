@@ -649,6 +649,41 @@ const HeroSection = () => {
           </Dialog>
         </Suspense>
       )}
+
+      {/* Slider arrow controls — show only when more than one slide is loaded */}
+      {slides.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={goToPrevious}
+            aria-label="Previous slide"
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          >
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+          <button
+            type="button"
+            onClick={goToNext}
+            aria-label="Next slide"
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all hover:scale-110 shadow-lg"
+          >
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+
+          {/* Dots indicator */}
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goToSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-2 rounded-full transition-all ${i === currentSlide ? "w-6 bg-secondary" : "w-2 bg-white/50 hover:bg-white/80"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 };
