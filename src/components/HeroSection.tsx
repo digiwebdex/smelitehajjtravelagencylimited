@@ -393,8 +393,9 @@ const HeroSection = () => {
         </div>
       )}
 
-      {/* Content - Conditional Layout */}
-      {isLoading ? (
+      {/* Content - Conditional Layout. Render nothing until CMS slides have loaded
+          so we don't flash placeholder text/badges/stats over the hero image. */}
+      {!hasContent ? null : isLoading ? (
         <HeroSkeleton />
       ) : layoutMode === "centered" ? (
         /* Full-Width Centered Layout */
