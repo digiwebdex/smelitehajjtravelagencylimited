@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense, forwardRef } from "react";
-import { ChevronDown, Play, Star } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Play, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
