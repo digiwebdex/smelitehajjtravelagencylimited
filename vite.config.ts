@@ -33,10 +33,10 @@ export default defineConfig(({ mode }) => {
       }),
       // Optimize raster images at build time (PNG/JPG/WebP) — significantly reduces payload
       mode === "production" && ViteImageOptimizer({
-        png: { quality: 80 },
-        jpeg: { quality: 78, progressive: true, mozjpeg: true },
-        jpg: { quality: 78, progressive: true, mozjpeg: true },
-        webp: { quality: 78, effort: 6 },
+        png: { quality: 95, compressionLevel: 9 },
+        jpeg: { quality: 92, progressive: true, mozjpeg: true },
+        jpg: { quality: 92, progressive: true, mozjpeg: true },
+        webp: { quality: 92, effort: 6, lossless: false },
         svg: {
           multipass: true,
           plugins: [
