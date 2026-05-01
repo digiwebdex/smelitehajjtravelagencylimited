@@ -161,7 +161,7 @@ const TeamSection = () => {
 
                       {/* Large Image Container */}
                       <div 
-                        className="relative w-full sm:w-72 md:w-80 lg:w-96 h-72 sm:h-auto flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-primary/10 cursor-pointer"
+                        className="relative w-full sm:w-60 md:w-64 lg:w-72 h-72 sm:h-auto flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-primary/10 cursor-pointer"
                         onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
                       >
                         {/* Inner gold border */}
@@ -172,7 +172,7 @@ const TeamSection = () => {
                             src={member.avatar_url} 
                             alt={member.name}
                             className="w-full h-full transition-transform duration-700 group-hover:scale-110"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-secondary">
@@ -187,11 +187,11 @@ const TeamSection = () => {
                       </div>
                       
                       {/* Content */}
-                      <div className="p-6 sm:p-7 lg:p-9 flex flex-col justify-center flex-1 relative">
+                      <div className="p-5 sm:p-6 lg:p-7 flex flex-col justify-center flex-1 min-w-0 relative">
                         {/* Crown accent */}
                         <Crown className="w-5 h-5 text-secondary/70 mb-3" />
                         
-                        <h3 className="font-pilgrimage font-bold text-3xl sm:text-3xl lg:text-4xl xl:text-5xl text-secondary mb-3 leading-tight">
+                        <h3 className="font-pilgrimage font-bold text-2xl sm:text-2xl lg:text-3xl xl:text-4xl text-secondary mb-3 leading-tight break-words">
                           {member.name}
                         </h3>
                         
