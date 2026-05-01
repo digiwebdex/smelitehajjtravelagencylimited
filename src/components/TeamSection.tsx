@@ -138,7 +138,7 @@ const TeamSection = () => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-24 max-w-6xl mx-auto"
+                className="grid md:grid-cols-2 gap-10 lg:gap-14 mb-24 max-w-7xl mx-auto"
               >
                 {shariahBoard.map((member) => (
                   <motion.div
