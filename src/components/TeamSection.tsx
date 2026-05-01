@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, X } from "lucide-react";
+import { Users, X, Crown, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import IslamicBorder from "./IslamicBorder";
 import WhatsAppIcon from "./icons/WhatsAppIcon";
@@ -112,14 +112,24 @@ const TeamSection = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-center mb-12"
+                className="text-center mb-14"
               >
-                <h2 className="font-calligraphy text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
+                <div className="inline-flex items-center justify-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-secondary" />
+                  <Crown className="w-7 h-7 text-secondary" />
+                  <Sparkles className="w-5 h-5 text-secondary" />
+                </div>
+                <h2 className="font-calligraphy text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-4">
                   Shariah Board
                 </h2>
-                <span className="font-thuluth text-secondary/60 text-2xl md:text-3xl block mb-6">مجلس الشريعة</span>
-                <p className="text-muted-foreground max-w-xl mx-auto">
-                  Our Shariah advisors ensure all our services comply with Islamic principles.
+                <span className="font-thuluth text-secondary text-3xl md:text-4xl block mb-4">مجلس الشريعة</span>
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent to-secondary/60" />
+                  <div className="w-2 h-2 rounded-full bg-secondary" />
+                  <div className="h-px w-12 sm:w-20 bg-gradient-to-l from-transparent to-secondary/60" />
+                </div>
+                <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+                  Our esteemed Shariah scholars guide and ensure all our services comply with the noble principles of Islam.
                 </p>
               </motion.div>
 
@@ -128,74 +138,101 @@ const TeamSection = () => {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid md:grid-cols-2 gap-6 lg:gap-8 mb-24"
+                className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-24 max-w-6xl mx-auto"
               >
                 {shariahBoard.map((member) => (
                   <motion.div
                     key={member.id}
                     variants={cardVariants}
-                    whileHover={{ y: -8 }}
-                    className="bg-card hover:bg-primary/10 rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group overflow-hidden flex"
+                    whileHover={{ y: -10 }}
+                    className="group relative"
                   >
-                    {/* Square Image Container with inner border */}
-                    <div 
-                      className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-48 md:h-48 lg:w-60 lg:h-60 flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-secondary/5 m-2 rounded-lg cursor-pointer"
-                      onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
-                    >
-                      {member.avatar_url ? (
-                        <OptimizedImage 
-                          src={member.avatar_url} 
-                          alt={member.name}
-                          className="w-full h-full transition-transform duration-500 group-hover:scale-110"
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-secondary">
-                          <span className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-secondary-foreground">
-                            {getInitials(member.name)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    {/* Outer gold gradient frame */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-br from-secondary via-secondary/40 to-secondary rounded-3xl opacity-70 group-hover:opacity-100 blur-sm group-hover:blur transition-all duration-500" />
                     
-                    {/* Content */}
-                    <div className="p-5 sm:p-6 lg:p-8 flex flex-col justify-center flex-1">
-                      <h3 className="font-pilgrimage font-bold text-2xl sm:text-3xl lg:text-4xl text-secondary mb-2">
-                        {member.name}
-                      </h3>
-                      <p className="text-foreground font-semibold text-xs sm:text-sm lg:text-base capitalize tracking-wide mb-2">
-                        {member.role}
-                      </p>
-                      {member.qualifications && (
-                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed mb-3 line-clamp-3">
-                          {member.qualifications}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap items-center gap-4">
-                        {member.whatsapp_number && (
-                          <a
-                            href={`https://wa.me/${member.whatsapp_number.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-sm text-[#25D366] hover:text-[#128C7E] transition-colors font-medium hover:scale-110"
-                            title="WhatsApp"
-                          >
-                            <WhatsAppIcon size={18} />
-                            <span className="text-xs">{member.whatsapp_number}</span>
-                          </a>
+                    {/* Card */}
+                    <div className="relative bg-gradient-to-br from-card via-card to-primary/5 rounded-3xl overflow-hidden shadow-elegant group-hover:shadow-2xl transition-all duration-500 flex flex-col sm:flex-row border border-secondary/20">
+                      
+                      {/* Decorative corner ornaments */}
+                      <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-secondary/60 rounded-tl-lg pointer-events-none" />
+                      <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-secondary/60 rounded-tr-lg pointer-events-none" />
+                      <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-secondary/60 rounded-bl-lg pointer-events-none" />
+                      <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-secondary/60 rounded-br-lg pointer-events-none" />
+
+                      {/* Large Image Container */}
+                      <div 
+                        className="relative w-full sm:w-72 md:w-80 lg:w-96 h-72 sm:h-auto flex-shrink-0 overflow-hidden bg-gradient-to-br from-secondary/20 to-primary/10 cursor-pointer"
+                        onClick={() => member.avatar_url && setLightboxImage({ url: member.avatar_url, name: member.name })}
+                      >
+                        {/* Inner gold border */}
+                        <div className="absolute inset-3 sm:inset-4 border border-secondary/40 rounded-2xl pointer-events-none z-10" />
+                        
+                        {member.avatar_url ? (
+                          <OptimizedImage 
+                            src={member.avatar_url} 
+                            alt={member.name}
+                            className="w-full h-full transition-transform duration-700 group-hover:scale-110"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-secondary">
+                            <span className="text-6xl sm:text-7xl lg:text-8xl font-heading font-bold text-secondary-foreground">
+                              {getInitials(member.name)}
+                            </span>
+                          </div>
                         )}
-                        {member.imo_number && (
-                          <a
-                            href={`https://imo.im/${member.imo_number.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#2563EB] transition-colors font-medium hover:scale-110"
-                            title="IMO"
-                          >
-                            <IMOIcon size={18} />
-                            <span className="text-xs">{member.imo_number}</span>
-                          </a>
+                        
+                        {/* Subtle gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="p-6 sm:p-7 lg:p-9 flex flex-col justify-center flex-1 relative">
+                        {/* Crown accent */}
+                        <Crown className="w-5 h-5 text-secondary/70 mb-3" />
+                        
+                        <h3 className="font-pilgrimage font-bold text-3xl sm:text-3xl lg:text-4xl xl:text-5xl text-secondary mb-3 leading-tight">
+                          {member.name}
+                        </h3>
+                        
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="h-px w-8 bg-secondary/60" />
+                          <p className="text-foreground font-semibold text-sm sm:text-base lg:text-lg capitalize tracking-wide">
+                            {member.role}
+                          </p>
+                        </div>
+                        
+                        {member.qualifications && (
+                          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-4 italic">
+                            {member.qualifications}
+                          </p>
                         )}
+                        <div className="flex flex-wrap items-center gap-4 mt-auto">
+                          {member.whatsapp_number && (
+                            <a
+                              href={`https://wa.me/${member.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm text-[#25D366] hover:text-[#128C7E] transition-all font-medium hover:scale-110"
+                              title="WhatsApp"
+                            >
+                              <WhatsAppIcon size={20} />
+                              <span className="text-xs sm:text-sm">{member.whatsapp_number}</span>
+                            </a>
+                          )}
+                          {member.imo_number && (
+                            <a
+                              href={`https://imo.im/${member.imo_number.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm text-[#3B82F6] hover:text-[#2563EB] transition-all font-medium hover:scale-110"
+                              title="IMO"
+                            >
+                              <IMOIcon size={20} />
+                              <span className="text-xs sm:text-sm">{member.imo_number}</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
