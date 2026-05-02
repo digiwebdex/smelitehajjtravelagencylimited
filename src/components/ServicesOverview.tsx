@@ -256,28 +256,22 @@ const ServicesOverview = () => {
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ 
-                  scale: 1.02, 
-                  y: -4,
-                }}
+                whileHover={{ opacity: 0.92 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ 
                   duration: 0.5, 
                   delay: index * 0.1,
                   ease: [0.25, 0.46, 0.45, 0.94],
-                  scale: { duration: 0.2 },
-                  y: { duration: 0.2 },
+                  opacity: { duration: 0.3 },
                 }}
                 onClick={() => handleServiceClick(service)}
-                className={`group relative flex items-start gap-4 p-6 rounded-xl transition-all duration-300 overflow-hidden cursor-pointer
-                  ${index % 2 === 0 ? 'bg-muted/30' : 'bg-card'}
-                  hover:bg-gradient-to-br hover:from-primary/5 hover:to-secondary/10
-                  before:absolute before:inset-0 before:rounded-xl before:border-2 before:border-transparent before:transition-all before:duration-300
-                  hover:before:border-primary/30 hover:before:shadow-[0_0_20px_rgba(30,58,95,0.15)]
+                className={`group relative flex items-start gap-4 p-6 rounded-xl overflow-hidden cursor-pointer
+                  bg-gradient-to-br from-primary/5 to-secondary/10
+                  border-2 border-primary/30 shadow-[0_0_20px_rgba(30,58,95,0.15)]
                 `}
               >
-                {/* Gradient border overlay on hover */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
+                {/* Gradient overlay (always visible) */}
+                <div className="absolute inset-0 rounded-xl pointer-events-none bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
                 
                 {isCustom && CustomIcon ? (
                   <CustomServiceIcon icon={CustomIcon} />
@@ -285,10 +279,10 @@ const ServicesOverview = () => {
                   <ServiceIcon icon={LucideIconComponent} />
                 ) : null}
                 <div className="relative z-10">
-                  <h3 className="font-heading font-semibold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                  <h3 className="font-heading font-semibold text-lg text-primary mb-2">
                     {service.title}
                     {service.link_url && (
-                      <span className="inline-block ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="inline-block ml-2">
                         →
                       </span>
                     )}
