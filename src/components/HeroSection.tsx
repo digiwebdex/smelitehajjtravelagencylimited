@@ -240,6 +240,7 @@ const HeroSection = () => {
 
   const goToSlide = useCallback((index: number) => {
     setPrevSlide(currentSlide);
+    setEnableTransition(true);
     setCurrentSlide(index);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
@@ -247,6 +248,7 @@ const HeroSection = () => {
 
   const goToPrevious = useCallback(() => {
     setPrevSlide(currentSlide);
+    setEnableTransition(true);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
@@ -254,10 +256,11 @@ const HeroSection = () => {
 
   const goToNext = useCallback(() => {
     setPrevSlide(currentSlide);
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setEnableTransition(true);
+    setCurrentSlide((prev) => prev + 1);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
-  }, [slides.length, currentSlide]);
+  }, [currentSlide]);
 
   const minSwipeDistance = 50;
 
