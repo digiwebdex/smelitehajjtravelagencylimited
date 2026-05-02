@@ -255,7 +255,7 @@ const Header = () => {
               <img 
                 src={logoSrc} 
                 alt={companyInfo.name} 
-                className={`object-contain ring-2 ring-primary/20 rounded-lg p-1 bg-white shadow-elegant group-hover:ring-primary/40 transition-all duration-300 ${isScrolled ? 'h-14 w-auto' : 'h-16 sm:h-20 w-auto'}`}
+                className={`object-contain ring-2 ring-primary/20 rounded-lg p-1 bg-white shadow-elegant group-hover:ring-primary/40 transition-all duration-300 ${isScrolled ? 'h-10 w-auto' : 'h-12 sm:h-14 w-auto'}`}
               />
               <span className={`font-calligraphy font-bold text-primary group-hover:text-primary/80 transition-all duration-300 ${isScrolled ? 'text-base sm:text-xl' : 'text-lg sm:text-2xl'}`}>
                 {companyInfo.name}
