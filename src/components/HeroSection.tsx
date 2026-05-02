@@ -3,8 +3,9 @@ import { ChevronDown, ChevronLeft, ChevronRight, Play, Star } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-// Hero image now comes exclusively from CMS (admin panel). No static fallback.
-const heroImage = "";
+// Static fallback hero image (used until CMS slides load or if none configured)
+const heroImage = "/hero-kaaba.webp";
+const heroImageMobile = "/hero-kaaba-mobile.webp";
 
 // Lightweight `motion` shim — strips framer-motion-only props and renders plain
 // elements. This removes ~80KB of JS off the mobile critical path (LCP/TBT win)
