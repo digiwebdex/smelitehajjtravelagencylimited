@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S. M. Elite Hajj Limited | Hajj & Umrah Services</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Preload hero image for fast LCP -->
-    <link rel="preload" as="image" href="/hero-kaaba.webp" media="(min-width: 768px)" fetchpriority="high">
-    <link rel="preload" as="image" href="/hero-kaaba-mobile.webp" media="(max-width: 767px)" fetchpriority="high">
+    <!-- Hero image is dynamically loaded from CMS (admin panel) — no static preload -->
 
     <!-- Single critical font: Inter only. Everything else is lazy-loaded after window load. -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
@@ -40,12 +38,10 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@smelitehajj" />
     <meta name="twitter:image" content="https://smelitehajj.com/favicon.jpeg" />
-    <!-- Critical CSS with hero bootstrap background to prevent flash -->
+    <!-- Critical CSS: solid background only — no static hero image. CMS hero loads on first paint. -->
     <style>
       html,body{margin:0;padding:0;background:#0f3a2e;color:#fff;font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
       #root{min-height:100vh}
-      .hero-bootstrap{background-image:url('/hero-kaaba.webp');background-size:cover;background-position:center;background-repeat:no-repeat}
-      @media (max-width:767px){.hero-bootstrap{background-image:url('/hero-kaaba-mobile.webp')}}
     </style>
   </head>
 
