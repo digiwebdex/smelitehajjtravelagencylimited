@@ -325,8 +325,11 @@ const Footer = () => {
               <img 
                 src={logoSrc} 
                 alt={companyInfo.name} 
-                className="h-16 w-auto object-contain bg-white/10 rounded-xl p-1"
+                className="h-24 w-auto object-contain bg-white/10 rounded-xl p-2"
               />
+              <span className="font-calligraphy font-bold text-xl sm:text-2xl text-primary-foreground leading-tight">
+                {companyInfo.name}
+              </span>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
               {displayDescription}
