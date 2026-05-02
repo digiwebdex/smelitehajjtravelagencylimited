@@ -8,9 +8,11 @@ interface UseImageUploadOptions {
   folder: string;
   /** Whether to compress images before upload (default: true) */
   compress?: boolean;
+  /** High-quality mode: larger dimensions + higher quality (for hero/banner images) */
+  highQuality?: boolean;
 }
 
-export const useImageUpload = ({ bucket, folder, compress = true }: UseImageUploadOptions) => {
+export const useImageUpload = ({ bucket, folder, compress = true, highQuality = false }: UseImageUploadOptions) => {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
 
