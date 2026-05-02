@@ -689,7 +689,7 @@ const HeroSection = () => {
                 type="button"
                 onClick={() => goToSlide(i)}
                 aria-label={`Go to slide ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${i === currentSlide ? "w-6 bg-secondary" : "w-2 bg-white/50 hover:bg-white/80"}`}
+                className={`h-2 rounded-full transition-all ${i === displayIndex ? "w-6 bg-secondary" : "w-2 bg-white/50 hover:bg-white/80"}`}
               />
             ))}
           </div>
