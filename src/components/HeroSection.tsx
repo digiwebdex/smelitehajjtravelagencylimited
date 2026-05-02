@@ -349,42 +349,50 @@ const HeroSection = () => {
           </div>
         </div>
       ) : (
-        /* Dark Theme Background — smooth right-to-left slide between hero images */
+        /* Dark Theme Background — continuous left→right marquee of hero images */
         <div className="absolute inset-0 bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
 
-          {/* Sliding track: all slide images sit side-by-side and translate left
-              when currentSlide changes. Falls back to default hero when no slides. */}
-          <div
-            className="absolute inset-0 z-[2] flex h-full ease-out"
-            style={{
-              width: `${Math.max(slides.length, 1) * 100}%`,
-              transform: `translateX(-${currentSlide * (100 / Math.max(slides.length, 1))}%)`,
-              transition: `transform ${transitionDuration}s cubic-bezier(0.45, 0, 0.15, 1)`,
-              willChange: "transform",
-            }}
-          >
-            {(slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide]).map((slide, idx) => (
+          {/* Marquee track: render slides twice back-to-back so the loop is seamless. */}
+          {(() => {
+            const trackSlides = slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide];
+            const doubled = [...trackSlides, ...trackSlides];
+            // Each image takes the full viewport width; total track width = 200% of slides count
+            const slideWidthPct = 100 / trackSlides.length; // % of track width per image (track itself is sized below)
+            // Adjust speed: ~8s per slide for a calm continuous motion
+            const durationSec = Math.max(trackSlides.length * 8, 16);
+            return (
               <div
-                key={slide.id}
-                className="relative h-full flex-shrink-0"
-                style={{ width: `${100 / Math.max(slides.length, 1)}%` }}
+                className="absolute inset-0 z-[2] flex h-full animate-hero-marquee"
+                style={{
+                  width: `${trackSlides.length * 200}%`,
+                  animationDuration: `${durationSec}s`,
+                  willChange: "transform",
+                }}
               >
-                <img
-                  src={toWebp(slide.background_image_url) || heroImage}
-                  srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
-                  sizes="100vw"
-                  alt="Hero background"
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: imageFocalPoint }}
-                  draggable={false}
-                  loading={idx === 0 ? "eager" : "lazy"}
-                  fetchPriority={idx === 0 ? "high" : "low"}
-                  decoding="async"
-                />
+                {doubled.map((slide, idx) => (
+                  <div
+                    key={`${slide.id}-${idx}`}
+                    className="relative h-full flex-shrink-0"
+                    style={{ width: `${slideWidthPct / 2}%` }}
+                  >
+                    <img
+                      src={toWebp(slide.background_image_url) || heroImage}
+                      srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
+                      sizes="100vw"
+                      alt="Hero background"
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: imageFocalPoint }}
+                      draggable={false}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      fetchPriority={idx === 0 ? "high" : "low"}
+                      decoding="async"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            );
+          })()}
 
           {/* Overlay gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/50 to-transparent z-[3]" />
