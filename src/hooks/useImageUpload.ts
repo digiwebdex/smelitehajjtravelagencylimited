@@ -46,7 +46,9 @@ export const useImageUpload = ({ bucket, folder, compress = true, highQuality = 
       
       // Compress image if enabled
       if (compress) {
-        const compressionSettings = getOptimalCompressionSettings(file);
+        const compressionSettings = highQuality
+          ? { maxWidth: 2560, maxHeight: 1600, quality: 0.95, outputFormat: "webp" as const }
+          : getOptimalCompressionSettings(file);
         try {
           fileToUpload = await compressImage(file, compressionSettings);
           
