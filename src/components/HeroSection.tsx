@@ -84,27 +84,12 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch hero content immediately so admin updates are reflected on the very next
-    // page load (no requestIdleCallback delay). Slider settings can stay deferred since
-    // they're cosmetic and have safe defaults.
+    // Fetch both hero content and slider settings (which include hero height/layout)
+    // immediately so the hero renders at its final size on first paint. Previously
+    // settings were deferred via requestIdleCallback, causing the section height
+    // to "grow" after load — making the image appear small first then big.
     fetchHeroContent();
-    const schedule = () => {
-      const idle = (cb: () => void) => {
-        if (typeof (window as any).requestIdleCallback === "function") {
-          (window as any).requestIdleCallback(cb, { timeout: 3000 });
-        } else {
-          setTimeout(cb, 1500);
-        }
-      };
-      idle(() => {
-        fetchSliderSettings();
-      });
-    };
-    if (document.readyState === "complete") {
-      setTimeout(schedule, 600);
-    } else {
-      window.addEventListener("load", () => setTimeout(schedule, 600), { once: true });
-    }
+    fetchSliderSettings();
   }, []);
 
   const fetchSliderSettings = async () => {
