@@ -256,18 +256,26 @@ const ServicesOverview = () => {
                 key={service.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ opacity: 0.92 }}
+                whileHover={{ 
+                  scale: 1.05, 
+                  y: -6,
+                  opacity: 0.98,
+                }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ 
                   duration: 0.5, 
                   delay: index * 0.1,
                   ease: [0.25, 0.46, 0.45, 0.94],
+                  scale: { duration: 0.25 },
+                  y: { duration: 0.25 },
                   opacity: { duration: 0.3 },
                 }}
                 onClick={() => handleServiceClick(service)}
                 className={`group relative flex items-start gap-4 p-6 rounded-xl overflow-hidden cursor-pointer
                   bg-gradient-to-br from-primary/5 to-secondary/10
                   border-2 border-primary/30 shadow-[0_0_20px_rgba(30,58,95,0.15)]
+                  hover:border-primary/60 hover:shadow-[0_10px_30px_rgba(30,58,95,0.3)]
+                  transition-[box-shadow,border-color] duration-300
                 `}
               >
                 {/* Gradient overlay (always visible) */}
