@@ -329,6 +329,9 @@ const Footer = () => {
               />
               <span className="font-calligraphy font-bold text-xl sm:text-2xl text-primary-foreground leading-tight">
                 {companyInfo.name}
+                <span className="block text-xs sm:text-sm font-normal text-secondary mt-1 italic">
+                  Excellence in Every Step of Hajj
+                </span>
               </span>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed mb-6">
