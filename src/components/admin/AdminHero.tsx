@@ -62,6 +62,7 @@ const AdminHero = () => {
   const { uploadImage, uploading } = useImageUpload({
     bucket: "admin-uploads",
     folder: "hero-banners",
+    highQuality: true,
   });
 
   useEffect(() => {
