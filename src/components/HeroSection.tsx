@@ -84,8 +84,10 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    // Defer non-critical DB fetches until AFTER window load + idle. Defaults render
-    // immediately so the hero is visible from the first frame; CMS values fill in later.
+    // Fetch hero content immediately so admin updates are reflected on the very next
+    // page load (no requestIdleCallback delay). Slider settings can stay deferred since
+    // they're cosmetic and have safe defaults.
+    fetchHeroContent();
     const schedule = () => {
       const idle = (cb: () => void) => {
         if (typeof (window as any).requestIdleCallback === "function") {
@@ -95,7 +97,6 @@ const HeroSection = () => {
         }
       };
       idle(() => {
-        fetchHeroContent();
         fetchSliderSettings();
       });
     };
