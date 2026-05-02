@@ -58,6 +58,7 @@ const HeroSection = () => {
   const [slides, setSlides] = useState<HeroSlide[]>(defaultSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState<number | null>(null);
+  const [enableTransition, setEnableTransition] = useState(true);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -163,13 +164,33 @@ const HeroSection = () => {
     
     autoplayRef.current = setTimeout(() => {
       setPrevSlide(currentSlide);
-      setCurrentSlide(curr => (curr + 1) % slides.length);
+      setEnableTransition(true);
+      // Always advance forward; allow going to slides.length (cloned first) so
+      // the wrap from last → first slides in the same direction as 1 → 2 → 3.
+      setCurrentSlide(curr => curr + 1);
     }, autoplayInterval);
 
     return () => {
       if (autoplayRef.current) clearTimeout(autoplayRef.current);
     };
   }, [isAutoPlaying, slides.length, autoplayInterval, currentSlide, isHovered]);
+
+  // After sliding to the cloned first slide, snap back to real index 0 without
+  // animation so the next forward slide continues smoothly.
+  useEffect(() => {
+    if (slides.length === 0) return;
+    if (currentSlide === slides.length) {
+      const t = setTimeout(() => {
+        setEnableTransition(false);
+        setCurrentSlide(0);
+        // Re-enable transition on next frame for subsequent slides.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setEnableTransition(true));
+        });
+      }, transitionDuration * 1000);
+      return () => clearTimeout(t);
+    }
+  }, [currentSlide, slides.length, transitionDuration]);
 
   const fetchHeroContent = async () => {
     const { data } = await supabase
@@ -219,6 +240,7 @@ const HeroSection = () => {
 
   const goToSlide = useCallback((index: number) => {
     setPrevSlide(currentSlide);
+    setEnableTransition(true);
     setCurrentSlide(index);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
@@ -226,6 +248,7 @@ const HeroSection = () => {
 
   const goToPrevious = useCallback(() => {
     setPrevSlide(currentSlide);
+    setEnableTransition(true);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
@@ -233,10 +256,11 @@ const HeroSection = () => {
 
   const goToNext = useCallback(() => {
     setPrevSlide(currentSlide);
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setEnableTransition(true);
+    setCurrentSlide((prev) => prev + 1);
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 10000);
-  }, [slides.length, currentSlide]);
+  }, [currentSlide]);
 
   const minSwipeDistance = 50;
 
@@ -273,7 +297,9 @@ const HeroSection = () => {
     }
     return url;
   };
-  const content = slides[currentSlide];
+  // When at cloned-first position (currentSlide === slides.length), display real first slide content
+  const displayIndex = slides.length > 0 ? currentSlide % slides.length : 0;
+  const content = slides[displayIndex];
   const hasContent = !!content;
   const backgroundImage = toWebp(content?.background_image_url) || heroImage;
   const isLight = heroTheme === "light";
@@ -354,37 +380,53 @@ const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-900/90 z-[1]" />
 
           {/* Sliding track: all slide images sit side-by-side and translate left
-              when currentSlide changes. Falls back to default hero when no slides. */}
-          <div
-            className="absolute inset-0 z-[2] flex h-full ease-out"
-            style={{
-              width: `${Math.max(slides.length, 1) * 100}%`,
-              transform: `translateX(-${currentSlide * (100 / Math.max(slides.length, 1))}%)`,
-              transition: `transform ${transitionDuration}s cubic-bezier(0.45, 0, 0.15, 1)`,
-              willChange: "transform",
-            }}
-          >
-            {(slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide]).map((slide, idx) => (
+              when currentSlide changes. We append a clone of the first slide at
+              the end so the wrap from last → first slides forward in the same
+              direction (no reverse rewind). After landing on the clone, we snap
+              back to index 0 without animation. */}
+          {(() => {
+            const baseSlides = slides.length > 0
+              ? slides
+              : [{ id: "default", background_image_url: undefined } as HeroSlide];
+            const trackSlides = slides.length > 1
+              ? [...baseSlides, { ...baseSlides[0], id: `${baseSlides[0].id}-clone` }]
+              : baseSlides;
+            const trackCount = trackSlides.length;
+            return (
               <div
-                key={slide.id}
-                className="relative h-full flex-shrink-0"
-                style={{ width: `${100 / Math.max(slides.length, 1)}%` }}
+                className="absolute inset-0 z-[2] flex h-full ease-out"
+                style={{
+                  width: `${trackCount * 100}%`,
+                  transform: `translateX(-${currentSlide * (100 / trackCount)}%)`,
+                  transition: enableTransition
+                    ? `transform ${transitionDuration}s cubic-bezier(0.45, 0, 0.15, 1)`
+                    : "none",
+                  willChange: "transform",
+                }}
               >
-                <img
-                  src={toWebp(slide.background_image_url) || heroImage}
-                  srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
-                  sizes="100vw"
-                  alt="Hero background"
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: imageFocalPoint }}
-                  draggable={false}
-                  loading={idx === 0 ? "eager" : "lazy"}
-                  fetchPriority={idx === 0 ? "high" : "low"}
-                  decoding="async"
-                />
+                {trackSlides.map((slide, idx) => (
+                  <div
+                    key={slide.id}
+                    className="relative h-full flex-shrink-0"
+                    style={{ width: `${100 / trackCount}%` }}
+                  >
+                    <img
+                      src={toWebp(slide.background_image_url) || heroImage}
+                      srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
+                      sizes="100vw"
+                      alt="Hero background"
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: imageFocalPoint }}
+                      draggable={false}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      fetchPriority={idx === 0 ? "high" : "low"}
+                      decoding="async"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            );
+          })()}
 
           {/* Overlay gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/50 to-transparent z-[3]" />
@@ -401,7 +443,7 @@ const HeroSection = () => {
         /* Full-Width Centered Layout */
         <div className={`relative z-10 container text-center pt-48 md:pt-52 lg:pt-56 pb-20 ${textPrimary}`}>
           <motion.div
-            key={`content-centered-${currentSlide}`}
+            key={`content-centered-${displayIndex}`}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -500,7 +542,7 @@ const HeroSection = () => {
             <div className="grid grid-cols-1 gap-8 items-center">
               {/* Content - Full width (right-side framed image removed) */}
               <motion.div
-                key={`content-${currentSlide}`}
+                key={`content-${displayIndex}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -647,7 +689,7 @@ const HeroSection = () => {
                 type="button"
                 onClick={() => goToSlide(i)}
                 aria-label={`Go to slide ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${i === currentSlide ? "w-6 bg-secondary" : "w-2 bg-white/50 hover:bg-white/80"}`}
+                className={`h-2 rounded-full transition-all ${i === displayIndex ? "w-6 bg-secondary" : "w-2 bg-white/50 hover:bg-white/80"}`}
               />
             ))}
           </div>
