@@ -58,6 +58,7 @@ const HeroSection = () => {
   const [slides, setSlides] = useState<HeroSlide[]>(defaultSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState<number | null>(null);
+  const [enableTransition, setEnableTransition] = useState(true);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
