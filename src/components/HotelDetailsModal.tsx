@@ -217,10 +217,12 @@ const HotelDetailsModal = ({
                           </span>
                         </div>
                       </Badge>
-                      <Badge variant="outline" className="gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {formatDistance(hotel.distance_from_haram)} from Haram
-                      </Badge>
+                      {isSaudiArabia && (
+                        <Badge variant="outline" className="gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {formatDistance(hotel.distance_from_haram)} from Haram
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
