@@ -378,24 +378,25 @@ const HeroSection = () => {
               willChange: "transform",
             }}
           >
-            {(slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide]).map((slide, idx) => (
+            {(slides.length > 0 ? slides : []).map((slide, idx) => (
               <div
                 key={slide.id}
                 className="relative h-full flex-shrink-0"
                 style={{ width: `${100 / Math.max(slides.length, 1)}%` }}
               >
-                <img
-                  src={toWebp(slide.background_image_url) || heroImage}
-                  srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
-                  sizes="100vw"
-                  alt="Hero background"
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: imageFocalPoint }}
-                  draggable={false}
-                  loading={idx === 0 ? "eager" : "lazy"}
-                  fetchPriority={idx === 0 ? "high" : "low"}
-                  decoding="async"
-                />
+                {slide.background_image_url && (
+                  <img
+                    src={toWebp(slide.background_image_url)}
+                    sizes="100vw"
+                    alt="Hero background"
+                    className="w-full h-full object-cover"
+                    style={{ objectPosition: imageFocalPoint }}
+                    draggable={false}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    fetchPriority={idx === 0 ? "high" : "low"}
+                    decoding="async"
+                  />
+                )}
               </div>
             ))}
           </div>
