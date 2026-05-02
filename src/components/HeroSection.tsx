@@ -297,7 +297,9 @@ const HeroSection = () => {
     }
     return url;
   };
-  const content = slides[currentSlide];
+  // When at cloned-first position (currentSlide === slides.length), display real first slide content
+  const displayIndex = slides.length > 0 ? currentSlide % slides.length : 0;
+  const content = slides[displayIndex];
   const hasContent = !!content;
   const backgroundImage = toWebp(content?.background_image_url) || heroImage;
   const isLight = heroTheme === "light";
