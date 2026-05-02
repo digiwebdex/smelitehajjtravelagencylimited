@@ -3,8 +3,8 @@ import { ChevronDown, ChevronLeft, ChevronRight, Play, Star } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-// Hero image now comes exclusively from CMS (admin panel). No static fallback.
-const heroImage = "";
+// Hero image is preloaded in index.html via <link rel="preload"> at /hero-kaaba.webp
+const heroImage = "/hero-kaaba.webp";
 
 // Lightweight `motion` shim — strips framer-motion-only props and renders plain
 // elements. This removes ~80KB of JS off the mobile critical path (LCP/TBT win)
@@ -378,25 +378,24 @@ const HeroSection = () => {
               willChange: "transform",
             }}
           >
-            {(slides.length > 0 ? slides : []).map((slide, idx) => (
+            {(slides.length > 0 ? slides : [{ id: "default", background_image_url: undefined } as HeroSlide]).map((slide, idx) => (
               <div
                 key={slide.id}
                 className="relative h-full flex-shrink-0"
                 style={{ width: `${100 / Math.max(slides.length, 1)}%` }}
               >
-                {slide.background_image_url && (
-                  <img
-                    src={toWebp(slide.background_image_url)}
-                    sizes="100vw"
-                    alt="Hero background"
-                    className="w-full h-full object-cover"
-                    style={{ objectPosition: imageFocalPoint }}
-                    draggable={false}
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    fetchPriority={idx === 0 ? "high" : "low"}
-                    decoding="async"
-                  />
-                )}
+                <img
+                  src={toWebp(slide.background_image_url) || heroImage}
+                  srcSet={!slide.background_image_url ? "/hero-kaaba-mobile.webp 768w, /hero-kaaba.webp 1280w" : undefined}
+                  sizes="100vw"
+                  alt="Hero background"
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: imageFocalPoint }}
+                  draggable={false}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  fetchPriority={idx === 0 ? "high" : "low"}
+                  decoding="async"
+                />
               </div>
             ))}
           </div>
