@@ -164,13 +164,33 @@ const HeroSection = () => {
     
     autoplayRef.current = setTimeout(() => {
       setPrevSlide(currentSlide);
-      setCurrentSlide(curr => (curr + 1) % slides.length);
+      setEnableTransition(true);
+      // Always advance forward; allow going to slides.length (cloned first) so
+      // the wrap from last → first slides in the same direction as 1 → 2 → 3.
+      setCurrentSlide(curr => curr + 1);
     }, autoplayInterval);
 
     return () => {
       if (autoplayRef.current) clearTimeout(autoplayRef.current);
     };
   }, [isAutoPlaying, slides.length, autoplayInterval, currentSlide, isHovered]);
+
+  // After sliding to the cloned first slide, snap back to real index 0 without
+  // animation so the next forward slide continues smoothly.
+  useEffect(() => {
+    if (slides.length === 0) return;
+    if (currentSlide === slides.length) {
+      const t = setTimeout(() => {
+        setEnableTransition(false);
+        setCurrentSlide(0);
+        // Re-enable transition on next frame for subsequent slides.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setEnableTransition(true));
+        });
+      }, transitionDuration * 1000);
+      return () => clearTimeout(t);
+    }
+  }, [currentSlide, slides.length, transitionDuration]);
 
   const fetchHeroContent = async () => {
     const { data } = await supabase
