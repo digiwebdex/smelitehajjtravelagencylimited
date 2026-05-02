@@ -443,7 +443,7 @@ const HeroSection = () => {
         /* Full-Width Centered Layout */
         <div className={`relative z-10 container text-center pt-48 md:pt-52 lg:pt-56 pb-20 ${textPrimary}`}>
           <motion.div
-            key={`content-centered-${currentSlide}`}
+            key={`content-centered-${displayIndex}`}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -542,7 +542,7 @@ const HeroSection = () => {
             <div className="grid grid-cols-1 gap-8 items-center">
               {/* Content - Full width (right-side framed image removed) */}
               <motion.div
-                key={`content-${currentSlide}`}
+                key={`content-${displayIndex}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
