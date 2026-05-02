@@ -109,10 +109,6 @@ export default {
           "0%, 100%": { opacity: "0.3" },
           "50%": { opacity: "0.7" },
         },
-        "hero-marquee": {
-          "0%": { transform: "translateX(-50%)" },
-          "100%": { transform: "translateX(0)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -120,7 +116,6 @@ export default {
         "shimmer": "shimmer 3s ease-in-out infinite",
         "shine-sweep": "shine-sweep 2.5s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
-        "hero-marquee": "hero-marquee 40s linear infinite",
       },
     },
   },
