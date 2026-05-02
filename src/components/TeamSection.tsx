@@ -270,7 +270,7 @@ const TeamSection = () => {
                 key={member.id}
                 variants={cardVariants}
                 whileHover={{ y: -8 }}
-                className="bg-gradient-to-br from-primary/5 to-secondary/10 rounded-2xl shadow-elegant hover:shadow-lg transition-all duration-300 group text-center overflow-hidden border-b-4 border-secondary"
+                className="bg-gradient-to-br from-slate-100 via-white to-slate-300 rounded-2xl shadow-elegant hover:shadow-[0_10px_30px_rgba(148,163,184,0.5)] transition-all duration-300 group text-center overflow-hidden border-b-4 border-slate-400"
               >
                 {/* Square Image Container */}
                 <div 
