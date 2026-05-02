@@ -187,7 +187,7 @@ const TeamSection = () => {
                       </div>
                       
                       {/* Content */}
-                      <div className="p-5 sm:p-6 lg:p-7 flex flex-col justify-center flex-1 min-w-0 relative">
+                      <div className="p-5 sm:p-6 lg:p-7 flex flex-col justify-center items-center text-center flex-1 min-w-0 relative">
                         {/* Crown accent */}
                         <Crown className="w-5 h-5 text-secondary/70 mb-3" />
                         
@@ -195,8 +195,7 @@ const TeamSection = () => {
                           {member.name}
                         </h3>
                         
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="h-px w-8 bg-secondary/60" />
+                        <div className="flex items-center justify-center gap-2 mb-4">
                           <p className="text-foreground font-semibold text-sm sm:text-base lg:text-lg capitalize tracking-wide">
                             {member.role}
                           </p>
@@ -207,7 +206,7 @@ const TeamSection = () => {
                             {member.qualifications}
                           </p>
                         )}
-                        <div className="flex flex-wrap items-center gap-4 mt-auto">
+                        <div className="flex flex-wrap items-center justify-center gap-4 mt-auto">
                           {member.whatsapp_number && (
                             <a
                               href={`https://wa.me/${member.whatsapp_number.replace(/[^0-9]/g, '')}`}
