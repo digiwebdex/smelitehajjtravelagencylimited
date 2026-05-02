@@ -100,18 +100,43 @@ const HotelDetailsModal = ({
   };
 
   const getEmbedUrl = () => {
-    if (hotel.google_map_embed_url) return hotel.google_map_embed_url;
+    if (hotel.google_map_embed_url) {
+      // If user pasted full <iframe> code, extract the src URL
+      const iframeMatch = hotel.google_map_embed_url.match(/src=["']([^"']+)["']/i);
+      if (iframeMatch) return iframeMatch[1];
+      return hotel.google_map_embed_url;
+    }
     if (hotel.google_map_link) {
-      // Try to convert regular Google Maps link to embed
-      const match = hotel.google_map_link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-      if (match) {
-        const [, lat, lng] = match;
-        return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM!5e0!3m2!1sen!2s!4v1600000000000!5m2!1sen!2s`;
+      const link = hotel.google_map_link.trim();
+      // Pattern 1: @lat,lng in the URL
+      const coordMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (coordMatch) {
+        const [, lat, lng] = coordMatch;
+        return `https://www.google.com/maps?q=${lat},${lng}&output=embed`;
       }
+      // Pattern 2: !3dLAT!4dLNG (place URLs)
+      const placeMatch = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      if (placeMatch) {
+        const [, lat, lng] = placeMatch;
+        return `https://www.google.com/maps?q=${lat},${lng}&output=embed`;
+      }
+      // Pattern 3: ?q=lat,lng or ?q=Place+Name
+      const qMatch = link.match(/[?&]q=([^&]+)/);
+      if (qMatch) {
+        return `https://www.google.com/maps?q=${qMatch[1]}&output=embed`;
+      }
+      // Pattern 4: /place/Name/ — extract name
+      const nameMatch = link.match(/\/place\/([^/@?]+)/);
+      if (nameMatch) {
+        return `https://www.google.com/maps?q=${nameMatch[1]}&output=embed`;
+      }
+      // Fallback: use hotel name + city as search query
+      return `https://www.google.com/maps?q=${encodeURIComponent(`${hotel.name} ${hotel.city}`)}&output=embed`;
     }
     return null;
   };
 
+  const isSaudiArabia = (hotel.country || "Saudi Arabia").toLowerCase().includes("saudi");
   const embedUrl = getEmbedUrl();
 
   return (
