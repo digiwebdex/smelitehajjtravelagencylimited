@@ -32,6 +32,7 @@ interface Hotel {
   id: string;
   name: string;
   city: string;
+  country?: string | null;
   star_rating: number;
   distance_from_haram: number;
   description: string | null;
