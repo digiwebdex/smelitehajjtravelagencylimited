@@ -16,7 +16,7 @@ DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-smelite_hajj}"
 DB_USER="${DB_USER:-postgres}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/smelitehajj}"
-RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-14}"
+RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
 
 mkdir -p "$BACKUP_DIR"
 
