@@ -5,11 +5,14 @@
 set -euo pipefail
 
 # Load env from backend .env if present
-if [ -f /var/www/smelitehajj/backend/.env ]; then
-  set -a
-  . /var/www/smelitehajj/backend/.env
-  set +a
-fi
+for ENV_FILE in /var/www/smelitehajjwebsite/backend/.env /var/www/smelitehajjwebsite/migration/backend/.env /var/www/smelitehajj/backend/.env; do
+  if [ -f "$ENV_FILE" ]; then
+    set -a
+    . "$ENV_FILE"
+    set +a
+    break
+  fi
+done
 
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
