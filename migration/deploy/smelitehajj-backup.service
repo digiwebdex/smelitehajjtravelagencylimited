@@ -1,0 +1,11 @@
+[Unit]
+Description=SM Elite Hajj Daily Database Backup
+After=postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/smelitehajj-daily-backup.sh
+User=root
+StandardOutput=journal
+StandardError=journal

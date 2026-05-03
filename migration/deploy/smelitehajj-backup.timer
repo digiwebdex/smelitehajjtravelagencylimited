@@ -1,0 +1,11 @@
+[Unit]
+Description=Run SM Elite Hajj DB backup daily at 02:30
+Requires=smelitehajj-backup.service
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+Unit=smelitehajj-backup.service
+
+[Install]
+WantedBy=timers.target
