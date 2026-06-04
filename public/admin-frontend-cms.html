@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Frontend CMS | SM Elite Hajj Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --green: #0f5f43;
+      --green2: #166b4d;
+      --gold: #d4a04f;
+      --bg: #f8f5ef;
+      --card: #ffffff;
+      --muted: #60766f;
+      --border: #e7ded1;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: #123329;
+    }
+    header {
+      height: 64px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 22px; font-family: Georgia, serif; color: var(--green); }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr 420px;
+      gap: 16px;
+      padding: 16px;
+      min-height: calc(100vh - 64px);
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(15, 31, 25, .05);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fffdf8;
+    }
+    .panel-body { padding: 16px; }
+    .list {
+      max-height: calc(100vh - 170px);
+      overflow: auto;
+    }
+    .section-row, .item-row {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+    }
+    .section-row:hover, .item-row:hover { background: #f8f5ef; }
+    .section-row.active, .item-row.active {
+      background: #eef7f2;
+      border-left: 4px solid var(--green);
+    }
+    .title { font-weight: 800; color: #123329; }
+    .small { color: var(--muted); font-size: 12px; margin-top: 3px; word-break: break-word; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--green);
+      background: #fff;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 12px;
+      color: #214c40;
+      margin: 0 0 5px;
+    }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #102d25;
+      border-radius: 10px;
+      padding: 10px 11px;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(15, 95, 67, .1);
+    }
+    textarea { min-height: 84px; resize: vertical; }
+    textarea.code {
+      min-height: 150px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+    .field { margin-bottom: 12px; }
+    .btn {
+      border: 0;
+      background: var(--green);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .btn:hover { background: var(--green2); }
+    .btn.gold { background: var(--gold); color: #102d25; }
+    .btn.light {
+      background: #fff;
+      color: var(--green);
+      border: 1px solid var(--border);
+    }
+    .btn.danger { background: var(--danger); }
+    .btn.small-btn { padding: 7px 10px; font-size: 12px; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .switch {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .switch input { width: auto; }
+    .preview-img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f5f5f5;
+      margin-top: 8px;
+    }
+    .status {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #102d25;
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.2);
+      display: none;
+      max-width: 420px;
+      z-index: 50;
+      white-space: pre-wrap;
+    }
+    .status.show { display: block; }
+    .error { color: var(--danger); font-weight: 700; }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .list { max-height: 420px; }
+    }
+  </style>
+
+<script>
+(function () {
+  const ADMIN_EMAILS = new Set(["asomoalamin@yahoo.com"]);
+
+  function readSession() {
+    try {
+      const raw = localStorage.getItem("smelite_vps_session");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  const session = readSession();
+  const user = session && session.user ? session.user : null;
+  const email = String(user && user.email ? user.email : "").trim().toLowerCase();
+  const role = String(user && user.role ? user.role : "").trim().toLowerCase();
+
+  if (!(role === "admin" || ADMIN_EMAILS.has(email))) {
+    alert("Admin login required.");
+    location.href = "/auth?redirect=frontend-cms";
+  }
+})();
+</script>
+
+</head>
+<body>
+<header>
+  <div>
+    <h1>Frontend CMS</h1>
+    <div class="small">Edit all public website sections, images, cards, buttons, stats and JSON settings</div>
+  </div>
+  <div class="top-actions">
+    <a class="btn light" href="/admin">← Back to Admin</a>
+    <a class="btn light" href="/" target="_blank">View Website</a>
+    <button class="btn" onclick="loadAll()">Refresh</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Sections</h2>
+        <div class="small" id="sectionCount">Loading...</div>
+      </div>
+      <button class="btn small-btn" onclick="newSection()">+ Add</button>
+    </div>
+    <div class="panel-body">
+      <input id="search" placeholder="Search section..." oninput="renderSections()" />
+    </div>
+    <div class="list" id="sectionsList"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Section Editor</h2>
+        <div class="small" id="selectedSectionLabel">Select a section</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn light small-btn" onclick="duplicateSection()">Duplicate</button>
+        <button class="btn danger small-btn" onclick="deleteSection()">Delete</button>
+        <button class="btn gold small-btn" onclick="saveSection()">Save Section</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <form id="sectionForm">
+        <input type="hidden" data-field="id" />
+
+        <div class="grid">
+          <div class="field">
+            <label>Section Key *</label>
+            <input data-field="section_key" placeholder="unique_key" />
+          </div>
+          <div class="field">
+            <label>Section Name *</label>
+            <input data-field="section_name" placeholder="Hero Section" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label>Type *</label>
+            <input data-field="section_type" placeholder="hero / package_section / contact" />
+          </div>
+          <div class="field">
+            <label>Page Slug</label>
+            <input data-field="page_slug" placeholder="home / global" />
+          </div>
+          <div class="field">
+            <label>Sort Order</label>
+            <input data-field="sort_order" type="number" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="switch">
+            <input data-field="is_active" type="checkbox" />
+            <span>Active</span>
+          </div>
+          <div class="switch">
+            <input data-field="is_visible" type="checkbox" />
+            <span>Visible on website</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Title</label>
+          <input data-field="title" />
+        </div>
+        <div class="field">
+          <label>Subtitle / Small Badge</label>
+          <input data-field="subtitle" />
+        </div>
+        <div class="field">
+          <label>Description / Paragraph</label>
+          <textarea data-field="description"></textarea>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Main Image URL</label>
+            <input data-field="image_url" placeholder="/uploads/..." />
+            <input type="file" accept="image/*" onchange="uploadSectionImage(event,'image_url')" />
+            <img id="sectionImagePreview" class="preview-img" style="display:none" />
+          </div>
+          <div class="field">
+            <label>Mobile Image URL</label>
+            <input data-field="mobile_image_url" placeholder="/uploads/..." />
+            <input type="file" accept="image/*" onchange="uploadSectionImage(event,'mobile_image_url')" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Background Image URL</label>
+            <input data-field="background_image_url" />
+            <input type="file" accept="image/*" onchange="uploadSectionImage(event,'background_image_url')" />
+          </div>
+          <div class="field">
+            <label>Video URL</label>
+            <input data-field="video_url" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Button Text</label>
+            <input data-field="button_text" />
+          </div>
+          <div class="field">
+            <label>Button URL</label>
+            <input data-field="button_url" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Secondary Button Text</label>
+            <input data-field="secondary_button_text" />
+          </div>
+          <div class="field">
+            <label>Secondary Button URL</label>
+            <input data-field="secondary_button_url" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Icon</label>
+            <input data-field="icon" />
+          </div>
+          <div class="field">
+            <label>Badge Text</label>
+            <input data-field="badge_text" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Badge Subtext</label>
+          <input data-field="badge_subtext" />
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Stat 1 Value</label>
+            <input data-field="stat_1_value" />
+          </div>
+          <div class="field">
+            <label>Stat 1 Label</label>
+            <input data-field="stat_1_label" />
+          </div>
+          <div class="field">
+            <label>Stat 2 Value</label>
+            <input data-field="stat_2_value" />
+          </div>
+          <div class="field">
+            <label>Stat 2 Label</label>
+            <input data-field="stat_2_label" />
+          </div>
+          <div class="field">
+            <label>Stat 3 Value</label>
+            <input data-field="stat_3_value" />
+          </div>
+          <div class="field">
+            <label>Stat 3 Label</label>
+            <input data-field="stat_3_label" />
+          </div>
+          <div class="field">
+            <label>Stat 4 Value</label>
+            <input data-field="stat_4_value" />
+          </div>
+          <div class="field">
+            <label>Stat 4 Label</label>
+            <input data-field="stat_4_label" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Content JSON advanced</label>
+          <textarea class="code" data-field="content">{}</textarea>
+        </div>
+        <div class="field">
+          <label>Styles JSON advanced</label>
+          <textarea class="code" data-field="styles">{}</textarea>
+        </div>
+        <div class="field">
+          <label>Settings JSON advanced</label>
+          <textarea class="code" data-field="settings">{}</textarea>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn gold" onclick="saveSection()">Save Section</button>
+          <button type="button" class="btn light" onclick="syncPackageTables()">Sync Package Section Tables</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Section Items</h2>
+        <div class="small">Cards, service boxes, menu items, repeatable content</div>
+      </div>
+      <button class="btn small-btn" onclick="newItem()">+ Add Item</button>
+    </div>
+
+    <div class="list" id="itemsList"></div>
+
+    <div class="panel-body">
+      <h3>Item Editor</h3>
+      <div class="small" id="selectedItemLabel">Select or add item</div>
+      <div class="divider"></div>
+
+      <form id="itemForm">
+        <input type="hidden" data-item-field="id" />
+        <input type="hidden" data-item-field="section_id" />
+        <input type="hidden" data-item-field="section_key" />
+
+        <div class="grid">
+          <div class="field">
+            <label>Item Key</label>
+            <input data-item-field="item_key" placeholder="unique_item_key" />
+          </div>
+          <div class="field">
+            <label>Item Type</label>
+            <input data-item-field="item_type" placeholder="card / menu / stat" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Title</label>
+          <input data-item-field="title" />
+        </div>
+        <div class="field">
+          <label>Subtitle</label>
+          <input data-item-field="subtitle" />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea data-item-field="description"></textarea>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Image URL</label>
+            <input data-item-field="image_url" />
+            <input type="file" accept="image/*" onchange="uploadItemImage(event,'image_url')" />
+          </div>
+          <div class="field">
+            <label>Mobile Image URL</label>
+            <input data-item-field="mobile_image_url" />
+            <input type="file" accept="image/*" onchange="uploadItemImage(event,'mobile_image_url')" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Icon</label>
+            <input data-item-field="icon" />
+          </div>
+          <div class="field">
+            <label>Badge Text</label>
+            <input data-item-field="badge_text" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Price</label>
+            <input data-item-field="price" />
+          </div>
+          <div class="field">
+            <label>Old Price</label>
+            <input data-item-field="old_price" />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Button Text</label>
+            <input data-item-field="button_text" />
+          </div>
+          <div class="field">
+            <label>Button URL</label>
+            <input data-item-field="button_url" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Link URL</label>
+          <input data-item-field="link_url" />
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Phone</label>
+            <input data-item-field="phone" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input data-item-field="email" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Address</label>
+          <input data-item-field="address" />
+        </div>
+
+        <div class="grid">
+          <div class="field">
+            <label>Sort Order</label>
+            <input data-item-field="sort_order" type="number" />
+          </div>
+          <div>
+            <div class="switch">
+              <input data-item-field="is_active" type="checkbox" />
+              <span>Active</span>
+            </div>
+            <div class="switch">
+              <input data-item-field="is_visible" type="checkbox" />
+              <span>Visible</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Content JSON advanced</label>
+          <textarea class="code" data-item-field="content">{}</textarea>
+        </div>
+        <div class="field">
+          <label>Styles JSON advanced</label>
+          <textarea class="code" data-item-field="styles">{}</textarea>
+        </div>
+        <div class="field">
+          <label>Settings JSON advanced</label>
+          <textarea class="code" data-item-field="settings">{}</textarea>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn gold" onclick="saveItem()">Save Item</button>
+          <button type="button" class="btn danger" onclick="deleteItem()">Delete Item</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div id="status" class="status"></div>
+
+<script>
+const API = "/api";
+let sections = [];
+let items = [];
+let selectedSection = null;
+let selectedItem = null;
+
+const sectionFields = [
+  "id","section_key","section_name","section_type","page_slug","title","subtitle","description",
+  "image_url","mobile_image_url","background_image_url","video_url",
+  "button_text","button_url","secondary_button_text","secondary_button_url",
+  "icon","badge_text","badge_subtext",
+  "stat_1_value","stat_1_label","stat_2_value","stat_2_label",
+  "stat_3_value","stat_3_label","stat_4_value","stat_4_label",
+  "content","styles","settings","is_active","is_visible","sort_order"
+];
+
+const itemFields = [
+  "id","section_id","section_key","item_key","item_type","title","subtitle","description",
+  "image_url","mobile_image_url","icon","badge_text","price","old_price",
+  "button_text","button_url","link_url","phone","email","address",
+  "content","styles","settings","is_active","is_visible","sort_order"
+];
+
+function toast(message, isError=false) {
+  const el = document.getElementById("status");
+  el.textContent = message;
+  el.style.background = isError ? "#b42318" : "#102d25";
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 4500);
+}
+
+async function api(path, options={}) {
+  const res = await fetch(API + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const text = await res.text();
+  let data;
+  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  if (!res.ok || (data && data.error)) {
+    throw new Error((data && (data.error || data.message)) || text || res.statusText);
+  }
+  return data;
+}
+
+function parseJsonField(value, fallback={}) {
+  if (!value || !String(value).trim()) return fallback;
+  try { return JSON.parse(value); }
+  catch (e) { throw new Error("Invalid JSON: " + e.message); }
+}
+
+function setFormValue(root, selectorPrefix, field, value) {
+  const el = root.querySelector(`[${selectorPrefix}="${field}"]`);
+  if (!el) return;
+
+  if (el.type === "checkbox") {
+    el.checked = !!value;
+  } else if (field === "content" || field === "styles" || field === "settings") {
+    el.value = JSON.stringify(value || {}, null, 2);
+  } else {
+    el.value = value ?? "";
+  }
+}
+
+function getFormPayload(root, selectorPrefix, fields) {
+  const payload = {};
+  for (const field of fields) {
+    if (field === "id") continue;
+    const el = root.querySelector(`[${selectorPrefix}="${field}"]`);
+    if (!el) continue;
+
+    if (el.type === "checkbox") {
+      payload[field] = el.checked;
+    } else if (field === "content" || field === "styles" || field === "settings") {
+      payload[field] = parseJsonField(el.value, {});
+    } else if (field === "sort_order") {
+      payload[field] = el.value === "" ? 0 : Number(el.value);
+    } else {
+      payload[field] = el.value === "" ? null : el.value;
+    }
+  }
+  return payload;
+}
+
+function sanitizeFileName(name) {
+  return String(name || "file.webp")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120) || "file.webp";
+}
+
+async function uploadFile(file, folder="cms") {
+  const clean = sanitizeFileName(file.name);
+  const path = `${folder}/${Date.now()}-${clean}`;
+  const form = new FormData();
+  form.append("path", path);
+  form.append("file", file);
+
+  const endpoints = [
+    "/vps-upload/admin-uploads",
+    "/upload/admin-uploads",
+    "/storage/upload/admin-uploads"
+  ];
+
+  let lastError = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(API + endpoint, { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && !data.error) {
+        if (data.publicUrl) return data.publicUrl;
+        if (data.url) return data.url;
+        if (data.fullPath) return `/uploads/${data.fullPath}`;
+        if (data.path && String(data.path).startsWith("/")) return data.path;
+        if (data.path) return `/uploads/admin-uploads/${data.path}`;
+        return `/uploads/admin-uploads/${path}`;
+      }
+
+      lastError = data.error || data.message || res.statusText;
+    } catch (e) {
+      lastError = e.message;
+    }
+  }
+
+  throw new Error("Upload failed: " + (lastError || "unknown error"));
+}
+
+async function loadAll() {
+  try {
+    sections = await api("/rest/frontend_sections?select=*&order=sort_order.asc&limit=500");
+    items = await api("/rest/frontend_section_items?select=*&order=sort_order.asc&limit=1000");
+    renderSections();
+
+    if (selectedSection) {
+      const fresh = sections.find(s => s.id === selectedSection.id);
+      if (fresh) selectSection(fresh.id);
+    }
+
+    toast("CMS loaded");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function renderSections() {
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  const list = document.getElementById("sectionsList");
+  const rows = sections.filter(s => {
+    const text = `${s.section_key} ${s.section_name} ${s.title} ${s.section_type}`.toLowerCase();
+    return !q || text.includes(q);
+  });
+
+  document.getElementById("sectionCount").textContent = `${rows.length} section(s)`;
+
+  list.innerHTML = rows.map(s => `
+    <div class="section-row ${selectedSection && selectedSection.id === s.id ? "active" : ""}" onclick="selectSection('${s.id}')">
+      <div>
+        <div class="title">${escapeHtml(s.section_name || s.title || s.section_key)}</div>
+        <div class="small">${escapeHtml(s.section_key)} • ${escapeHtml(s.section_type || "")}</div>
+        <div class="small">${escapeHtml(s.title || "")}</div>
+      </div>
+      <div>
+        <span class="badge">${s.is_visible ? "Visible" : "Hidden"}</span>
+        <div class="small">#${s.sort_order || 0}</div>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderItems() {
+  const list = document.getElementById("itemsList");
+
+  if (!selectedSection) {
+    list.innerHTML = `<div class="panel-body small">Select a section first.</div>`;
+    return;
+  }
+
+  const rows = items.filter(i => i.section_id === selectedSection.id || i.section_key === selectedSection.section_key);
+
+  list.innerHTML = rows.map(i => `
+    <div class="item-row ${selectedItem && selectedItem.id === i.id ? "active" : ""}" onclick="selectItem('${i.id}')">
+      <div>
+        <div class="title">${escapeHtml(i.title || i.item_key || "Untitled item")}</div>
+        <div class="small">${escapeHtml(i.item_key || "")} • ${escapeHtml(i.item_type || "")}</div>
+      </div>
+      <div>
+        <span class="badge">${i.is_visible ? "Visible" : "Hidden"}</span>
+        <div class="small">#${i.sort_order || 0}</div>
+      </div>
+    </div>
+  `).join("") || `<div class="panel-body small">No item found. Click + Add Item.</div>`;
+}
+
+function selectSection(id) {
+  selectedSection = sections.find(s => s.id === id) || null;
+  selectedItem = null;
+
+  const form = document.getElementById("sectionForm");
+  sectionFields.forEach(f => setFormValue(form, "data-field", f, selectedSection ? selectedSection[f] : ""));
+
+  document.getElementById("selectedSectionLabel").textContent = selectedSection
+    ? `${selectedSection.section_key} / ${selectedSection.section_type}`
+    : "Select a section";
+
+  const preview = document.getElementById("sectionImagePreview");
+  if (selectedSection && selectedSection.image_url) {
+    preview.src = selectedSection.image_url;
+    preview.style.display = "block";
+  } else {
+    preview.style.display = "none";
+  }
+
+  renderSections();
+  clearItemForm();
+  renderItems();
+}
+
+function newSection() {
+  selectedSection = null;
+  const form = document.getElementById("sectionForm");
+  form.reset();
+  sectionFields.forEach(f => setFormValue(form, "data-field", f, ""));
+  setFormValue(form, "data-field", "section_key", `new_section_${Date.now()}`);
+  setFormValue(form, "data-field", "section_name", "New Section");
+  setFormValue(form, "data-field", "section_type", "custom");
+  setFormValue(form, "data-field", "page_slug", "home");
+  setFormValue(form, "data-field", "sort_order", sections.length + 1);
+  setFormValue(form, "data-field", "is_active", true);
+  setFormValue(form, "data-field", "is_visible", true);
+  setFormValue(form, "data-field", "content", {});
+  setFormValue(form, "data-field", "styles", {});
+  setFormValue(form, "data-field", "settings", {});
+  document.getElementById("selectedSectionLabel").textContent = "New section";
+  renderSections();
+  renderItems();
+}
+
+async function saveSection() {
+  try {
+    const form = document.getElementById("sectionForm");
+    const id = form.querySelector('[data-field="id"]').value;
+    const payload = getFormPayload(form, "data-field", sectionFields);
+
+    if (!payload.section_key) throw new Error("Section key is required");
+    if (!payload.section_name) throw new Error("Section name is required");
+    if (!payload.section_type) throw new Error("Section type is required");
+
+    if (id) {
+      await api(`/rest/frontend_sections?id=eq.${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+      toast("Section updated");
+    } else {
+      const inserted = await api("/rest/frontend_sections", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      toast("Section created");
+    }
+
+    await loadAll();
+
+    const match = sections.find(s => s.section_key === payload.section_key);
+    if (match) selectSection(match.id);
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function duplicateSection() {
+  if (!selectedSection) return toast("Select section first", true);
+  const copy = { ...selectedSection };
+  delete copy.id;
+  copy.section_key = `${copy.section_key}_copy_${Date.now()}`;
+  copy.section_name = `${copy.section_name || copy.title || "Section"} Copy`;
+  copy.sort_order = Number(copy.sort_order || 0) + 1;
+
+  try {
+    await api("/rest/frontend_sections", { method: "POST", body: JSON.stringify(copy) });
+    await loadAll();
+    toast("Section duplicated");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function deleteSection() {
+  if (!selectedSection) return toast("Select section first", true);
+  if (!confirm(`Delete section "${selectedSection.section_name}" and its items?`)) return;
+
+  try {
+    await api(`/rest/frontend_sections?id=eq.${encodeURIComponent(selectedSection.id)}`, { method: "DELETE" });
+    selectedSection = null;
+    await loadAll();
+    clearSectionForm();
+    toast("Section deleted");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function clearSectionForm() {
+  const form = document.getElementById("sectionForm");
+  form.reset();
+  document.getElementById("selectedSectionLabel").textContent = "Select a section";
+}
+
+async function uploadSectionImage(event, field) {
+  try {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const url = await uploadFile(file, `cms/sections/${selectedSection?.section_key || "new"}`);
+    const form = document.getElementById("sectionForm");
+    setFormValue(form, "data-field", field, url);
+    if (field === "image_url") {
+      document.getElementById("sectionImagePreview").src = url;
+      document.getElementById("sectionImagePreview").style.display = "block";
+    }
+    toast("Image uploaded. Click Save Section.");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function clearItemForm() {
+  selectedItem = null;
+  const form = document.getElementById("itemForm");
+  form.reset();
+  itemFields.forEach(f => setFormValue(form, "data-item-field", f, ""));
+  setFormValue(form, "data-item-field", "content", {});
+  setFormValue(form, "data-item-field", "styles", {});
+  setFormValue(form, "data-item-field", "settings", {});
+  document.getElementById("selectedItemLabel").textContent = "Select or add item";
+}
+
+function selectItem(id) {
+  selectedItem = items.find(i => i.id === id) || null;
+  const form = document.getElementById("itemForm");
+  itemFields.forEach(f => setFormValue(form, "data-item-field", f, selectedItem ? selectedItem[f] : ""));
+  document.getElementById("selectedItemLabel").textContent = selectedItem
+    ? `${selectedItem.item_key || ""} / ${selectedItem.item_type || ""}`
+    : "Select or add item";
+  renderItems();
+}
+
+function newItem() {
+  if (!selectedSection) return toast("Select a section first", true);
+
+  selectedItem = null;
+  const form = document.getElementById("itemForm");
+  form.reset();
+
+  itemFields.forEach(f => setFormValue(form, "data-item-field", f, ""));
+  setFormValue(form, "data-item-field", "section_id", selectedSection.id);
+  setFormValue(form, "data-item-field", "section_key", selectedSection.section_key);
+  setFormValue(form, "data-item-field", "item_key", `new_item_${Date.now()}`);
+  setFormValue(form, "data-item-field", "item_type", "card");
+  setFormValue(form, "data-item-field", "sort_order", items.filter(i => i.section_id === selectedSection.id).length + 1);
+  setFormValue(form, "data-item-field", "is_active", true);
+  setFormValue(form, "data-item-field", "is_visible", true);
+  setFormValue(form, "data-item-field", "content", {});
+  setFormValue(form, "data-item-field", "styles", {});
+  setFormValue(form, "data-item-field", "settings", {});
+
+  document.getElementById("selectedItemLabel").textContent = "New item";
+  renderItems();
+}
+
+async function saveItem() {
+  try {
+    if (!selectedSection) throw new Error("Select a section first");
+
+    const form = document.getElementById("itemForm");
+    const id = form.querySelector('[data-item-field="id"]').value;
+    const payload = getFormPayload(form, "data-item-field", itemFields);
+
+    payload.section_id = payload.section_id || selectedSection.id;
+    payload.section_key = payload.section_key || selectedSection.section_key;
+
+    if (!payload.item_key) throw new Error("Item key is required");
+
+    if (id) {
+      await api(`/rest/frontend_section_items?id=eq.${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload)
+      });
+      toast("Item updated");
+    } else {
+      await api("/rest/frontend_section_items", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      toast("Item created");
+    }
+
+    await loadAll();
+    renderItems();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function deleteItem() {
+  if (!selectedItem) return toast("Select item first", true);
+  if (!confirm(`Delete item "${selectedItem.title || selectedItem.item_key}"?`)) return;
+
+  try {
+    await api(`/rest/frontend_section_items?id=eq.${encodeURIComponent(selectedItem.id)}`, { method: "DELETE" });
+    selectedItem = null;
+    await loadAll();
+    clearItemForm();
+    renderItems();
+    toast("Item deleted");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function uploadItemImage(event, field) {
+  try {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    const url = await uploadFile(file, `cms/items/${selectedSection?.section_key || "new"}`);
+    const form = document.getElementById("itemForm");
+    setFormValue(form, "data-item-field", field, url);
+    toast("Image uploaded. Click Save Item.");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function syncPackageTables() {
+  try {
+    const hajj = sections.find(s => s.section_key === "hajj_packages_section");
+    const umrah = sections.find(s => s.section_key === "umrah_packages_section");
+
+    async function upsertPackageSection(row, sectionKey, type) {
+      if (!row) return;
+
+      const payload = {
+        section_key: sectionKey,
+        section_type: type,
+        title: row.title,
+        subtitle: row.subtitle,
+        description: row.description,
+        image_url: row.image_url,
+        badge_text: row.badge_text,
+        badge_subtext: row.badge_subtext,
+        stat_1_value: row.stat_1_value,
+        stat_1_label: row.stat_1_label,
+        stat_2_value: row.stat_2_value,
+        stat_2_label: row.stat_2_label,
+        stat_3_value: row.stat_3_value,
+        stat_3_label: row.stat_3_label,
+        button_text: row.button_text,
+        button_url: row.button_url,
+        sort_order: row.sort_order,
+        settings: row.settings || {},
+        is_active: row.is_active
+      };
+
+      const existing = await api(`/rest/package_sections?select=*&section_key=eq.${sectionKey}&limit=1`);
+      if (existing && existing.length) {
+        await api(`/rest/package_sections?id=eq.${existing[0].id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      } else {
+        await api("/rest/package_sections", { method: "POST", body: JSON.stringify(payload) });
+      }
+
+      const existing2 = await api(`/rest/package_section_settings?select=*&section_key=eq.${sectionKey}&limit=1`);
+      if (existing2 && existing2.length) {
+        await api(`/rest/package_section_settings?id=eq.${existing2[0].id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      } else {
+        await api("/rest/package_section_settings", { method: "POST", body: JSON.stringify(payload) });
+      }
+    }
+
+    await upsertPackageSection(hajj, "hajj_section", "hajj");
+    await upsertPackageSection(umrah, "umrah_section", "umrah");
+
+    toast("Package section tables synced");
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+loadAll();
+</script>
+</body>
+</html>

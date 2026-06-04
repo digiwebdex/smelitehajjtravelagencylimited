@@ -546,7 +546,7 @@ const HeroSection = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className={`text-left ${textPrimary}`}
+                className={`text-center ${textPrimary}`}
               >
                   {/* Badge */}
                   {content.badge_text && (
@@ -579,7 +579,7 @@ const HeroSection = () => {
                   {/* Description */}
                   <motion.p
                     variants={itemVariants}
-                    className={`text-sm xs:text-base md:text-lg max-w-lg mb-6 sm:mb-8 leading-relaxed ${textSecondary}`}
+                    className={`text-sm xs:text-base md:text-lg max-w-lg mx-auto mb-6 sm:mb-8 leading-relaxed ${textSecondary}`}
                   >
                     {content.description}
                   </motion.p>
@@ -605,7 +605,7 @@ const HeroSection = () => {
                           ? "bg-white border border-slate-200 group-hover:border-emerald-300" 
                           : "bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/20 group-hover:bg-primary-foreground/20 group-hover:border-secondary/40"
                         }`}>
-                        <Play className="w-4 h-4 fill-current ml-0.5" />
+                        <Play className="w-4 h-4 fill-current mx-auto.5" />
                       </span>
                       <span className="font-medium text-sm">Watch Video</span>
                     </motion.button>
@@ -620,7 +620,7 @@ const HeroSection = () => {
                       {content.stats.slice(0, 3).map((stat) => (
                         <div
                           key={stat.label}
-                          className="text-left group cursor-default"
+                          className="text-center group cursor-default"
                         >
                           <div className={`font-kufi text-2xl md:text-3xl font-bold mb-1 ${isLight ? "text-emerald-600" : "text-secondary"}`}>
                             {stat.number}
@@ -642,7 +642,7 @@ const HeroSection = () => {
       {isVideoOpen && (
         <Suspense fallback={null}>
           <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
-            <DialogContent className="max-w-4xl p-0 bg-black border-none">
+            <DialogContent className="max-w-4xl mx-auto p-0 bg-black border-none">
               <DialogTitle className="sr-only">Watch Video</DialogTitle>
               <div className="relative aspect-video">
                 {content.video_url && isYouTubeUrl(content.video_url) ? (
