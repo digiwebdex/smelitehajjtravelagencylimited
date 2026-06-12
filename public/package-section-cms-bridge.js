@@ -206,26 +206,16 @@
 
   function runRepeated() {
     loadAndApply();
-
-    let count = 0;
-    const timer = setInterval(function () {
-      count += 1;
-      loadAndApply();
-      if (count >= 12) clearInterval(timer);
-    }, 700);
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", runRepeated);
-  } else {
-    runRepeated();
-  }
-
-  window.addEventListener("load", function () {
-    setTimeout(loadAndApply, 300);
-    setTimeout(loadAndApply, 1500);
+    // Retry a few times as React sections hydrate — avoid aggressive polling on main thread
+    setTimeout(loadAndApply, 1200);
     setTimeout(loadAndApply, 3000);
-  });
+  }
+
+  if (document.readyState === "complete") {
+    runRepeated();
+  } else {
+    window.addEventListener("load", runRepeated, { once: true });
+  }
 
   window.SME_APPLY_PACKAGE_SECTION_CMS = loadAndApply;
 })();

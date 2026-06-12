@@ -4,9 +4,32 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const path = require('path');
+const {
+  optionalAuth,
+  requireAdmin,
+  enforceRestAccess,
+  enforceFunctionAccess,
+  sanitizeTableRows,
+  isPublicUploadBucket,
+  isAdmin,
+  loadUserRole,
+} = require('./middleware/access');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+if (process.env.NODE_ENV === 'production') {
+  const secret = process.env.JWT_SECRET || '';
+  if (!secret || secret === 'your-super-secret-key-change-this') {
+    console.error('FATAL: Set a strong JWT_SECRET in production');
+    process.exit(1);
+  }
+}
+
+const CORS_ORIGINS = (process.env.CORS_ORIGIN || 'https://smelitehajj.com,https://www.smelitehajj.com')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 // Database connection pool
 const pool = new Pool({
@@ -24,8 +47,17 @@ const pool = new Pool({
 module.exports.pool = pool;
 
 // Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || CORS_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
@@ -235,13 +267,15 @@ function __restParseSelect(selectRaw, columns) {
   return requested.map(__restQuoteIdent).join(', ');
 }
 
-app.get('/api/rest/:table', async (req, res) => {
+app.get('/api/rest/:table', optionalAuth, async (req, res) => {
   try {
     const { table } = req.params;
 
     if (!__restIsAllowedTable(table)) {
       return res.status(403).json({ error: 'Table not allowed' });
     }
+
+    if (!(await enforceRestAccess(req, res, table, 'GET'))) return;
 
     const columns = await __restGetTableColumns(table);
 
@@ -292,24 +326,27 @@ app.get('/api/rest/:table', async (req, res) => {
 
     const sql = `SELECT ${selectSql} FROM public.${__restQuoteIdent(table)}${whereSql}${orderSql}${limitSql}${offsetSql}`;
     const result = await pool.query(sql, params);
+    const role = await loadUserRole(req);
 
-    res.json(result.rows);
+    res.json(sanitizeTableRows(table, result.rows, isAdmin(role)));
   } catch (error) {
     console.error('GET error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Request failed' });
   }
 });
 
 
 // POST /api/rest/:table - Insert row(s) / Upsert
 
-app.post('/api/rest/:table', async (req, res) => {
+app.post('/api/rest/:table', optionalAuth, async (req, res) => {
   try {
     const { table } = req.params;
 
     if (!__restIsAllowedTable(table)) {
       return res.status(403).json({ error: 'Table not allowed' });
     }
+
+    if (!(await enforceRestAccess(req, res, table, 'POST'))) return;
 
     const columns = await __restGetTableColumns(table);
 
@@ -350,20 +387,22 @@ app.post('/api/rest/:table', async (req, res) => {
     res.status(201).json(Array.isArray(req.body) ? insertedRows : insertedRows[0]);
   } catch (error) {
     console.error('POST error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Request failed' });
   }
 });
 
 
 // PATCH /api/rest/:table - Update rows
 
-app.patch('/api/rest/:table', async (req, res) => {
+app.patch('/api/rest/:table', optionalAuth, async (req, res) => {
   try {
     const { table } = req.params;
 
     if (!__restIsAllowedTable(table)) {
       return res.status(403).json({ error: 'Table not allowed' });
     }
+
+    if (!(await enforceRestAccess(req, res, table, 'PATCH'))) return;
 
     const columns = await __restGetTableColumns(table);
 
@@ -411,20 +450,22 @@ app.patch('/api/rest/:table', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('PATCH error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Request failed' });
   }
 });
 
 
 // DELETE /api/rest/:table - Delete rows
 
-app.delete('/api/rest/:table', async (req, res) => {
+app.delete('/api/rest/:table', optionalAuth, async (req, res) => {
   try {
     const { table } = req.params;
 
     if (!__restIsAllowedTable(table)) {
       return res.status(403).json({ error: 'Table not allowed' });
     }
+
+    if (!(await enforceRestAccess(req, res, table, 'DELETE'))) return;
 
     const columns = await __restGetTableColumns(table);
 
@@ -459,15 +500,19 @@ app.delete('/api/rest/:table', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('DELETE error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Request failed' });
   }
 });
 
 
-// RPC endpoint (call database functions)
-app.post('/api/rpc/:functionName', async (req, res) => {
+// RPC endpoint (call database functions) — admin only
+app.post('/api/rpc/:functionName', requireAdmin, async (req, res) => {
   try {
     const { functionName } = req.params;
+
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(functionName)) {
+      return res.status(400).json({ error: 'Invalid function name' });
+    }
     const params = req.body;
     const paramKeys = Object.keys(params);
     
@@ -485,7 +530,7 @@ app.post('/api/rpc/:functionName', async (req, res) => {
     }
   } catch (error) {
     console.error('RPC error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Request failed' });
   }
 });
 
@@ -512,23 +557,27 @@ app.use('/api/backup-restore', backupRoutes);
 
 // Functions proxy - replaces Supabase Edge Functions
 // Maps supabase.functions.invoke('name') -> /api/functions/name
-app.post('/api/functions/:name', async (req, res) => {
+app.post('/api/functions/:name', optionalAuth, async (req, res) => {
   const { name } = req.params;
+
+  if (!(await enforceFunctionAccess(req, res, name))) return;
+
   const routeMap = {
     'payment-sslcommerz': '/api/payment-sslcommerz',
     'payment-bkash': '/api/payment-bkash',
     'payment-nagad': '/api/payment-nagad',
-    'backup-restore': '/api/backup-restore',
-    'send-booking-notification': '/api/notifications/booking',
-    'send-air-ticket-notification': '/api/notifications/air-ticket',
-    'send-visa-notification': '/api/notifications/visa',
-    'send-emi-notification': '/api/notifications/emi',
-    'send-tracking-notification': '/api/notifications/tracking',
-    'send-welcome-notification': '/api/notifications/welcome',
-    'send-whatsapp-test': '/api/notifications/whatsapp-test',
-    'emi-reminder': '/api/notifications/emi-reminder',
-    'fb-event': '/api/notifications/fb-event',
-    'create-guest-account': '/api/auth/create-guest',
+    'payment-installment': '/api/payment-sslcommerz',
+    'backup-restore': '/api/backup-restore/backup',
+    'send-booking-notification': '/api/notifications/send-booking',
+    'send-air-ticket-notification': '/api/notifications/send-air-ticket',
+    'send-visa-notification': '/api/notifications/send-visa',
+    'send-emi-notification': '/api/notifications/send-booking',
+    'send-tracking-notification': '/api/notifications/send-tracking',
+    'send-welcome-notification': '/api/notifications/send-booking',
+    'send-whatsapp-test': '/api/notifications/send-whatsapp-test',
+    'emi-reminder': '/api/notifications/send-booking',
+    'fb-event': '/api/notifications/send-booking',
+    'create-guest-account': '/api/auth/signup',
     'create-demo-user': '/api/admin-users/create-demo',
     'create-admin-user': '/api/admin-users/create-admin',
     'create-staff-user': '/api/admin-users/create-staff',
@@ -536,29 +585,38 @@ app.post('/api/functions/:name', async (req, res) => {
   };
 
   const targetRoute = routeMap[name];
-  if (targetRoute) {
-    // Forward the request internally
-    try {
-      // Re-route internally by making a local fetch
-      const targetUrl = `http://127.0.0.1:${PORT}${targetRoute}`;
-      const response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
-        },
-        body: JSON.stringify(req.body),
-      });
-      const data = await response.json().catch(() => ({}));
-      res.status(response.status).json(data);
-    } catch (error) {
-      console.error(`Functions proxy error for ${name}:`, error);
-      res.status(500).json({ error: `Function ${name} failed: ${error.message}` });
-    }
-  } else {
-    // Unknown function - return stub success
+  if (!targetRoute) {
     console.warn(`Unknown function called: ${name}`);
-    res.json({ success: true, message: `Function ${name} not implemented on VPS` });
+    return res.status(404).json({ error: `Function ${name} not found` });
+  }
+
+  try {
+    let targetUrl = `http://127.0.0.1:${PORT}${targetRoute}`;
+
+    if (['payment-sslcommerz', 'payment-bkash', 'payment-nagad', 'payment-installment'].includes(name)) {
+      const action = req.body?.action || 'initiate';
+      targetUrl = `http://127.0.0.1:${PORT}${routeMap[name]}/${action}`;
+    }
+
+    if (name === 'backup-restore') {
+      const action = req.body?.action;
+      if (action === 'restore_backup') targetUrl = `http://127.0.0.1:${PORT}/api/backup-restore/restore`;
+      else targetUrl = `http://127.0.0.1:${PORT}/api/backup-restore/backup`;
+    }
+
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}),
+      },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json().catch(() => ({}));
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error(`Functions proxy error for ${name}:`, error);
+    res.status(500).json({ error: 'Function request failed' });
   }
 });
 
@@ -579,9 +637,15 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 15 * 1024 * 1024 } });
 
-app.post('/api/storage/:bucket/upload', upload.single('file'), (req, res) => {
+function uploadAuth(req, res, next) {
+  const bucket = req.params.bucket || req.body?.bucket;
+  if (isPublicUploadBucket(bucket)) return next();
+  return requireAdmin(req, res, next);
+}
+
+app.post('/api/storage/:bucket/upload', uploadAuth, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   
   const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.params.bucket}/${req.file.filename}`;
@@ -634,7 +698,7 @@ const __vpsUploader = __vpsMulter({
   }
 });
 
-app.post(['/api/upload/:bucket', '/api/storage/upload/:bucket', '/upload/:bucket'], __vpsUploader.single('file'), function (req, res) {
+app.post(['/api/upload/:bucket', '/api/storage/upload/:bucket', '/upload/:bucket'], uploadAuth, __vpsUploader.single('file'), function (req, res) {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
@@ -683,7 +747,7 @@ const __nestedUpload = __nestedMulter({
   }
 });
 
-app.post(['/api/vps-upload/:bucket', '/vps-upload/:bucket'], __nestedUpload.single('file'), function (req, res) {
+app.post(['/api/vps-upload/:bucket', '/vps-upload/:bucket'], uploadAuth, __nestedUpload.single('file'), function (req, res) {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });

@@ -37,7 +37,7 @@ export async function getTenantPackages(options?: {
       ascending: options.orderBy.ascending ?? true,
     });
   } else {
-    query = query.order("sort_order", { ascending: true });
+    query = query.order("order_index", { ascending: true });
   }
 
   return query;

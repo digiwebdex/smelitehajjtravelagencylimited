@@ -85,12 +85,17 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch both hero content and slider settings (which include hero height/layout)
-    // immediately so the hero renders at its final size on first paint. Previously
-    // settings were deferred via requestIdleCallback, causing the section height
-    // to "grow" after load — making the image appear small first then big.
-    fetchHeroContent();
-    fetchSliderSettings();
+    // Defer API calls until after first paint — hero image is already visible via
+    // index.html bootstrap + preload; defaults match bootstrap height (70vh/60vh).
+    const run = () => {
+      fetchHeroContent();
+      fetchSliderSettings();
+    };
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(() => requestAnimationFrame(run));
+    } else {
+      setTimeout(run, 0);
+    }
   }, []);
 
   const fetchSliderSettings = async () => {
